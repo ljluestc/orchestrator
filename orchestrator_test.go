@@ -2,9 +2,10 @@ package main
 
 import (
     "context"
+    "os"
     "testing"
 
-    "github.com/docker/docker/api/types"
+    "github.com/docker/docker/api/types/container"
     "github.com/docker/docker/client"
     "github.com/stretchr/testify/assert"
 )
@@ -64,7 +65,7 @@ func TestIntegrationStartContainer(t *testing.T) {
     assert.NoError(t, err, "Should start container without error")
 
     ctx := context.Background()
-    containers, err := o.client.ContainerList(ctx, types.ContainerListOptions{All: true})
+    containers, err := o.client.ContainerList(ctx, container.ListOptions{All: true})
     assert.NoError(t, err, "Should list containers")
     found := false
     for _, c := range containers {
