@@ -1,0 +1,38 @@
+name: Go CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      docker:
+        image: docker:stable
+        env:
+          DOCKER_TLS_CERTDIR: ""
+        ports:
+          - 2375:2375
+        options: --privileged
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.22'
+
+    - name: Install dependencies
+      run: go mod tidy
+
+    - name: Run Unit Tests
+      run: go test -v ./... -short
+
+    - name: Run Integration Tests
+      run: |
+        export DOCKER_HOST=tcp://localhost:2375
+        go test -v ./... -args -integration=true
