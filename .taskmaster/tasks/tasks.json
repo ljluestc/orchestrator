@@ -2,155 +2,149 @@
   "master": {
     "tasks": [
       {
-        "id": "1",
-        "title": "Implement Zookeeper Client and Connection Management",
-        "description": "Create robust Zookeeper client wrapper with connection pooling, retry logic, and health monitoring for both source and target clusters",
-        "details": "Implement ZookeeperClient struct using go-zookeeper library. Add connection management with automatic reconnection, session handling, and connection pooling. Include health checking methods to verify cluster quorum and connectivity. Support TLS encryption and authentication (SASL, Digest). Create configuration structs for cluster endpoints and authentication details. Add comprehensive error handling and logging for connection issues.",
-        "testStrategy": "Unit tests for connection handling, retry logic, and session management. Integration tests against real Zookeeper clusters. Mock tests for network failures and recovery scenarios.",
+        "id": 11,
+        "title": "Implement App Backend Core Infrastructure",
+        "description": "Create the main app component that receives and processes probe reports, implementing the core HTTP/gRPC server infrastructure with report aggregation and basic topology generation",
+        "details": "Build upon existing probe infrastructure by creating pkg/app package with: HTTP server using Go's net/http with middleware for authentication, logging, CORS; report receiver endpoints (/api/v1/reports, /api/v1/agents/*); report aggregation engine that merges data from multiple probes; basic topology graph generation from collected host, container, process, and network data; in-memory data store with time-series capabilities for 15-second sparklines; WebSocket support for real-time updates to UI. Leverage existing probe.ReportData structure and extend with graph relationships.",
+        "testStrategy": "Unit tests for report processing, integration tests with existing probe agents, load testing with multiple concurrent probe connections, WebSocket connection testing",
         "priority": "high",
         "dependencies": [],
-        "status": "in-progress",
-        "subtasks": [],
-        "updatedAt": "2025-10-05T07:25:37.285Z"
+        "status": "pending",
+        "subtasks": []
       },
       {
-        "id": "2",
-        "title": "Build Bidirectional Sync Engine Core",
-        "description": "Develop the core synchronization engine that watches and replicates znodes between Zookeeper clusters in real-time",
-        "details": "Create SyncEngine struct with bidirectional watchers using Zookeeper watch API. Implement event queue system for ordered replication of creates, updates, and deletes. Add conflict detection and resolution strategies (last-write-wins, manual). Include znode metadata preservation (version, timestamps, ACLs). Implement initial snapshot transfer with progress tracking and incremental catch-up for large datasets. Add sync lag monitoring with configurable thresholds (<50ms target).",
-        "testStrategy": "Unit tests for event processing and conflict resolution. Integration tests with concurrent writes to both clusters. Performance tests with high write volumes. Chaos tests with network partitions.",
+        "id": 12,
+        "title": "Build Time-Series Metrics Storage and Processing",
+        "description": "Implement efficient time-series data storage for metrics with 15-second resolution sparklines, data retention policies, and aggregation capabilities",
+        "details": "Create pkg/metrics package with: time-series database interface supporting in-memory storage initially (Redis/InfluxDB later); 15-second resolution metric collection from existing ContainerStats, HostInfo, ProcessInfo; metric aggregation functions (avg, max, min, p95) over time windows; data retention policies (24h full resolution, 7d hourly, 30d daily); efficient storage format for sparkline data; metric query API supporting time range filtering. Integrate with existing probe collectors' metric data structures.",
+        "testStrategy": "Performance tests for metric ingestion rates, memory usage validation, retention policy verification, query performance benchmarks",
         "priority": "high",
         "dependencies": [
-          "1"
+          11
         ],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": "3",
-        "title": "Create Migration Orchestrator State Machine",
-        "description": "Implement phase-based migration orchestrator with state management, validation, and rollback capabilities",
-        "details": "Build MigrationOrchestrator with state machine for 6 migration phases. Use etcd for persistent state storage and coordination. Implement phase transition logic with manual approval gates (configurable). Add pre-flight validation for cluster health, connectivity, and capacity. Include rollback capability to revert to any previous phase. Create validation framework for in-flight and post-migration checks. Add pause/resume functionality for each phase.",
-        "testStrategy": "Unit tests for state transitions and validation logic. Integration tests for phase execution and rollback scenarios. End-to-end tests simulating complete migration workflows.",
+        "id": 13,
+        "title": "Develop Interactive Web UI with Topology Visualization",
+        "description": "Create React-based web interface with D3.js/Cytoscape.js for real-time topology visualization, supporting multiple view modes and interactive graph navigation",
+        "details": "Build web/ui directory with: React 18+ application using TypeScript; D3.js or Cytoscape.js for force-directed graph layout; multiple topology views (Processes, Containers, Hosts, Services) as specified in PRD; real-time WebSocket integration for live updates; interactive features (zoom, pan, node selection, drill-down); responsive design for desktop/tablet; node detail panels showing metrics with sparklines; search and filter components. Use existing topology data from app backend.",
+        "testStrategy": "Cross-browser compatibility testing, responsive design validation, WebSocket connection stability tests, graph performance with 1000+ nodes, user interaction testing",
         "priority": "high",
         "dependencies": [
-          "2"
+          11,
+          12
         ],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": "4",
-        "title": "Implement Mesos API Integration",
-        "description": "Build Mesos HTTP API client for master and agent management during migration phases",
-        "details": "Create MesosClient using Mesos HTTP API for master and agent operations. Implement master deployment coordination, leader election monitoring, and graceful shutdown procedures. Add agent registration tracking, task draining coordination, and decommissioning logic. Include framework connectivity verification and resource offer monitoring. Support both v0 and v1 Mesos APIs. Add comprehensive error handling for API failures and timeouts.",
-        "testStrategy": "Unit tests for API client methods and response parsing. Integration tests against real Mesos clusters. Mock tests for API failures and recovery. Load tests for high-scale cluster operations.",
+        "id": 14,
+        "title": "Implement Container Control and Management Features",
+        "description": "Extend existing Docker integration to support container lifecycle operations (start, stop, pause, restart, delete) with secure execution and audit logging",
+        "details": "Enhance existing orchestrator.go and Docker client integration: extend Orchestrator struct with control plane methods; implement container operations API endpoints (/api/v1/containers/{id}/start, /stop, /pause, /restart, /delete); add bulk operations support for multi-container actions; integrate with existing Docker client in probe package; implement secure WebSocket tunneling for real-time operations; audit logging for all control actions; error handling and rollback mechanisms. Build on existing StopTask/ScheduleTask foundation.",
+        "testStrategy": "Container operation validation, bulk operation testing, security validation for WebSocket tunnels, audit log verification, error handling edge cases",
         "priority": "medium",
         "dependencies": [
-          "1"
+          11,
+          13
         ],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": "5",
-        "title": "Build Health Monitoring and Validation System",
-        "description": "Create comprehensive health checking system for Zookeeper clusters, Mesos components, and migration progress",
-        "details": "Implement HealthChecker with cluster quorum validation, performance metrics collection, and task migration tracking. Add Zookeeper cluster health checks (quorum status, response times, znode counts). Include Mesos cluster validation (master/agent connectivity, task counts, resource metrics). Create task migration progress tracking with success/failure rates. Implement alerting system with Slack, email, and PagerDuty integration. Add configurable health check intervals and thresholds.",
-        "testStrategy": "Unit tests for health check logic and metric collection. Integration tests with healthy and unhealthy clusters. Stress tests under high load conditions. Alert testing with various notification channels.",
+        "id": 15,
+        "title": "Add Container Terminal and Log Viewing Capabilities",
+        "description": "Implement secure container exec/terminal access and real-time log streaming through WebSocket connections with xterm.js integration",
+        "details": "Create pkg/terminal package with: Docker exec API integration using existing Docker client; secure WebSocket terminal proxy with authentication; xterm.js frontend terminal emulator; real-time log streaming from Docker logs API; session management for multiple concurrent terminals; terminal resize handling and copy/paste support; log filtering and search capabilities; download logs functionality. Extend existing UI with terminal components.",
+        "testStrategy": "Terminal session security testing, concurrent connection limits, log streaming performance, terminal resize functionality, session persistence validation",
         "priority": "medium",
         "dependencies": [
-          "1",
-          "4"
+          14
         ],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": "6",
-        "title": "Develop CLI Interface with Cobra Framework",
-        "description": "Create comprehensive CLI tool for migration management with commands for start, status, advance, rollback, and validation",
-        "details": "Build CLI using Cobra framework with commands: start, status, advance, rollback, validate. Implement configuration file support (YAML format) with cluster endpoints, sync settings, and orchestration parameters. Add interactive prompts for critical operations and confirmation steps. Include detailed help text and examples for all commands. Support output formatting (JSON, table, plain text). Add command completion and error handling with actionable guidance.",
-        "testStrategy": "Unit tests for command parsing and configuration validation. Integration tests for CLI workflows. User experience testing with typical migration scenarios. Documentation testing for help text accuracy.",
+        "id": 16,
+        "title": "Integrate Kubernetes API and Orchestrator Support",
+        "description": "Add Kubernetes client-go integration to discover and manage pods, services, deployments, and namespaces, extending the existing probe collectors",
+        "details": "Create pkg/k8s package with: Kubernetes client-go integration; extend existing probe collectors with K8s resource discovery; pod, service, deployment, namespace information collection; K8s resource relationship mapping to existing topology graph; RBAC integration with K8s permissions; support for labels, annotations, and custom resources; namespace filtering and multi-cluster support. Enhance existing probe.ProbeConfig with K8s options.",
+        "testStrategy": "K8s cluster integration testing, RBAC permission validation, multi-namespace discovery verification, resource relationship accuracy, performance with large clusters",
         "priority": "medium",
         "dependencies": [
-          "3"
+          11,
+          12
         ],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": "7",
-        "title": "Implement REST API Server and Web Dashboard",
-        "description": "Build REST API server with WebSocket support and React-based web dashboard for migration monitoring",
-        "details": "Create REST API server with endpoints for migration CRUD operations, status monitoring, and health checks. Implement WebSocket support for real-time updates to web dashboard. Build React-based web UI with migration progress visualization, cluster health indicators, sync lag metrics, and phase management controls. Add authentication and authorization for API access. Include API documentation with OpenAPI/Swagger specification.",
-        "testStrategy": "Unit tests for API endpoints and response formats. Integration tests for WebSocket functionality. UI testing for dashboard components and user interactions. Load testing for API performance under concurrent access.",
-        "priority": "medium",
+        "id": 17,
+        "title": "Build Plugin Architecture and SDK",
+        "description": "Design and implement HTTP-based plugin system for extensibility, allowing custom metrics, controls, and data sources with hot-reload support",
+        "details": "Create pkg/plugins package with: HTTP-based plugin API specification; plugin registration and discovery system; Go SDK for plugin development; plugin types (metrics, control, reporter) as defined in PRD; hot-reload plugin support without restart; plugin configuration management; sandboxed plugin execution; plugin lifecycle management (load, unload, update). Create examples/ directory with sample plugins.",
+        "testStrategy": "Plugin isolation testing, hot-reload functionality validation, SDK usability testing, plugin performance impact measurement, security sandboxing verification",
+        "priority": "low",
         "dependencies": [
-          "3",
-          "5"
+          11,
+          12
         ],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": "8",
-        "title": "Add Observability Stack with Metrics and Logging",
-        "description": "Implement comprehensive observability with Prometheus metrics, structured logging, and audit trails",
-        "details": "Implement metrics collection in Prometheus format for sync lag, replication rates, error counts, and performance indicators. Add structured JSON logging with detailed audit trails for all migration actions and phase transitions. Create log aggregation and retention policies. Include distributed tracing for complex migration operations. Add performance profiling capabilities and resource usage monitoring. Implement log rotation and archival for compliance requirements.",
-        "testStrategy": "Unit tests for metrics collection and log formatting. Integration tests with Prometheus and log aggregation systems. Performance tests for logging overhead. Compliance testing for audit trail completeness.",
-        "priority": "medium",
-        "dependencies": [
-          "2",
-          "5"
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": "9",
-        "title": "Implement Security Features and TLS Support",
-        "description": "Add comprehensive security features including TLS encryption, authentication, and ACL preservation",
-        "details": "Implement TLS 1.2+ encryption for all inter-cluster communication. Add support for Zookeeper authentication mechanisms (SASL, Digest). Create ACL preservation during sync operations with permission validation. Implement role-based access control for migration operations. Add certificate management and rotation capabilities. Include security audit logging and compliance reporting features.",
-        "testStrategy": "Unit tests for encryption and authentication logic. Integration tests with various auth mechanisms. Security testing for certificate validation and ACL preservation. Penetration testing for security vulnerabilities.",
+        "id": 18,
+        "title": "Implement Security Layer with RBAC and TLS",
+        "description": "Add comprehensive security features including TLS encryption, role-based access control, API authentication, and audit logging throughout the system",
+        "details": "Create pkg/auth package with: TLS/SSL encryption for all communications (extend existing client); JWT-based API authentication; role-based access control (RBAC) system; integration with K8s RBAC when available; secure WebSocket connections for terminal/logs; audit logging for all operations; API rate limiting and request validation; secure credential storage. Enhance existing client.Client with TLS support.",
+        "testStrategy": "Security penetration testing, TLS certificate validation, RBAC permission enforcement testing, audit log completeness verification, authentication bypass prevention",
         "priority": "high",
         "dependencies": [
-          "1",
-          "2"
+          11,
+          13,
+          14
         ],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": "10",
-        "title": "Create Comprehensive Testing Suite and Documentation",
-        "description": "Develop complete testing infrastructure including unit, integration, chaos, and performance tests with full documentation",
-        "details": "Build comprehensive test suite with unit tests (>90% coverage), integration tests against real clusters, chaos engineering tests for fault tolerance, and performance tests for scale validation. Create end-to-end migration scenarios testing. Implement test data generators for large-scale testing. Add CI/CD pipeline integration with automated testing. Create complete documentation including installation guide, migration runbooks, troubleshooting guide, API reference, and architecture documentation. Include configuration examples and best practices guide.",
-        "testStrategy": "Coverage analysis for all test types. Automated testing in CI/CD pipeline. Documentation review and validation. User acceptance testing with migration scenarios. Performance benchmarking against SLA requirements.",
+        "id": 19,
+        "title": "Create Deployment Infrastructure and Documentation",
+        "description": "Develop Kubernetes manifests, Docker Compose files, Helm charts, and comprehensive documentation for various deployment scenarios",
+        "details": "Create deployments/ directory with: Kubernetes DaemonSet for probe agents; Kubernetes Deployment for app component; Service and Ingress configurations; ConfigMap and Secret templates; Helm chart with configurable values; Docker Compose for local development; Dockerfile optimizations for both probe and app; deployment documentation covering standalone, cloud, and K8s modes; installation scripts and health check endpoints.",
+        "testStrategy": "Multi-environment deployment testing, Helm chart validation, Docker Compose functionality verification, documentation accuracy review, upgrade/rollback testing",
         "priority": "medium",
         "dependencies": [
-          "1",
-          "2",
-          "3",
-          "4",
-          "5",
-          "6",
-          "7",
-          "8",
-          "9"
+          11,
+          16,
+          18
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 20,
+        "title": "Optimize Performance and Add Production Monitoring",
+        "description": "Implement performance optimizations for large-scale deployments, add Prometheus metrics export, and create comprehensive monitoring dashboards",
+        "details": "Create pkg/monitoring package with: Prometheus metrics export for app and probe components; performance optimization for 1000+ nodes and 10,000+ containers; efficient graph compression algorithms; database query optimization; memory usage profiling and optimization; HTTP/2 support for better performance; caching layers for frequently accessed data; health check endpoints with detailed status; Grafana dashboard templates for system monitoring.",
+        "testStrategy": "Load testing with target scale (1000+ nodes, 10,000+ containers), memory leak detection, Prometheus metrics accuracy validation, performance regression testing, monitoring dashboard functionality",
+        "priority": "medium",
+        "dependencies": [
+          11,
+          12,
+          13,
+          18
         ],
         "status": "pending",
         "subtasks": []
       }
     ],
     "metadata": {
-      "version": "1.0.0",
-      "lastModified": "2025-10-05T07:25:37.286Z",
-      "taskCount": 10,
-      "completedCount": 0,
-      "tags": [
-        "master"
-      ]
+      "created": "2025-10-05T20:34:48.686Z",
+      "updated": "2025-10-05T20:34:48.687Z",
+      "description": "Tasks for master context"
     }
   }
 }

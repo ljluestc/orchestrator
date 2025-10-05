@@ -283,3 +283,91 @@ func TestHostCollector_GetCPUInfoEdgeCases(t *testing.T) {
 	assert.Equal(t, 0, info.Cores)
 	assert.Equal(t, 0.0, info.Usage)
 }
+
+func TestHostCollector_CollectWithPartialData(t *testing.T) {
+	// Test collection with some missing files
+	tmpDir := t.TempDir()
+	
+	// Create only some required files
+	versionPath := filepath.Join(tmpDir, "version")
+	err := os.WriteFile(versionPath, []byte("Linux version 5.4.0"), 0644)
+	require.NoError(t, err)
+	
+	uptimePath := filepath.Join(tmpDir, "uptime")
+	err = os.WriteFile(uptimePath, []byte("12345.67 9876.54"), 0644)
+	require.NoError(t, err)
+	
+	// Don't create meminfo, loadavg, or cpuinfo files
+	
+	collector := NewHostCollectorWithPath(tmpDir)
+	info, err := collector.Collect()
+	
+	// Should return partial data with errors for missing files
+	assert.Error(t, err)
+	if info != nil {
+		assert.Equal(t, "Linux version 5.4.0", info.KernelVersion)
+		assert.Equal(t, 12345.67, info.Uptime)
+	}
+}
+
+func TestHostCollector_CollectWithCorruptedData(t *testing.T) {
+	// Test collection with corrupted data files
+	tmpDir := t.TempDir()
+	
+	// Create files with corrupted data
+	versionPath := filepath.Join(tmpDir, "version")
+	err := os.WriteFile(versionPath, []byte("Linux version 5.4.0"), 0644)
+	require.NoError(t, err)
+	
+	uptimePath := filepath.Join(tmpDir, "uptime")
+	err = os.WriteFile(uptimePath, []byte("invalid uptime"), 0644)
+	require.NoError(t, err)
+	
+	meminfoPath := filepath.Join(tmpDir, "meminfo")
+	err = os.WriteFile(meminfoPath, []byte("invalid meminfo"), 0644)
+	require.NoError(t, err)
+	
+	loadavgPath := filepath.Join(tmpDir, "loadavg")
+	err = os.WriteFile(loadavgPath, []byte("invalid loadavg"), 0644)
+	require.NoError(t, err)
+	
+	cpuinfoPath := filepath.Join(tmpDir, "cpuinfo")
+	err = os.WriteFile(cpuinfoPath, []byte("invalid cpuinfo"), 0644)
+	require.NoError(t, err)
+	
+	collector := NewHostCollectorWithPath(tmpDir)
+	info, err := collector.Collect()
+	
+	// Should return partial data with errors for corrupted files
+	assert.Error(t, err)
+	if info != nil {
+		assert.Equal(t, "Linux version 5.4.0", info.KernelVersion)
+	}
+}
+
+func TestHostCollector_CollectWithEmptyDirectory(t *testing.T) {
+	// Test collection with completely empty directory
+	tmpDir := t.TempDir()
+	
+	collector := NewHostCollectorWithPath(tmpDir)
+	_, err := collector.Collect()
+	
+	// Should return error for missing files
+	assert.Error(t, err)
+}
+
+func TestHostCollector_CollectWithPermissionDenied(t *testing.T) {
+	// Test collection with permission denied files
+	tmpDir := t.TempDir()
+	
+	// Create files with no read permission
+	versionPath := filepath.Join(tmpDir, "version")
+	err := os.WriteFile(versionPath, []byte("Linux version 5.4.0"), 0000) // No read permission
+	require.NoError(t, err)
+	
+	collector := NewHostCollectorWithPath(tmpDir)
+	_, err = collector.Collect()
+	
+	// Should return error for permission denied
+	assert.Error(t, err)
+}

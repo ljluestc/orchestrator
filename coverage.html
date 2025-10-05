@@ -55,23 +55,23 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">github.com/ljluestc/orchestrator/cmd/probe-agent/main.go (0.0%)</option>
+				<option value="file0">github.com/ljluestc/orchestrator/cmd/probe-agent/main.go (52.3%)</option>
 				
 				<option value="file1">github.com/ljluestc/orchestrator/main.go (0.0%)</option>
 				
 				<option value="file2">github.com/ljluestc/orchestrator/orchestrator.go (52.9%)</option>
 				
-				<option value="file3">github.com/ljluestc/orchestrator/pkg/probe/client.go (66.7%)</option>
+				<option value="file3">github.com/ljluestc/orchestrator/pkg/probe/client.go (83.3%)</option>
 				
-				<option value="file4">github.com/ljluestc/orchestrator/pkg/probe/docker.go (13.2%)</option>
+				<option value="file4">github.com/ljluestc/orchestrator/pkg/probe/docker.go (24.3%)</option>
 				
-				<option value="file5">github.com/ljluestc/orchestrator/pkg/probe/host.go (82.5%)</option>
+				<option value="file5">github.com/ljluestc/orchestrator/pkg/probe/host.go (90.5%)</option>
 				
-				<option value="file6">github.com/ljluestc/orchestrator/pkg/probe/network.go (93.7%)</option>
+				<option value="file6">github.com/ljluestc/orchestrator/pkg/probe/network.go (95.3%)</option>
 				
-				<option value="file7">github.com/ljluestc/orchestrator/pkg/probe/probe.go (90.1%)</option>
+				<option value="file7">github.com/ljluestc/orchestrator/pkg/probe/probe.go (91.7%)</option>
 				
-				<option value="file8">github.com/ljluestc/orchestrator/pkg/probe/process.go (95.4%)</option>
+				<option value="file8">github.com/ljluestc/orchestrator/pkg/probe/process.go (94.4%)</option>
 				
 				</select>
 			</div>
@@ -186,7 +186,7 @@ func main() <span class="cov0" title="0">{
         <span class="cov0" title="0">log.Println("Probe agent stopped successfully")</span>
 }
 
-func printConfig(config probe.ProbeConfig) <span class="cov0" title="0">{
+func printConfig(config probe.ProbeConfig) <span class="cov8" title="1">{
         fmt.Println("\n=== Probe Agent Configuration ===")
         fmt.Printf("Server URL:           %s\n", config.ServerURL)
         fmt.Printf("Agent ID:             %s\n", config.AgentID)
@@ -195,21 +195,21 @@ func printConfig(config probe.ProbeConfig) <span class="cov0" title="0">{
         fmt.Println("\n=== Collection Modules ===")
         fmt.Printf("Host Information:     %v\n", config.CollectHost)
         fmt.Printf("Docker Information:   %v\n", config.CollectDocker)
-        if config.CollectDocker </span><span class="cov0" title="0">{
+        if config.CollectDocker </span><span class="cov8" title="1">{
                 fmt.Printf("  - Container Stats:  %v\n", config.CollectDockerStats)
         }</span>
-        <span class="cov0" title="0">fmt.Printf("Process Information:  %v\n", config.CollectProcesses)
-        if config.CollectProcesses </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">fmt.Printf("Process Information:  %v\n", config.CollectProcesses)
+        if config.CollectProcesses </span><span class="cov8" title="1">{
                 fmt.Printf("  - Max Processes:    %d\n", config.MaxProcesses)
                 fmt.Printf("  - Include All:      %v\n", config.IncludeAllProcesses)
         }</span>
-        <span class="cov0" title="0">fmt.Printf("Network Information:  %v\n", config.CollectNetwork)
-        if config.CollectNetwork </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">fmt.Printf("Network Information:  %v\n", config.CollectNetwork)
+        if config.CollectNetwork </span><span class="cov8" title="1">{
                 fmt.Printf("  - Max Connections:  %d\n", config.MaxConnections)
                 fmt.Printf("  - Include Localhost:%v\n", config.IncludeLocalhost)
                 fmt.Printf("  - Resolve Processes:%v\n", config.ResolveProcesses)
         }</span>
-        <span class="cov0" title="0">fmt.Println("\n=== Retry Configuration ===")
+        <span class="cov8" title="1">fmt.Println("\n=== Retry Configuration ===")
         fmt.Printf("Retry Attempts:       %d\n", config.RetryAttempts)
         fmt.Printf("Retry Delay:          %s\n", config.RetryDelay)
         fmt.Println("================================")</span>
@@ -449,7 +449,7 @@ func (c *Client) SendReportWithRetry(ctx context.Context, data *ReportData, atte
                 <span class="cov8" title="1">if i &lt; attempts-1 </span><span class="cov8" title="1">{
                         select </span>{
                         case &lt;-time.After(delay):<span class="cov8" title="1"></span>
-                        case &lt;-ctx.Done():<span class="cov0" title="0">
+                        case &lt;-ctx.Done():<span class="cov8" title="1">
                                 return ctx.Err()</span>
                         }
                 }
@@ -472,7 +472,7 @@ func (c *Client) Ping(ctx context.Context) error <span class="cov8" title="1">{
         <span class="cov8" title="1">req.Header.Set("X-Agent-ID", c.agentID)
 
         resp, err := c.httpClient.Do(req)
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return fmt.Errorf("failed to ping server: %w", err)
         }</span>
         <span class="cov8" title="1">defer resp.Body.Close()
@@ -485,35 +485,35 @@ func (c *Client) Ping(ctx context.Context) error <span class="cov8" title="1">{
 }
 
 // GetConfig retrieves configuration from the app component
-func (c *Client) GetConfig(ctx context.Context) (map[string]interface{}, error) <span class="cov0" title="0">{
+func (c *Client) GetConfig(ctx context.Context) (map[string]interface{}, error) <span class="cov8" title="1">{
         url := fmt.Sprintf("%s/api/v1/agents/config/%s", c.serverURL, c.agentID)
         req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
         if err != nil </span><span class="cov0" title="0">{
                 return nil, fmt.Errorf("failed to create config request: %w", err)
         }</span>
 
-        <span class="cov0" title="0">if c.apiKey != "" </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if c.apiKey != "" </span><span class="cov0" title="0">{
                 req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.apiKey))
         }</span>
-        <span class="cov0" title="0">req.Header.Set("X-Agent-ID", c.agentID)
+        <span class="cov8" title="1">req.Header.Set("X-Agent-ID", c.agentID)
 
         resp, err := c.httpClient.Do(req)
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return nil, fmt.Errorf("failed to get config: %w", err)
         }</span>
-        <span class="cov0" title="0">defer resp.Body.Close()
+        <span class="cov8" title="1">defer resp.Body.Close()
 
         if resp.StatusCode != http.StatusOK </span><span class="cov0" title="0">{
                 body, _ := io.ReadAll(resp.Body)
                 return nil, fmt.Errorf("failed to get config, status %d: %s", resp.StatusCode, string(body))
         }</span>
 
-        <span class="cov0" title="0">var config map[string]interface{}
-        if err := json.NewDecoder(resp.Body).Decode(&amp;config); err != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">var config map[string]interface{}
+        if err := json.NewDecoder(resp.Body).Decode(&amp;config); err != nil </span><span class="cov8" title="1">{
                 return nil, fmt.Errorf("failed to decode config: %w", err)
         }</span>
 
-        <span class="cov0" title="0">return config, nil</span>
+        <span class="cov8" title="1">return config, nil</span>
 }
 
 // RegisterAgent registers the agent with the app component
@@ -542,7 +542,7 @@ func (c *Client) RegisterAgent(ctx context.Context, hostname string, metadata ma
         }</span>
 
         <span class="cov8" title="1">resp, err := c.httpClient.Do(req)
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return fmt.Errorf("failed to register agent: %w", err)
         }</span>
         <span class="cov8" title="1">defer resp.Body.Close()
@@ -580,7 +580,7 @@ func (c *Client) Heartbeat(ctx context.Context) error <span class="cov8" title="
         <span class="cov8" title="1">req.Header.Set("X-Agent-ID", c.agentID)
 
         resp, err := c.httpClient.Do(req)
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return fmt.Errorf("failed to send heartbeat: %w", err)
         }</span>
         <span class="cov8" title="1">defer resp.Body.Close()
@@ -676,7 +676,7 @@ func NewDockerCollector(collectStats bool) (*DockerCollector, error) <span class
 }
 
 // NewDockerCollectorWithClient creates a Docker collector with custom client (for testing)
-func NewDockerCollectorWithClient(cli *client.Client, collectStats bool) *DockerCollector <span class="cov0" title="0">{
+func NewDockerCollectorWithClient(cli *client.Client, collectStats bool) *DockerCollector <span class="cov8" title="1">{
         return &amp;DockerCollector{
                 client:      cli,
                 collectStats: collectStats,
@@ -685,7 +685,11 @@ func NewDockerCollectorWithClient(cli *client.Client, collectStats bool) *Docker
 
 // Collect gathers Docker container information
 func (d *DockerCollector) Collect(ctx context.Context) (*DockerInfo, error) <span class="cov8" title="1">{
-        info := &amp;DockerInfo{
+        if d.client == nil </span><span class="cov8" title="1">{
+                return nil, fmt.Errorf("Docker client is nil")
+        }</span>
+        
+        <span class="cov8" title="1">info := &amp;DockerInfo{
                 Timestamp: time.Now(),
         }
 
@@ -770,7 +774,7 @@ func (d *DockerCollector) Collect(ctx context.Context) (*DockerInfo, error) <spa
 }
 
 // getContainerStats retrieves resource usage statistics for a container
-func (d *DockerCollector) getContainerStats(ctx context.Context, containerID string) (*ContainerStats, error) <span class="cov0" title="0">{
+func (d *DockerCollector) getContainerStats(ctx context.Context, containerID string) (*ContainerStats, error) <span class="cov8" title="1">{
         // Use a timeout context for stats collection
         statsCtx, cancel := context.WithTimeout(ctx, 2*time.Second)
         defer cancel()
@@ -826,7 +830,7 @@ func (d *DockerCollector) Close() error <span class="cov8" title="1">{
         if d.client != nil </span><span class="cov8" title="1">{
                 return d.client.Close()
         }</span>
-        <span class="cov0" title="0">return nil</span>
+        <span class="cov8" title="1">return nil</span>
 }
 </pre>
 		
@@ -911,19 +915,19 @@ func (h *HostCollector) Collect() (*HostInfo, error) <span class="cov8" title="1
 
         // Get kernel version
         <span class="cov8" title="1">info.KernelVersion, err = h.getKernelVersion()
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return nil, fmt.Errorf("failed to get kernel version: %w", err)
         }</span>
 
         // Get uptime and boot time
         <span class="cov8" title="1">info.Uptime, info.BootTime, err = h.getUptime()
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return nil, fmt.Errorf("failed to get uptime: %w", err)
         }</span>
 
         // Get CPU info
         <span class="cov8" title="1">info.CPUInfo, err = h.getCPUInfo()
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return nil, fmt.Errorf("failed to get CPU info: %w", err)
         }</span>
 
@@ -980,7 +984,7 @@ func (h *HostCollector) getCPUInfo() (CPUInfo, error) <span class="cov8" title="
 
         // Read /proc/cpuinfo for model and core count
         file, err := os.Open(fmt.Sprintf("%s/cpuinfo", h.procPath))
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return info, err
         }</span>
         <span class="cov8" title="1">defer file.Close()
@@ -1008,7 +1012,7 @@ func (h *HostCollector) getCPUInfo() (CPUInfo, error) <span class="cov8" title="
 
         // Calculate CPU usage from /proc/stat
         <span class="cov8" title="1">usage, err := h.getCPUUsage()
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 // CPU usage is optional, don't fail on error
                 info.Usage = 0
         }</span> else<span class="cov8" title="1"> {
@@ -1021,7 +1025,7 @@ func (h *HostCollector) getCPUInfo() (CPUInfo, error) <span class="cov8" title="
 // getCPUUsage calculates CPU usage percentage from /proc/stat
 func (h *HostCollector) getCPUUsage() (float64, error) <span class="cov8" title="1">{
         data, err := os.ReadFile(fmt.Sprintf("%s/stat", h.procPath))
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return 0, err
         }</span>
 
@@ -1032,7 +1036,7 @@ func (h *HostCollector) getCPUUsage() (float64, error) <span class="cov8" title=
 
         // First line is aggregate CPU stats
         <span class="cov8" title="1">fields := strings.Fields(lines[0])
-        if len(fields) &lt; 5 || fields[0] != "cpu" </span><span class="cov0" title="0">{
+        if len(fields) &lt; 5 || fields[0] != "cpu" </span><span class="cov8" title="1">{
                 return 0, fmt.Errorf("invalid CPU line format")
         }</span>
 
@@ -1044,7 +1048,7 @@ func (h *HostCollector) getCPUUsage() (float64, error) <span class="cov8" title=
         total := user + nice + system + idle
         used := user + nice + system
 
-        if total == 0 </span><span class="cov0" title="0">{
+        if total == 0 </span><span class="cov8" title="1">{
                 return 0, nil
         }</span>
 
@@ -1056,7 +1060,7 @@ func (h *HostCollector) getMemoryInfo() (MemoryInfo, error) <span class="cov8" t
         info := MemoryInfo{}
 
         file, err := os.Open(fmt.Sprintf("%s/meminfo", h.procPath))
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return info, err
         }</span>
         <span class="cov8" title="1">defer file.Close()
@@ -1090,7 +1094,7 @@ func (h *HostCollector) getMemoryInfo() (MemoryInfo, error) <span class="cov8" t
 
         if info.AvailableMB &gt; 0 </span><span class="cov8" title="1">{
                 info.UsedMB = info.TotalMB - info.AvailableMB
-        }</span> else<span class="cov0" title="0"> {
+        }</span> else<span class="cov8" title="1"> {
                 info.UsedMB = info.TotalMB - info.FreeMB
         }</span>
 
@@ -1221,7 +1225,7 @@ func (n *NetworkCollector) Collect() (*NetworkInfo, error) <span class="cov8" ti
 
         // Collect TCP connections
         <span class="cov8" title="1">tcpConns, err := n.collectTCPConnections(inodeToPID, inodeToName)
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return nil, fmt.Errorf("failed to collect TCP connections: %w", err)
         }</span>
         <span class="cov8" title="1">info.Connections = append(info.Connections, tcpConns...)
@@ -1256,7 +1260,7 @@ func (n *NetworkCollector) collectUDPConnections(inodeToPID map[string]int, inod
 // parseNetFile parses /proc/net/tcp or /proc/net/udp
 func (n *NetworkCollector) parseNetFile(path, protocol string, inodeToPID map[string]int, inodeToName map[string]string) ([]NetworkConnection, error) <span class="cov8" title="1">{
         file, err := os.Open(path)
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return nil, err
         }</span>
         <span class="cov8" title="1">defer file.Close()
@@ -1630,7 +1634,7 @@ func (p *Probe) Start(ctx context.Context) error <span class="cov8" title="1">{
                 "os":      "linux",
         }
 
-        if err := p.client.RegisterAgent(ctx, p.hostname, metadata); err != nil </span><span class="cov0" title="0">{
+        if err := p.client.RegisterAgent(ctx, p.hostname, metadata); err != nil </span><span class="cov8" title="1">{
                 log.Printf("Warning: Failed to register agent: %v", err)
         }</span> else<span class="cov8" title="1"> {
                 log.Printf("Agent registered successfully")
@@ -1662,10 +1666,15 @@ func (p *Probe) Stop() error <span class="cov8" title="1">{
         log.Printf("Stopping probe agent...")
 
         // Signal goroutines to stop
-        close(p.stopCh)
+        select </span>{
+        case &lt;-p.stopCh:<span class="cov0" title="0"></span>
+                // Channel already closed
+        default:<span class="cov8" title="1">
+                close(p.stopCh)</span>
+        }
 
         // Wait for goroutines to finish
-        p.wg.Wait()
+        <span class="cov8" title="1">p.wg.Wait()
 
         // Close collectors
         if p.dockerCollector != nil </span><span class="cov8" title="1">{
@@ -1712,7 +1721,7 @@ func (p *Probe) heartbeatLoop(ctx context.Context) <span class="cov8" title="1">
         for </span><span class="cov8" title="1">{
                 select </span>{
                 case &lt;-ticker.C:<span class="cov8" title="1">
-                        if err := p.client.Heartbeat(ctx); err != nil </span><span class="cov0" title="0">{
+                        if err := p.client.Heartbeat(ctx); err != nil </span><span class="cov8" title="1">{
                                 log.Printf("Heartbeat failed: %v", err)
                         }</span>
                 case &lt;-p.stopCh:<span class="cov8" title="1">
@@ -1911,7 +1920,7 @@ func (p *ProcessCollector) Collect() (*ProcessesInfo, error) <span class="cov8" 
                 }
 
                 <span class="cov8" title="1">procInfo, err := p.getProcessInfo(pid)
-                if err != nil </span><span class="cov8" title="1">{
+                if err != nil </span><span class="cov0" title="0">{
                         // Process may have exited, skip it
                         continue</span>
                 }

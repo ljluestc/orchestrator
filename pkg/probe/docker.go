@@ -84,6 +84,10 @@ func NewDockerCollectorWithClient(cli *client.Client, collectStats bool) *Docker
 
 // Collect gathers Docker container information
 func (d *DockerCollector) Collect(ctx context.Context) (*DockerInfo, error) {
+	if d.client == nil {
+		return nil, fmt.Errorf("Docker client is nil")
+	}
+	
 	info := &DockerInfo{
 		Timestamp: time.Now(),
 	}

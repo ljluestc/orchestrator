@@ -183,7 +183,12 @@ func (p *Probe) Stop() error {
 	log.Printf("Stopping probe agent...")
 
 	// Signal goroutines to stop
-	close(p.stopCh)
+	select {
+	case <-p.stopCh:
+		// Channel already closed
+	default:
+		close(p.stopCh)
+	}
 
 	// Wait for goroutines to finish
 	p.wg.Wait()
