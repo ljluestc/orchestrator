@@ -1,0 +1,487 @@
+{
+  "project": {
+    "name": "Container Orchestrator with Weave Scope Capabilities",
+    "version": "1.0",
+    "description": "Comprehensive container orchestration and monitoring platform with real-time visualization and management"
+  },
+  "architecture": {
+    "components": [
+      {
+        "name": "Probe",
+        "type": "agent",
+        "language": "Go",
+        "responsibilities": [
+          "Collect host/container/process information",
+          "Monitor /proc filesystem",
+          "Interface with Docker API",
+          "Interface with Kubernetes API",
+          "Track network connections via conntrack",
+          "Generate topology reports",
+          "Send reports to App via gRPC/HTTP"
+        ],
+        "performance_targets": {
+          "cpu_overhead": "< 5%",
+          "memory_usage": "< 100MB"
+        }
+      },
+      {
+        "name": "App",
+        "type": "backend",
+        "language": "Go",
+        "responsibilities": [
+          "Receive and merge probe reports",
+          "Process topology data",
+          "Store time-series metrics (15-second intervals)",
+          "Serve REST API",
+          "Handle WebSocket connections",
+          "Implement container control plane",
+          "Aggregate distributed reports"
+        ],
+        "features": [
+          "Horizontal scaling",
+          "High availability",
+          "Load balancing"
+        ]
+      },
+      {
+        "name": "UI",
+        "type": "frontend",
+        "technologies": ["React/Vue.js", "D3.js/Cytoscape.js", "WebSocket", "xterm.js"],
+        "responsibilities": [
+          "Render topology graphs",
+          "Display multiple view modes",
+          "Show metrics and sparklines",
+          "Provide container control interface",
+          "Search and filter functionality"
+        ]
+      },
+      {
+        "name": "Collector",
+        "type": "internal",
+        "responsibilities": [
+          "Transform probe reports to graph data",
+          "Aggregate metrics",
+          "Handle graph layout algorithms"
+        ]
+      }
+    ],
+    "databases": [
+      {
+        "type": "time-series",
+        "options": ["Prometheus TSDB", "InfluxDB"],
+        "purpose": "Store metrics with 15-second resolution"
+      },
+      {
+        "type": "graph",
+        "optional": true,
+        "purpose": "Complex topology queries"
+      }
+    ]
+  },
+  "functional_requirements": {
+    "discovery": {
+      "hosts": [
+        "Auto-detect all infrastructure hosts",
+        "Collect: hostname, IP, OS, kernel version",
+        "Track resource capacity (CPU, memory, disk)",
+        "Monitor host-level metrics"
+      ],
+      "containers": [
+        "Auto-discover running containers",
+        "Extract metadata: image, labels, env vars",
+        "Track lifecycle states",
+        "Monitor resource usage"
+      ],
+      "processes": [
+        "Detect processes in containers and hosts",
+        "Collect: PID, command, user, working dir",
+        "Track parent-child relationships",
+        "Monitor resource consumption"
+      ],
+      "network": [
+        "Map network connections between containers",
+        "Visualize service-to-service communication",
+        "Track TCP/UDP via conntrack",
+        "Display traffic flows (ingress/egress)"
+      ],
+      "kubernetes": [
+        "Discover pods, services, deployments, namespaces",
+        "Map K8s resource relationships",
+        "Support labels and annotations",
+        "Integrate with Docker Swarm, ECS, DCOS"
+      ]
+    },
+    "visualization": {
+      "views": [
+        "Processes View",
+        "Containers View",
+        "Hosts View",
+        "Pods View (K8s)",
+        "Services View"
+      ],
+      "graph_features": [
+        "Real-time force-directed layout",
+        "Node sizing by metrics",
+        "Color coding by status (healthy/warning/critical)",
+        "Animated connection flows",
+        "Zoom, pan, navigation",
+        "Node grouping and clustering"
+      ],
+      "context_panel": [
+        "Display node details on selection",
+        "Show metadata, tags, labels",
+        "Real-time metrics with sparklines",
+        "Network metrics",
+        "Connected nodes list"
+      ],
+      "search_filter": [
+        "Full-text search",
+        "Filter by labels, tags, metadata",
+        "Filter by resource type",
+        "Filter by metric thresholds",
+        "Save and share configurations"
+      ]
+    },
+    "metrics": {
+      "collection": [
+        "CPU usage (container/process/host)",
+        "Memory usage and limits",
+        "Network I/O (ingress/egress byte rates)",
+        "Disk I/O and storage",
+        "15-second resolution sparklines"
+      ],
+      "visualization": [
+        "Time-series sparkline charts",
+        "Current value with historical trend",
+        "Percentage-based utilization",
+        "Network connection counts",
+        "Custom plugin metrics"
+      ],
+      "alerting": [
+        "Threshold-based alerts",
+        "Anomaly detection",
+        "Notification channels"
+      ]
+    },
+    "container_control": {
+      "lifecycle": [
+        "Start containers",
+        "Stop containers",
+        "Pause/unpause containers",
+        "Restart containers",
+        "Delete/remove containers"
+      ],
+      "inspection": [
+        "View real-time logs",
+        "Attach to terminal (exec shell)",
+        "Inspect configuration",
+        "View environment variables",
+        "Access filesystem"
+      ],
+      "bulk_operations": [
+        "Multi-select containers",
+        "Batch stop/start",
+        "Apply labels to multiple containers"
+      ]
+    },
+    "plugins": {
+      "architecture": [
+        "HTTP-based plugin API",
+        "Plugin registration and discovery",
+        "Custom metric injection",
+        "Custom UI components"
+      ],
+      "types": [
+        "Metrics plugins",
+        "Control plugins",
+        "Reporter plugins"
+      ],
+      "development": [
+        "Go SDK",
+        "Configuration-based deployment",
+        "Hot-reload support"
+      ]
+    },
+    "api": {
+      "rest": [
+        "Topology data endpoints (JSON)",
+        "Metrics query API",
+        "Container control endpoints",
+        "OpenAPI/Swagger documentation"
+      ],
+      "realtime": [
+        "WebSocket for live updates"
+      ],
+      "integrations": {
+        "platforms": ["Docker", "Kubernetes", "AWS ECS", "DCOS", "Docker Swarm"],
+        "third_party": ["Prometheus", "Grafana", "Webhooks", "SIEM"]
+      }
+    }
+  },
+  "deployment_models": [
+    {
+      "name": "Standalone",
+      "description": "Self-hosted Probe + App + UI",
+      "use_case": "On-premise, private cloud",
+      "options": ["Single-node", "Multi-node cluster", "High availability"]
+    },
+    {
+      "name": "Cloud/SaaS",
+      "description": "Probes in user infra, App + UI hosted",
+      "features": ["Multi-tenancy", "TLS communication", "Centralized management"]
+    },
+    {
+      "name": "Kubernetes",
+      "components": {
+        "probe": "DaemonSet (one per node)",
+        "app": "Deployment",
+        "access": "Service/Ingress",
+        "config": "ConfigMap",
+        "secrets": "Secrets"
+      },
+      "packaging": "Helm chart"
+    },
+    {
+      "name": "Docker Standalone",
+      "components": ["Container images", "Docker Compose", "Volume mounts"]
+    }
+  ],
+  "technical_requirements": {
+    "performance": {
+      "nodes": "1000+",
+      "containers": "10000+",
+      "probe_cpu": "< 5%",
+      "probe_memory": "< 100MB",
+      "ui_rendering": "< 2s for 1000 nodes",
+      "update_latency": "< 1s"
+    },
+    "security": {
+      "encryption": "TLS for all communications",
+      "access_control": "RBAC with K8s integration",
+      "authentication": "Tokens, OAuth",
+      "container_exec": "TTY encryption",
+      "audit": "Logging for all control actions"
+    },
+    "scalability": {
+      "app_scaling": "Horizontal",
+      "report_aggregation": "Distributed",
+      "metrics_retention": "Time-based policies",
+      "topology_compression": "Efficient for large graphs"
+    },
+    "reliability": {
+      "probe_reconnection": "Automatic on failure",
+      "app_failover": "Cluster failover",
+      "storage": "Persistent configuration",
+      "degradation": "Graceful when probes offline"
+    }
+  },
+  "data_collection": {
+    "host": [
+      "hostname",
+      "ip_addresses",
+      "os_version",
+      "kernel_version",
+      "cpu_architecture",
+      "cpu_cores",
+      "total_memory",
+      "disk_capacity",
+      "load_average",
+      "uptime"
+    ],
+    "container": [
+      "container_id",
+      "container_name",
+      "image_name",
+      "image_tag",
+      "image_id",
+      "status",
+      "created_timestamp",
+      "labels",
+      "annotations",
+      "environment_variables",
+      "port_mappings",
+      "volume_mounts",
+      "network_mode",
+      "resource_limits",
+      "current_usage"
+    ],
+    "process": [
+      "pid",
+      "parent_pid",
+      "command_line",
+      "user_uid",
+      "cpu_usage",
+      "memory_rss",
+      "memory_vsz",
+      "open_file_descriptors",
+      "network_connections"
+    ],
+    "network": [
+      "source_ip_port",
+      "destination_ip_port",
+      "protocol",
+      "connection_state",
+      "process_id",
+      "bytes_sent",
+      "bytes_received"
+    ],
+    "kubernetes": [
+      "pods",
+      "services",
+      "deployments",
+      "namespaces",
+      "nodes"
+    ]
+  },
+  "ui_requirements": {
+    "main_dashboard": {
+      "layout": {
+        "center": "Topology graph canvas",
+        "top": "View selector + Search bar",
+        "left": "Filter panel",
+        "right": "Node details panel",
+        "bottom": "Metrics summary"
+      }
+    },
+    "detail_panels": {
+      "container": [
+        "Name and ID",
+        "Image info",
+        "Status and uptime",
+        "CPU/Memory sparklines",
+        "Network metrics",
+        "Control buttons (Stop, Restart, Pause, Logs, Exec)",
+        "Labels and metadata",
+        "Connected containers"
+      ],
+      "host": [
+        "Hostname and IPs",
+        "OS information",
+        "Resource capacity and usage",
+        "Container count",
+        "Load average",
+        "System metrics"
+      ],
+      "process": [
+        "PID and command",
+        "User and working directory",
+        "Resource usage",
+        "Parent/child processes",
+        "Network connections"
+      ]
+    },
+    "terminal": {
+      "emulator": "xterm.js",
+      "features": ["Multiple tabs", "Copy/paste", "Resize", "Session persistence"]
+    },
+    "logs": {
+      "features": ["Real-time streaming", "Search", "Filter by level", "Timestamps", "Download", "Tail mode"]
+    }
+  },
+  "implementation_phases": [
+    {
+      "phase": 1,
+      "name": "Core Infrastructure",
+      "duration": "Months 1-2",
+      "deliverables": [
+        "Probe with Docker integration",
+        "Basic App with report aggregation",
+        "Simple web UI with container topology",
+        "Container control actions (start/stop/restart)"
+      ]
+    },
+    {
+      "phase": 2,
+      "name": "Enhanced Monitoring",
+      "duration": "Month 3",
+      "deliverables": [
+        "Metrics collection and storage",
+        "Sparkline visualization",
+        "Process-level topology",
+        "Host topology view"
+      ]
+    },
+    {
+      "phase": 3,
+      "name": "Kubernetes & Orchestrators",
+      "duration": "Month 4",
+      "deliverables": [
+        "Kubernetes integration",
+        "Pod/Service topology",
+        "K8s resource management",
+        "RBAC integration"
+      ]
+    },
+    {
+      "phase": 4,
+      "name": "Management & Control",
+      "duration": "Month 5",
+      "deliverables": [
+        "Container logs viewer",
+        "Container exec/terminal",
+        "Search and filter",
+        "Multi-view navigation"
+      ]
+    },
+    {
+      "phase": 5,
+      "name": "Extensibility",
+      "duration": "Month 6",
+      "deliverables": [
+        "Plugin architecture",
+        "REST API completion",
+        "Plugin SDK and documentation",
+        "Example plugins"
+      ]
+    },
+    {
+      "phase": 6,
+      "name": "Production Readiness",
+      "duration": "Month 7",
+      "deliverables": [
+        "High availability",
+        "Security hardening",
+        "Performance optimization",
+        "Documentation completion"
+      ]
+    }
+  ],
+  "technology_stack": {
+    "backend": {
+      "language": "Go",
+      "communication": ["gRPC", "HTTP", "WebSocket"],
+      "database": "Prometheus TSDB or InfluxDB"
+    },
+    "frontend": {
+      "framework": "React or Vue.js",
+      "visualization": "D3.js or Cytoscape.js",
+      "realtime": "WebSocket",
+      "terminal": "xterm.js"
+    },
+    "probe": {
+      "language": "Go",
+      "libraries": ["Docker client", "Kubernetes client-go", "conntrack"]
+    },
+    "deployment": {
+      "containers": "Docker images",
+      "orchestration": ["Kubernetes manifests", "Helm charts"],
+      "iac": "Terraform modules (optional)"
+    }
+  },
+  "success_metrics": {
+    "adoption": "Number of active deployments",
+    "scale": "Average cluster size monitored",
+    "performance": "P95 UI response time < 2s",
+    "reliability": "99.9% probe uptime",
+    "engagement": "Daily active users",
+    "ecosystem": "Number of community plugins"
+  },
+  "out_of_scope_v1": [
+    "Application Performance Monitoring (APM) with distributed tracing",
+    "Log aggregation and analysis",
+    "Cost optimization recommendations",
+    "Automated remediation/auto-healing",
+    "Change management and deployment tracking",
+    "Service mesh integration (Istio, Linkerd)"
+  ]
+}
