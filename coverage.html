@@ -1,0 +1,2145 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>probe-agent: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/ljluestc/orchestrator/cmd/probe-agent/main.go (0.0%)</option>
+				
+				<option value="file1">github.com/ljluestc/orchestrator/main.go (0.0%)</option>
+				
+				<option value="file2">github.com/ljluestc/orchestrator/orchestrator.go (52.9%)</option>
+				
+				<option value="file3">github.com/ljluestc/orchestrator/pkg/probe/client.go (66.7%)</option>
+				
+				<option value="file4">github.com/ljluestc/orchestrator/pkg/probe/docker.go (13.2%)</option>
+				
+				<option value="file5">github.com/ljluestc/orchestrator/pkg/probe/host.go (82.5%)</option>
+				
+				<option value="file6">github.com/ljluestc/orchestrator/pkg/probe/network.go (93.7%)</option>
+				
+				<option value="file7">github.com/ljluestc/orchestrator/pkg/probe/probe.go (90.1%)</option>
+				
+				<option value="file8">github.com/ljluestc/orchestrator/pkg/probe/process.go (95.4%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package main
+
+import (
+        "context"
+        "flag"
+        "fmt"
+        "log"
+        "os"
+        "os/signal"
+        "syscall"
+        "time"
+
+        "github.com/ljluestc/orchestrator/pkg/probe"
+)
+
+var (
+        serverURL          = flag.String("server", "http://localhost:8080", "Server URL")
+        agentID            = flag.String("agent-id", "", "Agent ID (auto-generated if empty)")
+        apiKey             = flag.String("api-key", "", "API key for authentication")
+        collectionInterval = flag.Duration("interval", 30*time.Second, "Collection interval")
+        heartbeatInterval  = flag.Duration("heartbeat", 60*time.Second, "Heartbeat interval")
+        collectHost        = flag.Bool("collect-host", true, "Collect host information")
+        collectDocker      = flag.Bool("collect-docker", true, "Collect Docker information")
+        collectDockerStats = flag.Bool("collect-docker-stats", false, "Collect Docker container stats")
+        collectProcesses   = flag.Bool("collect-processes", true, "Collect process information")
+        collectNetwork     = flag.Bool("collect-network", true, "Collect network information")
+        maxProcesses       = flag.Int("max-processes", 100, "Maximum number of processes to collect")
+        maxConnections     = flag.Int("max-connections", 100, "Maximum number of network connections to collect")
+        includeLocalhost   = flag.Bool("include-localhost", true, "Include localhost connections")
+        includeAllProcs    = flag.Bool("include-all-processes", false, "Include all processes (not just containers)")
+        resolveProcesses   = flag.Bool("resolve-processes", true, "Resolve process names for network connections")
+        retryAttempts      = flag.Int("retry-attempts", 3, "Number of retry attempts for failed requests")
+        retryDelay         = flag.Duration("retry-delay", 5*time.Second, "Delay between retry attempts")
+)
+
+func main() <span class="cov0" title="0">{
+        flag.Parse()
+
+        // Setup logging
+        log.SetFlags(log.LstdFlags | log.Lshortfile)
+        log.Println("Starting Probe Agent...")
+
+        // Create probe configuration
+        config := probe.ProbeConfig{
+                ServerURL:           *serverURL,
+                AgentID:             *agentID,
+                APIKey:              *apiKey,
+                CollectionInterval:  *collectionInterval,
+                HeartbeatInterval:   *heartbeatInterval,
+                CollectHost:         *collectHost,
+                CollectDocker:       *collectDocker,
+                CollectDockerStats:  *collectDockerStats,
+                CollectProcesses:    *collectProcesses,
+                CollectNetwork:      *collectNetwork,
+                MaxProcesses:        *maxProcesses,
+                MaxConnections:      *maxConnections,
+                IncludeLocalhost:    *includeLocalhost,
+                IncludeAllProcesses: *includeAllProcs,
+                ResolveProcesses:    *resolveProcesses,
+                RetryAttempts:       *retryAttempts,
+                RetryDelay:          *retryDelay,
+        }
+
+        // Create probe
+        p, err := probe.NewProbe(config)
+        if err != nil </span><span class="cov0" title="0">{
+                log.Fatalf("Failed to create probe: %v", err)
+        }</span>
+
+        // Setup context with cancellation
+        <span class="cov0" title="0">ctx, cancel := context.WithCancel(context.Background())
+        defer cancel()
+
+        // Setup signal handling
+        sigChan := make(chan os.Signal, 1)
+        signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+
+        // Start probe
+        if err := p.Start(ctx); err != nil </span><span class="cov0" title="0">{
+                log.Fatalf("Failed to start probe: %v", err)
+        }</span>
+
+        // Print configuration
+        <span class="cov0" title="0">printConfig(config)
+
+        // Wait for termination signal
+        sig := &lt;-sigChan
+        log.Printf("Received signal: %v", sig)
+
+        // Cancel context to stop background tasks
+        cancel()
+
+        // Stop probe gracefully
+        log.Println("Stopping probe agent...")
+        if err := p.Stop(); err != nil </span><span class="cov0" title="0">{
+                log.Printf("Error stopping probe: %v", err)
+        }</span>
+
+        <span class="cov0" title="0">log.Println("Probe agent stopped successfully")</span>
+}
+
+func printConfig(config probe.ProbeConfig) <span class="cov0" title="0">{
+        fmt.Println("\n=== Probe Agent Configuration ===")
+        fmt.Printf("Server URL:           %s\n", config.ServerURL)
+        fmt.Printf("Agent ID:             %s\n", config.AgentID)
+        fmt.Printf("Collection Interval:  %s\n", config.CollectionInterval)
+        fmt.Printf("Heartbeat Interval:   %s\n", config.HeartbeatInterval)
+        fmt.Println("\n=== Collection Modules ===")
+        fmt.Printf("Host Information:     %v\n", config.CollectHost)
+        fmt.Printf("Docker Information:   %v\n", config.CollectDocker)
+        if config.CollectDocker </span><span class="cov0" title="0">{
+                fmt.Printf("  - Container Stats:  %v\n", config.CollectDockerStats)
+        }</span>
+        <span class="cov0" title="0">fmt.Printf("Process Information:  %v\n", config.CollectProcesses)
+        if config.CollectProcesses </span><span class="cov0" title="0">{
+                fmt.Printf("  - Max Processes:    %d\n", config.MaxProcesses)
+                fmt.Printf("  - Include All:      %v\n", config.IncludeAllProcesses)
+        }</span>
+        <span class="cov0" title="0">fmt.Printf("Network Information:  %v\n", config.CollectNetwork)
+        if config.CollectNetwork </span><span class="cov0" title="0">{
+                fmt.Printf("  - Max Connections:  %d\n", config.MaxConnections)
+                fmt.Printf("  - Include Localhost:%v\n", config.IncludeLocalhost)
+                fmt.Printf("  - Resolve Processes:%v\n", config.ResolveProcesses)
+        }</span>
+        <span class="cov0" title="0">fmt.Println("\n=== Retry Configuration ===")
+        fmt.Printf("Retry Attempts:       %d\n", config.RetryAttempts)
+        fmt.Printf("Retry Delay:          %s\n", config.RetryDelay)
+        fmt.Println("================================")</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package main
+
+import (
+    "fmt"
+)
+
+func main() <span class="cov0" title="0">{
+    o := NewOrchestrator()
+    if o == nil </span><span class="cov0" title="0">{
+        fmt.Println("Failed to initialize orchestrator")
+        return
+    }</span>
+    <span class="cov0" title="0">fmt.Println("Orchestrator initialized successfully")</span>
+}</pre>
+		
+		<pre class="file" id="file2" style="display: none">package main
+
+import (
+    "context"
+    "fmt"
+
+    "github.com/docker/docker/api/types/container"
+    "github.com/docker/docker/client"
+)
+
+// Node represents a compute node
+type Node struct {
+    ID       string
+    Tasks    []Task
+    Capacity int
+}
+
+// Task represents a task to be scheduled
+type Task struct {
+    ID    string
+    Image string
+}
+
+// Orchestrator manages nodes and tasks
+type Orchestrator struct {
+    nodes  map[string]*Node
+    tasks  map[string]Task
+    client *client.Client
+}
+
+// NewOrchestrator initializes a new orchestrator
+func NewOrchestrator() *Orchestrator <span class="cov8" title="1">{
+    cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+    if err != nil </span><span class="cov0" title="0">{
+        fmt.Printf("Failed to create Docker client: %v\n", err)
+        return nil
+    }</span>
+    <span class="cov8" title="1">return &amp;Orchestrator{
+        nodes:  map[string]*Node{"node1": {ID: "node1", Capacity: 2}},
+        tasks:  make(map[string]Task),
+        client: cli,
+    }</span>
+}
+
+// ScheduleTask schedules a task on an available node
+func (o *Orchestrator) ScheduleTask(task Task) error <span class="cov8" title="1">{
+    for _, node := range o.nodes </span><span class="cov8" title="1">{
+        if len(node.Tasks) &lt; node.Capacity </span><span class="cov8" title="1">{
+            node.Tasks = append(node.Tasks, task)
+            o.tasks[task.ID] = task
+
+            ctx := context.Background()
+            config := &amp;container.Config{
+                Image: task.Image,
+            }
+            hostConfig := &amp;container.HostConfig{}
+            resp, err := o.client.ContainerCreate(ctx, config, hostConfig, nil, nil, task.ID)
+            if err != nil </span><span class="cov8" title="1">{
+                return fmt.Errorf("failed to create container: %v", err)
+            }</span>
+            <span class="cov0" title="0">err = o.client.ContainerStart(ctx, resp.ID, container.StartOptions{})
+            if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to start container: %v", err)
+            }</span>
+            <span class="cov0" title="0">return nil</span>
+        }
+    }
+    <span class="cov8" title="1">return fmt.Errorf("no available nodes")</span>
+}
+
+// StopTask stops and removes a task
+func (o *Orchestrator) StopTask(taskID string) error <span class="cov8" title="1">{
+    ctx := context.Background()
+    err := o.client.ContainerStop(ctx, taskID, container.StopOptions{})
+    if err != nil </span><span class="cov8" title="1">{
+        return fmt.Errorf("failed to stop container: %v", err)
+    }</span>
+    <span class="cov0" title="0">err = o.client.ContainerRemove(ctx, taskID, container.RemoveOptions{Force: true})
+    if err != nil </span><span class="cov0" title="0">{
+        return fmt.Errorf("failed to remove container: %v", err)
+    }</span>
+    <span class="cov0" title="0">for _, node := range o.nodes </span><span class="cov0" title="0">{
+        for i, t := range node.Tasks </span><span class="cov0" title="0">{
+            if t.ID == taskID </span><span class="cov0" title="0">{
+                node.Tasks = append(node.Tasks[:i], node.Tasks[i+1:]...)
+                break</span>
+            }
+        }
+    }
+    <span class="cov0" title="0">delete(o.tasks, taskID)
+    return nil</span>
+}</pre>
+		
+		<pre class="file" id="file3" style="display: none">package probe
+
+import (
+        "bytes"
+        "context"
+        "encoding/json"
+        "fmt"
+        "io"
+        "net/http"
+        "time"
+)
+
+// ReportData contains all collected data to be sent to the app component
+type ReportData struct {
+        HostInfo      *HostInfo      `json:"host_info,omitempty"`
+        DockerInfo    *DockerInfo    `json:"docker_info,omitempty"`
+        ProcessesInfo *ProcessesInfo `json:"processes_info,omitempty"`
+        NetworkInfo   *NetworkInfo   `json:"network_info,omitempty"`
+        Timestamp     time.Time      `json:"timestamp"`
+        AgentID       string         `json:"agent_id"`
+        Hostname      string         `json:"hostname"`
+}
+
+// Client handles communication with the app component
+type Client struct {
+        serverURL  string
+        httpClient *http.Client
+        agentID    string
+        apiKey     string
+}
+
+// ClientConfig contains configuration for the client
+type ClientConfig struct {
+        ServerURL      string
+        AgentID        string
+        APIKey         string
+        RequestTimeout time.Duration
+        RetryAttempts  int
+        RetryDelay     time.Duration
+}
+
+// NewClient creates a new client for communicating with the app component
+func NewClient(config ClientConfig) *Client <span class="cov8" title="1">{
+        if config.RequestTimeout == 0 </span><span class="cov8" title="1">{
+                config.RequestTimeout = 30 * time.Second
+        }</span>
+
+        <span class="cov8" title="1">return &amp;Client{
+                serverURL: config.ServerURL,
+                httpClient: &amp;http.Client{
+                        Timeout: config.RequestTimeout,
+                        Transport: &amp;http.Transport{
+                                MaxIdleConns:        10,
+                                MaxIdleConnsPerHost: 5,
+                                IdleConnTimeout:     90 * time.Second,
+                        },
+                },
+                agentID: config.AgentID,
+                apiKey:  config.APIKey,
+        }</span>
+}
+
+// SendReport sends collected data to the app component via HTTP
+func (c *Client) SendReport(ctx context.Context, data *ReportData) error <span class="cov8" title="1">{
+        // Set agent ID and timestamp
+        data.AgentID = c.agentID
+        data.Timestamp = time.Now()
+
+        // Marshal data to JSON
+        jsonData, err := json.Marshal(data)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to marshal report data: %w", err)
+        }</span>
+
+        // Create HTTP request
+        <span class="cov8" title="1">url := fmt.Sprintf("%s/api/v1/reports", c.serverURL)
+        req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(jsonData))
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to create request: %w", err)
+        }</span>
+
+        // Set headers
+        <span class="cov8" title="1">req.Header.Set("Content-Type", "application/json")
+        if c.apiKey != "" </span><span class="cov8" title="1">{
+                req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.apiKey))
+        }</span>
+        <span class="cov8" title="1">req.Header.Set("X-Agent-ID", c.agentID)
+
+        // Send request
+        resp, err := c.httpClient.Do(req)
+        if err != nil </span><span class="cov8" title="1">{
+                return fmt.Errorf("failed to send request: %w", err)
+        }</span>
+        <span class="cov8" title="1">defer resp.Body.Close()
+
+        // Check response status
+        if resp.StatusCode != http.StatusOK &amp;&amp; resp.StatusCode != http.StatusAccepted </span><span class="cov8" title="1">{
+                body, _ := io.ReadAll(resp.Body)
+                return fmt.Errorf("server returned error status %d: %s", resp.StatusCode, string(body))
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+// SendReportWithRetry sends a report with retry logic
+func (c *Client) SendReportWithRetry(ctx context.Context, data *ReportData, attempts int, delay time.Duration) error <span class="cov8" title="1">{
+        var lastErr error
+
+        for i := 0; i &lt; attempts; i++ </span><span class="cov8" title="1">{
+                err := c.SendReport(ctx, data)
+                if err == nil </span><span class="cov8" title="1">{
+                        return nil
+                }</span>
+
+                <span class="cov8" title="1">lastErr = err
+
+                // Don't retry on context cancellation
+                if ctx.Err() != nil </span><span class="cov8" title="1">{
+                        return ctx.Err()
+                }</span>
+
+                // Wait before retrying (except on last attempt)
+                <span class="cov8" title="1">if i &lt; attempts-1 </span><span class="cov8" title="1">{
+                        select </span>{
+                        case &lt;-time.After(delay):<span class="cov8" title="1"></span>
+                        case &lt;-ctx.Done():<span class="cov0" title="0">
+                                return ctx.Err()</span>
+                        }
+                }
+        }
+
+        <span class="cov8" title="1">return fmt.Errorf("failed after %d attempts: %w", attempts, lastErr)</span>
+}
+
+// Ping checks connectivity with the app component
+func (c *Client) Ping(ctx context.Context) error <span class="cov8" title="1">{
+        url := fmt.Sprintf("%s/api/v1/ping", c.serverURL)
+        req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to create ping request: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">if c.apiKey != "" </span><span class="cov0" title="0">{
+                req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.apiKey))
+        }</span>
+        <span class="cov8" title="1">req.Header.Set("X-Agent-ID", c.agentID)
+
+        resp, err := c.httpClient.Do(req)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to ping server: %w", err)
+        }</span>
+        <span class="cov8" title="1">defer resp.Body.Close()
+
+        if resp.StatusCode != http.StatusOK </span><span class="cov0" title="0">{
+                return fmt.Errorf("ping failed with status: %d", resp.StatusCode)
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+// GetConfig retrieves configuration from the app component
+func (c *Client) GetConfig(ctx context.Context) (map[string]interface{}, error) <span class="cov0" title="0">{
+        url := fmt.Sprintf("%s/api/v1/agents/config/%s", c.serverURL, c.agentID)
+        req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to create config request: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">if c.apiKey != "" </span><span class="cov0" title="0">{
+                req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.apiKey))
+        }</span>
+        <span class="cov0" title="0">req.Header.Set("X-Agent-ID", c.agentID)
+
+        resp, err := c.httpClient.Do(req)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to get config: %w", err)
+        }</span>
+        <span class="cov0" title="0">defer resp.Body.Close()
+
+        if resp.StatusCode != http.StatusOK </span><span class="cov0" title="0">{
+                body, _ := io.ReadAll(resp.Body)
+                return nil, fmt.Errorf("failed to get config, status %d: %s", resp.StatusCode, string(body))
+        }</span>
+
+        <span class="cov0" title="0">var config map[string]interface{}
+        if err := json.NewDecoder(resp.Body).Decode(&amp;config); err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to decode config: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">return config, nil</span>
+}
+
+// RegisterAgent registers the agent with the app component
+func (c *Client) RegisterAgent(ctx context.Context, hostname string, metadata map[string]string) error <span class="cov8" title="1">{
+        registration := map[string]interface{}{
+                "agent_id":  c.agentID,
+                "hostname":  hostname,
+                "metadata":  metadata,
+                "timestamp": time.Now(),
+        }
+
+        jsonData, err := json.Marshal(registration)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to marshal registration: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">url := fmt.Sprintf("%s/api/v1/agents/register", c.serverURL)
+        req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(jsonData))
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to create registration request: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">req.Header.Set("Content-Type", "application/json")
+        if c.apiKey != "" </span><span class="cov0" title="0">{
+                req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.apiKey))
+        }</span>
+
+        <span class="cov8" title="1">resp, err := c.httpClient.Do(req)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to register agent: %w", err)
+        }</span>
+        <span class="cov8" title="1">defer resp.Body.Close()
+
+        if resp.StatusCode != http.StatusOK &amp;&amp; resp.StatusCode != http.StatusCreated </span><span class="cov0" title="0">{
+                body, _ := io.ReadAll(resp.Body)
+                return fmt.Errorf("registration failed with status %d: %s", resp.StatusCode, string(body))
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+// Heartbeat sends a heartbeat to the app component
+func (c *Client) Heartbeat(ctx context.Context) error <span class="cov8" title="1">{
+        heartbeat := map[string]interface{}{
+                "agent_id":  c.agentID,
+                "timestamp": time.Now(),
+        }
+
+        jsonData, err := json.Marshal(heartbeat)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to marshal heartbeat: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">url := fmt.Sprintf("%s/api/v1/agents/heartbeat/%s", c.serverURL, c.agentID)
+        req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(jsonData))
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to create heartbeat request: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">req.Header.Set("Content-Type", "application/json")
+        if c.apiKey != "" </span><span class="cov0" title="0">{
+                req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.apiKey))
+        }</span>
+        <span class="cov8" title="1">req.Header.Set("X-Agent-ID", c.agentID)
+
+        resp, err := c.httpClient.Do(req)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to send heartbeat: %w", err)
+        }</span>
+        <span class="cov8" title="1">defer resp.Body.Close()
+
+        if resp.StatusCode != http.StatusOK </span><span class="cov0" title="0">{
+                return fmt.Errorf("heartbeat failed with status: %d", resp.StatusCode)
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+// Close closes the HTTP client
+func (c *Client) Close() error <span class="cov8" title="1">{
+        c.httpClient.CloseIdleConnections()
+        return nil
+}</span>
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package probe
+
+import (
+        "context"
+        "encoding/json"
+        "fmt"
+        "time"
+
+        "github.com/docker/docker/api/types"
+        "github.com/docker/docker/api/types/container"
+        "github.com/docker/docker/client"
+)
+
+// ContainerInfo contains information about a Docker container
+type ContainerInfo struct {
+        ID      string            `json:"id"`
+        Name    string            `json:"name"`
+        Image   string            `json:"image"`
+        ImageID string            `json:"image_id"`
+        Status  string            `json:"status"`
+        State   string            `json:"state"`
+        Created time.Time         `json:"created"`
+        Ports   []PortMapping     `json:"ports"`
+        Labels  map[string]string `json:"labels"`
+        Stats   *ContainerStats   `json:"stats,omitempty"`
+}
+
+// PortMapping contains port mapping information
+type PortMapping struct {
+        PrivatePort uint16 `json:"private_port"`
+        PublicPort  uint16 `json:"public_port"`
+        Type        string `json:"type"`
+        IP          string `json:"ip"`
+}
+
+// ContainerStats contains container resource usage statistics
+type ContainerStats struct {
+        CPUPercent    float64 `json:"cpu_percent"`
+        MemoryUsageMB uint64  `json:"memory_usage_mb"`
+        MemoryLimitMB uint64  `json:"memory_limit_mb"`
+        MemoryPercent float64 `json:"memory_percent"`
+        NetworkRxMB   float64 `json:"network_rx_mb"`
+        NetworkTxMB   float64 `json:"network_tx_mb"`
+}
+
+// DockerInfo contains aggregated Docker information
+type DockerInfo struct {
+        Containers       []ContainerInfo `json:"containers"`
+        TotalContainers  int             `json:"total_containers"`
+        RunningContainers int            `json:"running_containers"`
+        PausedContainers int             `json:"paused_containers"`
+        StoppedContainers int            `json:"stopped_containers"`
+        Images           int             `json:"images"`
+        DockerVersion    string          `json:"docker_version"`
+        Timestamp        time.Time       `json:"timestamp"`
+}
+
+// DockerCollector collects Docker container information
+type DockerCollector struct {
+        client      *client.Client
+        collectStats bool
+}
+
+// NewDockerCollector creates a new Docker collector
+func NewDockerCollector(collectStats bool) (*DockerCollector, error) <span class="cov8" title="1">{
+        cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to create Docker client: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">return &amp;DockerCollector{
+                client:      cli,
+                collectStats: collectStats,
+        }, nil</span>
+}
+
+// NewDockerCollectorWithClient creates a Docker collector with custom client (for testing)
+func NewDockerCollectorWithClient(cli *client.Client, collectStats bool) *DockerCollector <span class="cov0" title="0">{
+        return &amp;DockerCollector{
+                client:      cli,
+                collectStats: collectStats,
+        }
+}</span>
+
+// Collect gathers Docker container information
+func (d *DockerCollector) Collect(ctx context.Context) (*DockerInfo, error) <span class="cov8" title="1">{
+        info := &amp;DockerInfo{
+                Timestamp: time.Now(),
+        }
+
+        // Get Docker version
+        version, err := d.client.ServerVersion(ctx)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, fmt.Errorf("failed to get Docker version: %w", err)
+        }</span>
+        <span class="cov0" title="0">info.DockerVersion = version.Version
+
+        // List all containers
+        containers, err := d.client.ContainerList(ctx, container.ListOptions{All: true})
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to list containers: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">info.TotalContainers = len(containers)
+        info.Containers = make([]ContainerInfo, 0, len(containers))
+
+        for _, c := range containers </span><span class="cov0" title="0">{
+                containerInfo := ContainerInfo{
+                        ID:      c.ID,
+                        Image:   c.Image,
+                        ImageID: c.ImageID,
+                        Status:  c.Status,
+                        State:   c.State,
+                        Created: time.Unix(c.Created, 0),
+                        Labels:  c.Labels,
+                }
+
+                // Extract container name (remove leading /)
+                if len(c.Names) &gt; 0 </span><span class="cov0" title="0">{
+                        containerInfo.Name = c.Names[0]
+                        if len(containerInfo.Name) &gt; 0 &amp;&amp; containerInfo.Name[0] == '/' </span><span class="cov0" title="0">{
+                                containerInfo.Name = containerInfo.Name[1:]
+                        }</span>
+                }
+
+                // Extract port mappings
+                <span class="cov0" title="0">containerInfo.Ports = make([]PortMapping, 0, len(c.Ports))
+                for _, port := range c.Ports </span><span class="cov0" title="0">{
+                        containerInfo.Ports = append(containerInfo.Ports, PortMapping{
+                                PrivatePort: port.PrivatePort,
+                                PublicPort:  port.PublicPort,
+                                Type:        port.Type,
+                                IP:          port.IP,
+                        })
+                }</span>
+
+                // Count containers by state
+                <span class="cov0" title="0">switch c.State </span>{
+                case "running":<span class="cov0" title="0">
+                        info.RunningContainers++</span>
+                case "paused":<span class="cov0" title="0">
+                        info.PausedContainers++</span>
+                case "exited", "dead":<span class="cov0" title="0">
+                        info.StoppedContainers++</span>
+                }
+
+                // Collect container stats if enabled
+                <span class="cov0" title="0">if d.collectStats &amp;&amp; c.State == "running" </span><span class="cov0" title="0">{
+                        stats, err := d.getContainerStats(ctx, c.ID)
+                        if err != nil </span><span class="cov0" title="0">{
+                                // Log error but don't fail the entire collection
+                                containerInfo.Stats = nil
+                        }</span> else<span class="cov0" title="0"> {
+                                containerInfo.Stats = stats
+                        }</span>
+                }
+
+                <span class="cov0" title="0">info.Containers = append(info.Containers, containerInfo)</span>
+        }
+
+        // Get image count
+        <span class="cov0" title="0">images, err := d.client.ImageList(ctx, types.ImageListOptions{})
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to list images: %w", err)
+        }</span>
+        <span class="cov0" title="0">info.Images = len(images)
+
+        return info, nil</span>
+}
+
+// getContainerStats retrieves resource usage statistics for a container
+func (d *DockerCollector) getContainerStats(ctx context.Context, containerID string) (*ContainerStats, error) <span class="cov0" title="0">{
+        // Use a timeout context for stats collection
+        statsCtx, cancel := context.WithTimeout(ctx, 2*time.Second)
+        defer cancel()
+
+        stats, err := d.client.ContainerStats(statsCtx, containerID, false)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to get container stats: %w", err)
+        }</span>
+        <span class="cov0" title="0">defer stats.Body.Close()
+
+        var containerStats types.StatsJSON
+        if err := json.NewDecoder(stats.Body).Decode(&amp;containerStats); err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to decode stats: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">result := &amp;ContainerStats{
+                MemoryUsageMB: containerStats.MemoryStats.Usage / 1024 / 1024,
+                MemoryLimitMB: containerStats.MemoryStats.Limit / 1024 / 1024,
+        }
+
+        // Calculate CPU percentage
+        cpuDelta := float64(containerStats.CPUStats.CPUUsage.TotalUsage - containerStats.PreCPUStats.CPUUsage.TotalUsage)
+        systemDelta := float64(containerStats.CPUStats.SystemUsage - containerStats.PreCPUStats.SystemUsage)
+        onlineCPUs := float64(containerStats.CPUStats.OnlineCPUs)
+
+        if onlineCPUs == 0 </span><span class="cov0" title="0">{
+                onlineCPUs = float64(len(containerStats.CPUStats.CPUUsage.PercpuUsage))
+        }</span>
+
+        <span class="cov0" title="0">if systemDelta &gt; 0 &amp;&amp; cpuDelta &gt; 0 </span><span class="cov0" title="0">{
+                result.CPUPercent = (cpuDelta / systemDelta) * onlineCPUs * 100.0
+        }</span>
+
+        // Calculate memory percentage
+        <span class="cov0" title="0">if result.MemoryLimitMB &gt; 0 </span><span class="cov0" title="0">{
+                result.MemoryPercent = float64(result.MemoryUsageMB) / float64(result.MemoryLimitMB) * 100.0
+        }</span>
+
+        // Calculate network I/O
+        <span class="cov0" title="0">var rxBytes, txBytes uint64
+        for _, network := range containerStats.Networks </span><span class="cov0" title="0">{
+                rxBytes += network.RxBytes
+                txBytes += network.TxBytes
+        }</span>
+        <span class="cov0" title="0">result.NetworkRxMB = float64(rxBytes) / 1024.0 / 1024.0
+        result.NetworkTxMB = float64(txBytes) / 1024.0 / 1024.0
+
+        return result, nil</span>
+}
+
+// Close closes the Docker client connection
+func (d *DockerCollector) Close() error <span class="cov8" title="1">{
+        if d.client != nil </span><span class="cov8" title="1">{
+                return d.client.Close()
+        }</span>
+        <span class="cov0" title="0">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file5" style="display: none">package probe
+
+import (
+        "bufio"
+        "fmt"
+        "os"
+        "strconv"
+        "strings"
+        "time"
+)
+
+// HostInfo contains collected host system information
+type HostInfo struct {
+        Hostname     string            `json:"hostname"`
+        KernelVersion string           `json:"kernel_version"`
+        Uptime       time.Duration     `json:"uptime"`
+        BootTime     time.Time         `json:"boot_time"`
+        CPUInfo      CPUInfo           `json:"cpu_info"`
+        MemoryInfo   MemoryInfo        `json:"memory_info"`
+        LoadAverage  LoadAverage       `json:"load_average"`
+        Timestamp    time.Time         `json:"timestamp"`
+}
+
+// CPUInfo contains CPU-related information
+type CPUInfo struct {
+        Model      string  `json:"model"`
+        Cores      int     `json:"cores"`
+        Usage      float64 `json:"usage"` // percentage
+}
+
+// MemoryInfo contains memory-related information
+type MemoryInfo struct {
+        TotalMB     uint64  `json:"total_mb"`
+        FreeMB      uint64  `json:"free_mb"`
+        AvailableMB uint64  `json:"available_mb"`
+        UsedMB      uint64  `json:"used_mb"`
+        Usage       float64 `json:"usage"` // percentage
+}
+
+// LoadAverage contains system load averages
+type LoadAverage struct {
+        Load1  float64 `json:"load1"`
+        Load5  float64 `json:"load5"`
+        Load15 float64 `json:"load15"`
+}
+
+// HostCollector collects host information
+type HostCollector struct {
+        procPath string
+}
+
+// NewHostCollector creates a new host collector
+func NewHostCollector() *HostCollector <span class="cov8" title="1">{
+        return &amp;HostCollector{
+                procPath: "/proc",
+        }
+}</span>
+
+// NewHostCollectorWithPath creates a host collector with custom proc path (for testing)
+func NewHostCollectorWithPath(procPath string) *HostCollector <span class="cov8" title="1">{
+        return &amp;HostCollector{
+                procPath: procPath,
+        }
+}</span>
+
+// Collect gathers host information
+func (h *HostCollector) Collect() (*HostInfo, error) <span class="cov8" title="1">{
+        info := &amp;HostInfo{
+                Timestamp: time.Now(),
+        }
+
+        var err error
+
+        // Get hostname
+        info.Hostname, err = os.Hostname()
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to get hostname: %w", err)
+        }</span>
+
+        // Get kernel version
+        <span class="cov8" title="1">info.KernelVersion, err = h.getKernelVersion()
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to get kernel version: %w", err)
+        }</span>
+
+        // Get uptime and boot time
+        <span class="cov8" title="1">info.Uptime, info.BootTime, err = h.getUptime()
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to get uptime: %w", err)
+        }</span>
+
+        // Get CPU info
+        <span class="cov8" title="1">info.CPUInfo, err = h.getCPUInfo()
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to get CPU info: %w", err)
+        }</span>
+
+        // Get memory info
+        <span class="cov8" title="1">info.MemoryInfo, err = h.getMemoryInfo()
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to get memory info: %w", err)
+        }</span>
+
+        // Get load average
+        <span class="cov8" title="1">info.LoadAverage, err = h.getLoadAverage()
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to get load average: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">return info, nil</span>
+}
+
+// getKernelVersion reads kernel version from /proc/version
+func (h *HostCollector) getKernelVersion() (string, error) <span class="cov8" title="1">{
+        data, err := os.ReadFile(fmt.Sprintf("%s/version", h.procPath))
+        if err != nil </span><span class="cov8" title="1">{
+                return "", err
+        }</span>
+        <span class="cov8" title="1">return strings.TrimSpace(string(data)), nil</span>
+}
+
+// getUptime reads system uptime from /proc/uptime
+func (h *HostCollector) getUptime() (time.Duration, time.Time, error) <span class="cov8" title="1">{
+        data, err := os.ReadFile(fmt.Sprintf("%s/uptime", h.procPath))
+        if err != nil </span><span class="cov8" title="1">{
+                return 0, time.Time{}, err
+        }</span>
+
+        <span class="cov8" title="1">parts := strings.Fields(string(data))
+        if len(parts) &lt; 1 </span><span class="cov0" title="0">{
+                return 0, time.Time{}, fmt.Errorf("invalid uptime format")
+        }</span>
+
+        <span class="cov8" title="1">uptimeSeconds, err := strconv.ParseFloat(parts[0], 64)
+        if err != nil </span><span class="cov8" title="1">{
+                return 0, time.Time{}, err
+        }</span>
+
+        <span class="cov8" title="1">uptime := time.Duration(uptimeSeconds * float64(time.Second))
+        bootTime := time.Now().Add(-uptime)
+
+        return uptime, bootTime, nil</span>
+}
+
+// getCPUInfo reads CPU information from /proc/cpuinfo and /proc/stat
+func (h *HostCollector) getCPUInfo() (CPUInfo, error) <span class="cov8" title="1">{
+        info := CPUInfo{}
+
+        // Read /proc/cpuinfo for model and core count
+        file, err := os.Open(fmt.Sprintf("%s/cpuinfo", h.procPath))
+        if err != nil </span><span class="cov0" title="0">{
+                return info, err
+        }</span>
+        <span class="cov8" title="1">defer file.Close()
+
+        scanner := bufio.NewScanner(file)
+        cores := 0
+        for scanner.Scan() </span><span class="cov8" title="1">{
+                line := scanner.Text()
+                if strings.HasPrefix(line, "model name") </span><span class="cov8" title="1">{
+                        if info.Model == "" </span><span class="cov8" title="1">{
+                                parts := strings.Split(line, ":")
+                                if len(parts) &gt; 1 </span><span class="cov8" title="1">{
+                                        info.Model = strings.TrimSpace(parts[1])
+                                }</span>
+                        }
+                } else<span class="cov8" title="1"> if strings.HasPrefix(line, "processor") </span><span class="cov8" title="1">{
+                        cores++
+                }</span>
+        }
+        <span class="cov8" title="1">info.Cores = cores
+
+        if err := scanner.Err(); err != nil </span><span class="cov0" title="0">{
+                return info, err
+        }</span>
+
+        // Calculate CPU usage from /proc/stat
+        <span class="cov8" title="1">usage, err := h.getCPUUsage()
+        if err != nil </span><span class="cov0" title="0">{
+                // CPU usage is optional, don't fail on error
+                info.Usage = 0
+        }</span> else<span class="cov8" title="1"> {
+                info.Usage = usage
+        }</span>
+
+        <span class="cov8" title="1">return info, nil</span>
+}
+
+// getCPUUsage calculates CPU usage percentage from /proc/stat
+func (h *HostCollector) getCPUUsage() (float64, error) <span class="cov8" title="1">{
+        data, err := os.ReadFile(fmt.Sprintf("%s/stat", h.procPath))
+        if err != nil </span><span class="cov0" title="0">{
+                return 0, err
+        }</span>
+
+        <span class="cov8" title="1">lines := strings.Split(string(data), "\n")
+        if len(lines) &lt; 1 </span><span class="cov0" title="0">{
+                return 0, fmt.Errorf("invalid stat format")
+        }</span>
+
+        // First line is aggregate CPU stats
+        <span class="cov8" title="1">fields := strings.Fields(lines[0])
+        if len(fields) &lt; 5 || fields[0] != "cpu" </span><span class="cov0" title="0">{
+                return 0, fmt.Errorf("invalid CPU line format")
+        }</span>
+
+        <span class="cov8" title="1">user, _ := strconv.ParseUint(fields[1], 10, 64)
+        nice, _ := strconv.ParseUint(fields[2], 10, 64)
+        system, _ := strconv.ParseUint(fields[3], 10, 64)
+        idle, _ := strconv.ParseUint(fields[4], 10, 64)
+
+        total := user + nice + system + idle
+        used := user + nice + system
+
+        if total == 0 </span><span class="cov0" title="0">{
+                return 0, nil
+        }</span>
+
+        <span class="cov8" title="1">return float64(used) / float64(total) * 100, nil</span>
+}
+
+// getMemoryInfo reads memory information from /proc/meminfo
+func (h *HostCollector) getMemoryInfo() (MemoryInfo, error) <span class="cov8" title="1">{
+        info := MemoryInfo{}
+
+        file, err := os.Open(fmt.Sprintf("%s/meminfo", h.procPath))
+        if err != nil </span><span class="cov0" title="0">{
+                return info, err
+        }</span>
+        <span class="cov8" title="1">defer file.Close()
+
+        memData := make(map[string]uint64)
+        scanner := bufio.NewScanner(file)
+        for scanner.Scan() </span><span class="cov8" title="1">{
+                line := scanner.Text()
+                parts := strings.Fields(line)
+                if len(parts) &lt; 2 </span><span class="cov0" title="0">{
+                        continue</span>
+                }
+
+                <span class="cov8" title="1">key := strings.TrimSuffix(parts[0], ":")
+                value, err := strconv.ParseUint(parts[1], 10, 64)
+                if err != nil </span><span class="cov0" title="0">{
+                        continue</span>
+                }
+
+                // Convert from KB to MB
+                <span class="cov8" title="1">memData[key] = value / 1024</span>
+        }
+
+        <span class="cov8" title="1">if err := scanner.Err(); err != nil </span><span class="cov0" title="0">{
+                return info, err
+        }</span>
+
+        <span class="cov8" title="1">info.TotalMB = memData["MemTotal"]
+        info.FreeMB = memData["MemFree"]
+        info.AvailableMB = memData["MemAvailable"]
+
+        if info.AvailableMB &gt; 0 </span><span class="cov8" title="1">{
+                info.UsedMB = info.TotalMB - info.AvailableMB
+        }</span> else<span class="cov0" title="0"> {
+                info.UsedMB = info.TotalMB - info.FreeMB
+        }</span>
+
+        <span class="cov8" title="1">if info.TotalMB &gt; 0 </span><span class="cov8" title="1">{
+                info.Usage = float64(info.UsedMB) / float64(info.TotalMB) * 100
+        }</span>
+
+        <span class="cov8" title="1">return info, nil</span>
+}
+
+// getLoadAverage reads load average from /proc/loadavg
+func (h *HostCollector) getLoadAverage() (LoadAverage, error) <span class="cov8" title="1">{
+        avg := LoadAverage{}
+
+        data, err := os.ReadFile(fmt.Sprintf("%s/loadavg", h.procPath))
+        if err != nil </span><span class="cov8" title="1">{
+                return avg, err
+        }</span>
+
+        <span class="cov8" title="1">parts := strings.Fields(string(data))
+        if len(parts) &lt; 3 </span><span class="cov8" title="1">{
+                return avg, fmt.Errorf("invalid loadavg format")
+        }</span>
+
+        <span class="cov8" title="1">avg.Load1, err = strconv.ParseFloat(parts[0], 64)
+        if err != nil </span><span class="cov0" title="0">{
+                return avg, err
+        }</span>
+
+        <span class="cov8" title="1">avg.Load5, err = strconv.ParseFloat(parts[1], 64)
+        if err != nil </span><span class="cov0" title="0">{
+                return avg, err
+        }</span>
+
+        <span class="cov8" title="1">avg.Load15, err = strconv.ParseFloat(parts[2], 64)
+        if err != nil </span><span class="cov0" title="0">{
+                return avg, err
+        }</span>
+
+        <span class="cov8" title="1">return avg, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file6" style="display: none">package probe
+
+import (
+        "bufio"
+        "fmt"
+        "os"
+        "strconv"
+        "strings"
+        "time"
+)
+
+// NetworkConnection represents a network connection
+type NetworkConnection struct {
+        Protocol    string `json:"protocol"`
+        LocalAddr   string `json:"local_addr"`
+        LocalPort   uint16 `json:"local_port"`
+        RemoteAddr  string `json:"remote_addr"`
+        RemotePort  uint16 `json:"remote_port"`
+        State       string `json:"state"`
+        PID         int    `json:"pid,omitempty"`
+        ProcessName string `json:"process_name,omitempty"`
+}
+
+// NetworkInfo contains aggregated network information
+type NetworkInfo struct {
+        Connections        []NetworkConnection `json:"connections"`
+        TotalConnections   int                 `json:"total_connections"`
+        TCPConnections     int                 `json:"tcp_connections"`
+        UDPConnections     int                 `json:"udp_connections"`
+        ListeningPorts     []ListeningPort     `json:"listening_ports"`
+        Timestamp          time.Time           `json:"timestamp"`
+}
+
+// ListeningPort represents a listening port
+type ListeningPort struct {
+        Protocol    string `json:"protocol"`
+        Port        uint16 `json:"port"`
+        Addr        string `json:"addr"`
+        PID         int    `json:"pid,omitempty"`
+        ProcessName string `json:"process_name,omitempty"`
+}
+
+// NetworkCollector collects network connection information
+type NetworkCollector struct {
+        procPath          string
+        includeLocalhost  bool
+        maxConnections    int
+        resolveProcesses  bool
+}
+
+// NewNetworkCollector creates a new network collector
+func NewNetworkCollector(includeLocalhost bool, maxConnections int, resolveProcesses bool) *NetworkCollector <span class="cov8" title="1">{
+        return &amp;NetworkCollector{
+                procPath:         "/proc",
+                includeLocalhost: includeLocalhost,
+                maxConnections:   maxConnections,
+                resolveProcesses: resolveProcesses,
+        }
+}</span>
+
+// NewNetworkCollectorWithPath creates a network collector with custom proc path (for testing)
+func NewNetworkCollectorWithPath(procPath string, includeLocalhost bool, maxConnections int, resolveProcesses bool) *NetworkCollector <span class="cov8" title="1">{
+        return &amp;NetworkCollector{
+                procPath:         procPath,
+                includeLocalhost: includeLocalhost,
+                maxConnections:   maxConnections,
+                resolveProcesses: resolveProcesses,
+        }
+}</span>
+
+// Collect gathers network connection information
+func (n *NetworkCollector) Collect() (*NetworkInfo, error) <span class="cov8" title="1">{
+        info := &amp;NetworkInfo{
+                Timestamp:      time.Now(),
+                Connections:    make([]NetworkConnection, 0),
+                ListeningPorts: make([]ListeningPort, 0),
+        }
+
+        // Build inode to PID mapping if process resolution is enabled
+        var inodeToPID map[string]int
+        var inodeToName map[string]string
+        if n.resolveProcesses </span><span class="cov8" title="1">{
+                inodeToPID, inodeToName = n.buildInodeMapping()
+        }</span>
+
+        // Collect TCP connections
+        <span class="cov8" title="1">tcpConns, err := n.collectTCPConnections(inodeToPID, inodeToName)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to collect TCP connections: %w", err)
+        }</span>
+        <span class="cov8" title="1">info.Connections = append(info.Connections, tcpConns...)
+        info.TCPConnections = len(tcpConns)
+
+        // Collect UDP connections
+        udpConns, err := n.collectUDPConnections(inodeToPID, inodeToName)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to collect UDP connections: %w", err)
+        }</span>
+        <span class="cov8" title="1">info.Connections = append(info.Connections, udpConns...)
+        info.UDPConnections = len(udpConns)
+
+        info.TotalConnections = len(info.Connections)
+
+        // Extract listening ports
+        info.ListeningPorts = n.extractListeningPorts(info.Connections)
+
+        return info, nil</span>
+}
+
+// collectTCPConnections reads TCP connections from /proc/net/tcp
+func (n *NetworkCollector) collectTCPConnections(inodeToPID map[string]int, inodeToName map[string]string) ([]NetworkConnection, error) <span class="cov8" title="1">{
+        return n.parseNetFile(fmt.Sprintf("%s/net/tcp", n.procPath), "tcp", inodeToPID, inodeToName)
+}</span>
+
+// collectUDPConnections reads UDP connections from /proc/net/udp
+func (n *NetworkCollector) collectUDPConnections(inodeToPID map[string]int, inodeToName map[string]string) ([]NetworkConnection, error) <span class="cov8" title="1">{
+        return n.parseNetFile(fmt.Sprintf("%s/net/udp", n.procPath), "udp", inodeToPID, inodeToName)
+}</span>
+
+// parseNetFile parses /proc/net/tcp or /proc/net/udp
+func (n *NetworkCollector) parseNetFile(path, protocol string, inodeToPID map[string]int, inodeToName map[string]string) ([]NetworkConnection, error) <span class="cov8" title="1">{
+        file, err := os.Open(path)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">defer file.Close()
+
+        var connections []NetworkConnection
+        scanner := bufio.NewScanner(file)
+
+        // Skip header line
+        scanner.Scan()
+
+        count := 0
+        for scanner.Scan() </span><span class="cov8" title="1">{
+                if n.maxConnections &gt; 0 &amp;&amp; count &gt;= n.maxConnections </span><span class="cov8" title="1">{
+                        break</span>
+                }
+
+                <span class="cov8" title="1">line := scanner.Text()
+                conn, err := n.parseConnectionLine(line, protocol)
+                if err != nil </span><span class="cov0" title="0">{
+                        continue</span>
+                }
+
+                // Skip localhost connections if not included
+                <span class="cov8" title="1">if !n.includeLocalhost &amp;&amp; (conn.LocalAddr == "127.0.0.1" || conn.RemoteAddr == "127.0.0.1") </span><span class="cov8" title="1">{
+                        continue</span>
+                }
+
+                // Resolve process if mapping is available
+                <span class="cov8" title="1">if inodeToPID != nil </span><span class="cov8" title="1">{
+                        // Extract inode from line (last field)
+                        fields := strings.Fields(line)
+                        if len(fields) &gt;= 10 </span><span class="cov8" title="1">{
+                                inode := fields[9]
+                                if pid, ok := inodeToPID[inode]; ok </span><span class="cov8" title="1">{
+                                        conn.PID = pid
+                                        if name, ok := inodeToName[inode]; ok </span><span class="cov8" title="1">{
+                                                conn.ProcessName = name
+                                        }</span>
+                                }
+                        }
+                }
+
+                <span class="cov8" title="1">connections = append(connections, *conn)
+                count++</span>
+        }
+
+        <span class="cov8" title="1">return connections, scanner.Err()</span>
+}
+
+// parseConnectionLine parses a line from /proc/net/tcp or /proc/net/udp
+func (n *NetworkCollector) parseConnectionLine(line, protocol string) (*NetworkConnection, error) <span class="cov8" title="1">{
+        fields := strings.Fields(line)
+        if len(fields) &lt; 4 </span><span class="cov8" title="1">{
+                return nil, fmt.Errorf("invalid line format")
+        }</span>
+
+        <span class="cov8" title="1">conn := &amp;NetworkConnection{
+                Protocol: protocol,
+        }
+
+        // Parse local address
+        localParts := strings.Split(fields[1], ":")
+        if len(localParts) != 2 </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("invalid local address format")
+        }</span>
+        <span class="cov8" title="1">conn.LocalAddr = hexToIP(localParts[0])
+        port, _ := strconv.ParseUint(localParts[1], 16, 16)
+        conn.LocalPort = uint16(port)
+
+        // Parse remote address
+        remoteParts := strings.Split(fields[2], ":")
+        if len(remoteParts) != 2 </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("invalid remote address format")
+        }</span>
+        <span class="cov8" title="1">conn.RemoteAddr = hexToIP(remoteParts[0])
+        port, _ = strconv.ParseUint(remoteParts[1], 16, 16)
+        conn.RemotePort = uint16(port)
+
+        // Parse state
+        if protocol == "tcp" </span><span class="cov8" title="1">{
+                stateHex := fields[3]
+                state, _ := strconv.ParseUint(stateHex, 16, 8)
+                conn.State = tcpStateToString(uint8(state))
+        }</span> else<span class="cov8" title="1"> {
+                conn.State = "ACTIVE"
+        }</span>
+
+        <span class="cov8" title="1">return conn, nil</span>
+}
+
+// hexToIP converts hex IP address to dotted decimal notation
+func hexToIP(hexIP string) string <span class="cov8" title="1">{
+        if len(hexIP) != 8 </span><span class="cov0" title="0">{
+                return hexIP
+        }</span>
+
+        // Reverse byte order (little-endian)
+        <span class="cov8" title="1">var octets [4]string
+        for i := 0; i &lt; 4; i++ </span><span class="cov8" title="1">{
+                octet, _ := strconv.ParseUint(hexIP[i*2:i*2+2], 16, 8)
+                octets[3-i] = strconv.Itoa(int(octet))
+        }</span>
+
+        <span class="cov8" title="1">return strings.Join(octets[:], ".")</span>
+}
+
+// tcpStateToString converts TCP state number to string
+func tcpStateToString(state uint8) string <span class="cov8" title="1">{
+        states := map[uint8]string{
+                0x01: "ESTABLISHED",
+                0x02: "SYN_SENT",
+                0x03: "SYN_RECV",
+                0x04: "FIN_WAIT1",
+                0x05: "FIN_WAIT2",
+                0x06: "TIME_WAIT",
+                0x07: "CLOSE",
+                0x08: "CLOSE_WAIT",
+                0x09: "LAST_ACK",
+                0x0A: "LISTEN",
+                0x0B: "CLOSING",
+        }
+
+        if s, ok := states[state]; ok </span><span class="cov8" title="1">{
+                return s
+        }</span>
+        <span class="cov8" title="1">return fmt.Sprintf("UNKNOWN(%02X)", state)</span>
+}
+
+// buildInodeMapping creates a mapping from socket inodes to PIDs and process names
+func (n *NetworkCollector) buildInodeMapping() (map[string]int, map[string]string) <span class="cov8" title="1">{
+        inodeToPID := make(map[string]int)
+        inodeToName := make(map[string]string)
+
+        entries, err := os.ReadDir(n.procPath)
+        if err != nil </span><span class="cov0" title="0">{
+                return inodeToPID, inodeToName
+        }</span>
+
+        <span class="cov8" title="1">for _, entry := range entries </span><span class="cov8" title="1">{
+                if !entry.IsDir() </span><span class="cov8" title="1">{
+                        continue</span>
+                }
+
+                <span class="cov8" title="1">pid, err := strconv.Atoi(entry.Name())
+                if err != nil </span><span class="cov8" title="1">{
+                        continue</span>
+                }
+
+                // Get process name
+                <span class="cov8" title="1">statPath := fmt.Sprintf("%s/%d/stat", n.procPath, pid)
+                statData, err := os.ReadFile(statPath)
+                if err != nil </span><span class="cov8" title="1">{
+                        continue</span>
+                }
+
+                <span class="cov8" title="1">processName := extractProcessName(string(statData))
+
+                // Read socket inodes from /proc/[pid]/fd
+                fdPath := fmt.Sprintf("%s/%d/fd", n.procPath, pid)
+                fdEntries, err := os.ReadDir(fdPath)
+                if err != nil </span><span class="cov8" title="1">{
+                        continue</span>
+                }
+
+                <span class="cov8" title="1">for _, fdEntry := range fdEntries </span><span class="cov8" title="1">{
+                        link, err := os.Readlink(fmt.Sprintf("%s/%s", fdPath, fdEntry.Name()))
+                        if err != nil </span><span class="cov8" title="1">{
+                                continue</span>
+                        }
+
+                        // Check if it's a socket
+                        <span class="cov8" title="1">if strings.HasPrefix(link, "socket:[") </span><span class="cov8" title="1">{
+                                inode := strings.TrimPrefix(link, "socket:[")
+                                inode = strings.TrimSuffix(inode, "]")
+                                inodeToPID[inode] = pid
+                                inodeToName[inode] = processName
+                        }</span>
+                }
+        }
+
+        <span class="cov8" title="1">return inodeToPID, inodeToName</span>
+}
+
+// extractProcessName extracts process name from /proc/[pid]/stat
+func extractProcessName(stat string) string <span class="cov8" title="1">{
+        startIdx := strings.IndexByte(stat, '(')
+        endIdx := strings.LastIndexByte(stat, ')')
+
+        if startIdx == -1 || endIdx == -1 </span><span class="cov8" title="1">{
+                return ""
+        }</span>
+
+        <span class="cov8" title="1">return stat[startIdx+1 : endIdx]</span>
+}
+
+// extractListeningPorts extracts listening ports from connections
+func (n *NetworkCollector) extractListeningPorts(connections []NetworkConnection) []ListeningPort <span class="cov8" title="1">{
+        var ports []ListeningPort
+        seen := make(map[string]bool)
+
+        for _, conn := range connections </span><span class="cov8" title="1">{
+                if conn.State == "LISTEN" </span><span class="cov8" title="1">{
+                        key := fmt.Sprintf("%s:%d", conn.Protocol, conn.LocalPort)
+                        if !seen[key] </span><span class="cov8" title="1">{
+                                ports = append(ports, ListeningPort{
+                                        Protocol:    conn.Protocol,
+                                        Port:        conn.LocalPort,
+                                        Addr:        conn.LocalAddr,
+                                        PID:         conn.PID,
+                                        ProcessName: conn.ProcessName,
+                                })
+                                seen[key] = true
+                        }</span>
+                }
+        }
+
+        <span class="cov8" title="1">return ports</span>
+}
+</pre>
+		
+		<pre class="file" id="file7" style="display: none">package probe
+
+import (
+        "context"
+        "fmt"
+        "log"
+        "os"
+        "sync"
+        "time"
+)
+
+// ProbeConfig contains configuration for the probe agent
+type ProbeConfig struct {
+        // Client configuration
+        ServerURL      string
+        AgentID        string
+        APIKey         string
+
+        // Collection intervals
+        CollectionInterval time.Duration
+        HeartbeatInterval  time.Duration
+
+        // Feature flags
+        CollectHost      bool
+        CollectDocker    bool
+        CollectProcesses bool
+        CollectNetwork   bool
+        CollectDockerStats bool
+
+        // Limits
+        MaxProcesses   int
+        MaxConnections int
+
+        // Network options
+        IncludeLocalhost  bool
+        ResolveProcesses  bool
+
+        // Process options
+        IncludeAllProcesses bool
+
+        // Retry configuration
+        RetryAttempts int
+        RetryDelay    time.Duration
+}
+
+// Probe is the main probe agent structure
+type Probe struct {
+        config           ProbeConfig
+        client           *Client
+        hostCollector    *HostCollector
+        dockerCollector  *DockerCollector
+        processCollector *ProcessCollector
+        networkCollector *NetworkCollector
+
+        hostname         string
+        running          bool
+        mu               sync.RWMutex
+        stopCh           chan struct{}
+        wg               sync.WaitGroup
+}
+
+// NewProbe creates a new probe agent
+func NewProbe(config ProbeConfig) (*Probe, error) <span class="cov8" title="1">{
+        // Set defaults
+        if config.CollectionInterval == 0 </span><span class="cov8" title="1">{
+                config.CollectionInterval = 30 * time.Second
+        }</span>
+        <span class="cov8" title="1">if config.HeartbeatInterval == 0 </span><span class="cov8" title="1">{
+                config.HeartbeatInterval = 60 * time.Second
+        }</span>
+        <span class="cov8" title="1">if config.RetryAttempts == 0 </span><span class="cov8" title="1">{
+                config.RetryAttempts = 3
+        }</span>
+        <span class="cov8" title="1">if config.RetryDelay == 0 </span><span class="cov8" title="1">{
+                config.RetryDelay = 5 * time.Second
+        }</span>
+
+        // Get hostname
+        <span class="cov8" title="1">hostname, err := os.Hostname()
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to get hostname: %w", err)
+        }</span>
+
+        // Generate agent ID if not provided
+        <span class="cov8" title="1">if config.AgentID == "" </span><span class="cov8" title="1">{
+                config.AgentID = fmt.Sprintf("%s-%d", hostname, time.Now().Unix())
+        }</span>
+
+        <span class="cov8" title="1">probe := &amp;Probe{
+                config:   config,
+                hostname: hostname,
+                stopCh:   make(chan struct{}),
+        }
+
+        // Initialize client
+        probe.client = NewClient(ClientConfig{
+                ServerURL:      config.ServerURL,
+                AgentID:        config.AgentID,
+                APIKey:         config.APIKey,
+                RequestTimeout: 30 * time.Second,
+                RetryAttempts:  config.RetryAttempts,
+                RetryDelay:     config.RetryDelay,
+        })
+
+        // Initialize collectors based on configuration
+        if config.CollectHost </span><span class="cov8" title="1">{
+                probe.hostCollector = NewHostCollector()
+        }</span>
+
+        <span class="cov8" title="1">if config.CollectDocker </span><span class="cov8" title="1">{
+                dockerCollector, err := NewDockerCollector(config.CollectDockerStats)
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, fmt.Errorf("failed to create Docker collector: %w", err)
+                }</span>
+                <span class="cov8" title="1">probe.dockerCollector = dockerCollector</span>
+        }
+
+        <span class="cov8" title="1">if config.CollectProcesses </span><span class="cov8" title="1">{
+                probe.processCollector = NewProcessCollector(
+                        config.IncludeAllProcesses,
+                        config.MaxProcesses,
+                )
+        }</span>
+
+        <span class="cov8" title="1">if config.CollectNetwork </span><span class="cov8" title="1">{
+                probe.networkCollector = NewNetworkCollector(
+                        config.IncludeLocalhost,
+                        config.MaxConnections,
+                        config.ResolveProcesses,
+                )
+        }</span>
+
+        <span class="cov8" title="1">return probe, nil</span>
+}
+
+// Start starts the probe agent
+func (p *Probe) Start(ctx context.Context) error <span class="cov8" title="1">{
+        p.mu.Lock()
+        if p.running </span><span class="cov8" title="1">{
+                p.mu.Unlock()
+                return fmt.Errorf("probe is already running")
+        }</span>
+        <span class="cov8" title="1">p.running = true
+        p.mu.Unlock()
+
+        log.Printf("Starting probe agent (ID: %s, Hostname: %s)", p.config.AgentID, p.hostname)
+
+        // Register agent
+        metadata := map[string]string{
+                "version": "1.0.0",
+                "os":      "linux",
+        }
+
+        if err := p.client.RegisterAgent(ctx, p.hostname, metadata); err != nil </span><span class="cov0" title="0">{
+                log.Printf("Warning: Failed to register agent: %v", err)
+        }</span> else<span class="cov8" title="1"> {
+                log.Printf("Agent registered successfully")
+        }</span>
+
+        // Start collection loop
+        <span class="cov8" title="1">p.wg.Add(1)
+        go p.collectionLoop(ctx)
+
+        // Start heartbeat loop
+        p.wg.Add(1)
+        go p.heartbeatLoop(ctx)
+
+        log.Printf("Probe agent started")
+
+        return nil</span>
+}
+
+// Stop stops the probe agent
+func (p *Probe) Stop() error <span class="cov8" title="1">{
+        p.mu.Lock()
+        if !p.running </span><span class="cov8" title="1">{
+                p.mu.Unlock()
+                return fmt.Errorf("probe is not running")
+        }</span>
+        <span class="cov8" title="1">p.running = false
+        p.mu.Unlock()
+
+        log.Printf("Stopping probe agent...")
+
+        // Signal goroutines to stop
+        close(p.stopCh)
+
+        // Wait for goroutines to finish
+        p.wg.Wait()
+
+        // Close collectors
+        if p.dockerCollector != nil </span><span class="cov8" title="1">{
+                p.dockerCollector.Close()
+        }</span>
+
+        // Close client
+        <span class="cov8" title="1">p.client.Close()
+
+        log.Printf("Probe agent stopped")
+
+        return nil</span>
+}
+
+// collectionLoop runs the main collection loop
+func (p *Probe) collectionLoop(ctx context.Context) <span class="cov8" title="1">{
+        defer p.wg.Done()
+
+        ticker := time.NewTicker(p.config.CollectionInterval)
+        defer ticker.Stop()
+
+        // Collect immediately on start
+        p.collectAndSend(ctx)
+
+        for </span><span class="cov8" title="1">{
+                select </span>{
+                case &lt;-ticker.C:<span class="cov8" title="1">
+                        p.collectAndSend(ctx)</span>
+                case &lt;-p.stopCh:<span class="cov8" title="1">
+                        return</span>
+                case &lt;-ctx.Done():<span class="cov8" title="1">
+                        return</span>
+                }
+        }
+}
+
+// heartbeatLoop runs the heartbeat loop
+func (p *Probe) heartbeatLoop(ctx context.Context) <span class="cov8" title="1">{
+        defer p.wg.Done()
+
+        ticker := time.NewTicker(p.config.HeartbeatInterval)
+        defer ticker.Stop()
+
+        for </span><span class="cov8" title="1">{
+                select </span>{
+                case &lt;-ticker.C:<span class="cov8" title="1">
+                        if err := p.client.Heartbeat(ctx); err != nil </span><span class="cov0" title="0">{
+                                log.Printf("Heartbeat failed: %v", err)
+                        }</span>
+                case &lt;-p.stopCh:<span class="cov8" title="1">
+                        return</span>
+                case &lt;-ctx.Done():<span class="cov8" title="1">
+                        return</span>
+                }
+        }
+}
+
+// collectAndSend collects data from all collectors and sends it to the server
+func (p *Probe) collectAndSend(ctx context.Context) <span class="cov8" title="1">{
+        report := &amp;ReportData{
+                Hostname: p.hostname,
+        }
+
+        var wg sync.WaitGroup
+        var mu sync.Mutex
+
+        // Collect host information
+        if p.hostCollector != nil </span><span class="cov8" title="1">{
+                wg.Add(1)
+                go func() </span><span class="cov8" title="1">{
+                        defer wg.Done()
+                        hostInfo, err := p.hostCollector.Collect()
+                        if err != nil </span><span class="cov0" title="0">{
+                                log.Printf("Failed to collect host info: %v", err)
+                                return
+                        }</span>
+                        <span class="cov8" title="1">mu.Lock()
+                        report.HostInfo = hostInfo
+                        mu.Unlock()</span>
+                }()
+        }
+
+        // Collect Docker information
+        <span class="cov8" title="1">if p.dockerCollector != nil </span><span class="cov8" title="1">{
+                wg.Add(1)
+                go func() </span><span class="cov8" title="1">{
+                        defer wg.Done()
+                        dockerInfo, err := p.dockerCollector.Collect(ctx)
+                        if err != nil </span><span class="cov8" title="1">{
+                                log.Printf("Failed to collect Docker info: %v", err)
+                                return
+                        }</span>
+                        <span class="cov0" title="0">mu.Lock()
+                        report.DockerInfo = dockerInfo
+                        mu.Unlock()</span>
+                }()
+        }
+
+        // Collect process information
+        <span class="cov8" title="1">if p.processCollector != nil </span><span class="cov8" title="1">{
+                wg.Add(1)
+                go func() </span><span class="cov8" title="1">{
+                        defer wg.Done()
+                        processInfo, err := p.processCollector.Collect()
+                        if err != nil </span><span class="cov0" title="0">{
+                                log.Printf("Failed to collect process info: %v", err)
+                                return
+                        }</span>
+                        <span class="cov8" title="1">mu.Lock()
+                        report.ProcessesInfo = processInfo
+                        mu.Unlock()</span>
+                }()
+        }
+
+        // Collect network information
+        <span class="cov8" title="1">if p.networkCollector != nil </span><span class="cov8" title="1">{
+                wg.Add(1)
+                go func() </span><span class="cov8" title="1">{
+                        defer wg.Done()
+                        networkInfo, err := p.networkCollector.Collect()
+                        if err != nil </span><span class="cov0" title="0">{
+                                log.Printf("Failed to collect network info: %v", err)
+                                return
+                        }</span>
+                        <span class="cov8" title="1">mu.Lock()
+                        report.NetworkInfo = networkInfo
+                        mu.Unlock()</span>
+                }()
+        }
+
+        // Wait for all collectors to finish
+        <span class="cov8" title="1">wg.Wait()
+
+        // Send report with retry
+        if err := p.client.SendReportWithRetry(ctx, report, p.config.RetryAttempts, p.config.RetryDelay); err != nil </span><span class="cov8" title="1">{
+                log.Printf("Failed to send report: %v", err)
+        }</span> else<span class="cov8" title="1"> {
+                log.Printf("Report sent successfully")
+        }</span>
+}
+
+// IsRunning returns whether the probe is running
+func (p *Probe) IsRunning() bool <span class="cov8" title="1">{
+        p.mu.RLock()
+        defer p.mu.RUnlock()
+        return p.running
+}</span>
+
+// GetConfig returns the probe configuration
+func (p *Probe) GetConfig() ProbeConfig <span class="cov8" title="1">{
+        return p.config
+}</span>
+</pre>
+		
+		<pre class="file" id="file8" style="display: none">package probe
+
+import (
+        "bufio"
+        "fmt"
+        "os"
+        "path/filepath"
+        "strconv"
+        "strings"
+        "time"
+)
+
+// ProcessInfo contains information about a running process
+type ProcessInfo struct {
+        PID       int               `json:"pid"`
+        Name      string            `json:"name"`
+        Cmdline   string            `json:"cmdline"`
+        State     string            `json:"state"`
+        PPID      int               `json:"ppid"`
+        UID       int               `json:"uid"`
+        GID       int               `json:"gid"`
+        Threads   int               `json:"threads"`
+        CPUTime   uint64            `json:"cpu_time"`
+        MemoryMB  uint64            `json:"memory_mb"`
+        OpenFiles int               `json:"open_files"`
+        Cgroup    string            `json:"cgroup,omitempty"` // Docker container ID if applicable
+}
+
+// ProcessesInfo contains aggregated process information
+type ProcessesInfo struct {
+        Processes     []ProcessInfo `json:"processes"`
+        TotalProcesses int          `json:"total_processes"`
+        Timestamp     time.Time     `json:"timestamp"`
+}
+
+// ProcessCollector collects process information
+type ProcessCollector struct {
+        procPath       string
+        includeAll     bool // if false, only include processes in containers
+        maxProcesses   int  // limit number of processes to collect (0 = no limit)
+}
+
+// NewProcessCollector creates a new process collector
+func NewProcessCollector(includeAll bool, maxProcesses int) *ProcessCollector <span class="cov8" title="1">{
+        return &amp;ProcessCollector{
+                procPath:     "/proc",
+                includeAll:   includeAll,
+                maxProcesses: maxProcesses,
+        }
+}</span>
+
+// NewProcessCollectorWithPath creates a process collector with custom proc path (for testing)
+func NewProcessCollectorWithPath(procPath string, includeAll bool, maxProcesses int) *ProcessCollector <span class="cov8" title="1">{
+        return &amp;ProcessCollector{
+                procPath:     procPath,
+                includeAll:   includeAll,
+                maxProcesses: maxProcesses,
+        }
+}</span>
+
+// Collect gathers process information
+func (p *ProcessCollector) Collect() (*ProcessesInfo, error) <span class="cov8" title="1">{
+        info := &amp;ProcessesInfo{
+                Timestamp: time.Now(),
+                Processes: make([]ProcessInfo, 0),
+        }
+
+        // Read all PID directories from /proc
+        entries, err := os.ReadDir(p.procPath)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to read proc directory: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">count := 0
+        for _, entry := range entries </span><span class="cov8" title="1">{
+                if !entry.IsDir() </span><span class="cov8" title="1">{
+                        continue</span>
+                }
+
+                // Check if directory name is a number (PID)
+                <span class="cov8" title="1">pid, err := strconv.Atoi(entry.Name())
+                if err != nil </span><span class="cov8" title="1">{
+                        continue</span>
+                }
+
+                // Check limit
+                <span class="cov8" title="1">if p.maxProcesses &gt; 0 &amp;&amp; count &gt;= p.maxProcesses </span><span class="cov8" title="1">{
+                        break</span>
+                }
+
+                <span class="cov8" title="1">procInfo, err := p.getProcessInfo(pid)
+                if err != nil </span><span class="cov8" title="1">{
+                        // Process may have exited, skip it
+                        continue</span>
+                }
+
+                // Filter by container if needed
+                <span class="cov8" title="1">if !p.includeAll &amp;&amp; procInfo.Cgroup == "" </span><span class="cov8" title="1">{
+                        continue</span>
+                }
+
+                <span class="cov8" title="1">info.Processes = append(info.Processes, *procInfo)
+                count++</span>
+        }
+
+        <span class="cov8" title="1">info.TotalProcesses = len(info.Processes)
+
+        return info, nil</span>
+}
+
+// getProcessInfo retrieves information for a specific process
+func (p *ProcessCollector) getProcessInfo(pid int) (*ProcessInfo, error) <span class="cov8" title="1">{
+        info := &amp;ProcessInfo{
+                PID: pid,
+        }
+
+        pidPath := filepath.Join(p.procPath, strconv.Itoa(pid))
+
+        // Read /proc/[pid]/stat
+        statData, err := os.ReadFile(filepath.Join(pidPath, "stat"))
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">if err := p.parseStatFile(string(statData), info); err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        // Read /proc/[pid]/status
+        <span class="cov8" title="1">statusData, err := os.ReadFile(filepath.Join(pidPath, "status"))
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">if err := p.parseStatusFile(string(statusData), info); err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        // Read /proc/[pid]/cmdline
+        <span class="cov8" title="1">cmdlineData, err := os.ReadFile(filepath.Join(pidPath, "cmdline"))
+        if err != nil </span><span class="cov0" title="0">{
+                // cmdline may not be accessible, use name from stat
+                info.Cmdline = info.Name
+        }</span> else<span class="cov8" title="1"> {
+                // Replace null bytes with spaces
+                cmdline := strings.ReplaceAll(string(cmdlineData), "\x00", " ")
+                info.Cmdline = strings.TrimSpace(cmdline)
+                if info.Cmdline == "" </span><span class="cov8" title="1">{
+                        info.Cmdline = info.Name
+                }</span>
+        }
+
+        // Read /proc/[pid]/cgroup to detect container
+        <span class="cov8" title="1">cgroupData, err := os.ReadFile(filepath.Join(pidPath, "cgroup"))
+        if err == nil </span><span class="cov8" title="1">{
+                info.Cgroup = p.extractContainerID(string(cgroupData))
+        }</span>
+
+        // Count open files
+        <span class="cov8" title="1">fdPath := filepath.Join(pidPath, "fd")
+        fdEntries, err := os.ReadDir(fdPath)
+        if err == nil </span><span class="cov8" title="1">{
+                info.OpenFiles = len(fdEntries)
+        }</span>
+
+        <span class="cov8" title="1">return info, nil</span>
+}
+
+// parseStatFile parses /proc/[pid]/stat
+func (p *ProcessCollector) parseStatFile(data string, info *ProcessInfo) error <span class="cov8" title="1">{
+        // Format: pid (name) state ppid ...
+        // Name can contain spaces and parentheses, so we need to find the last )
+        startIdx := strings.IndexByte(data, '(')
+        endIdx := strings.LastIndexByte(data, ')')
+
+        if startIdx == -1 || endIdx == -1 </span><span class="cov8" title="1">{
+                return fmt.Errorf("invalid stat format")
+        }</span>
+
+        <span class="cov8" title="1">info.Name = data[startIdx+1 : endIdx]
+
+        fields := strings.Fields(data[endIdx+1:])
+        if len(fields) &lt; 13 </span><span class="cov8" title="1">{
+                return fmt.Errorf("insufficient fields in stat")
+        }</span>
+
+        <span class="cov8" title="1">info.State = fields[0]
+
+        ppid, _ := strconv.Atoi(fields[1])
+        info.PPID = ppid
+
+        // CPU time (user + system) in clock ticks
+        utime, _ := strconv.ParseUint(fields[11], 10, 64)
+        stime, _ := strconv.ParseUint(fields[12], 10, 64)
+        info.CPUTime = utime + stime
+
+        // Number of threads
+        if len(fields) &gt;= 17 </span><span class="cov8" title="1">{
+                threads, _ := strconv.Atoi(fields[17])
+                info.Threads = threads
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+// parseStatusFile parses /proc/[pid]/status
+func (p *ProcessCollector) parseStatusFile(data string, info *ProcessInfo) error <span class="cov8" title="1">{
+        scanner := bufio.NewScanner(strings.NewReader(data))
+
+        for scanner.Scan() </span><span class="cov8" title="1">{
+                line := scanner.Text()
+                parts := strings.Fields(line)
+                if len(parts) &lt; 2 </span><span class="cov8" title="1">{
+                        continue</span>
+                }
+
+                <span class="cov8" title="1">key := strings.TrimSuffix(parts[0], ":")
+
+                switch key </span>{
+                case "Uid":<span class="cov8" title="1">
+                        if len(parts) &gt;= 2 </span><span class="cov8" title="1">{
+                                uid, _ := strconv.Atoi(parts[1])
+                                info.UID = uid
+                        }</span>
+                case "Gid":<span class="cov8" title="1">
+                        if len(parts) &gt;= 2 </span><span class="cov8" title="1">{
+                                gid, _ := strconv.Atoi(parts[1])
+                                info.GID = gid
+                        }</span>
+                case "VmRSS":<span class="cov8" title="1">
+                        // Resident Set Size in KB
+                        if len(parts) &gt;= 2 </span><span class="cov8" title="1">{
+                                rss, _ := strconv.ParseUint(parts[1], 10, 64)
+                                info.MemoryMB = rss / 1024 // Convert to MB
+                        }</span>
+                case "Threads":<span class="cov8" title="1">
+                        if len(parts) &gt;= 2 </span><span class="cov8" title="1">{
+                                threads, _ := strconv.Atoi(parts[1])
+                                info.Threads = threads
+                        }</span>
+                }
+        }
+
+        <span class="cov8" title="1">return scanner.Err()</span>
+}
+
+// extractContainerID extracts Docker container ID from cgroup path
+func (p *ProcessCollector) extractContainerID(cgroupData string) string <span class="cov8" title="1">{
+        lines := strings.Split(cgroupData, "\n")
+
+        for _, line := range lines </span><span class="cov8" title="1">{
+                // Look for docker container ID in cgroup path
+                // Format examples:
+                // 0::/docker/64-char-container-id
+                // 0::/system.slice/docker-64-char-container-id.scope
+                if strings.Contains(line, "docker") </span><span class="cov8" title="1">{
+                        parts := strings.Split(line, "/")
+                        for _, part := range parts </span><span class="cov8" title="1">{
+                                // Docker container IDs are 64 hex characters
+                                if len(part) == 64 &amp;&amp; isHexString(part) </span><span class="cov8" title="1">{
+                                        return part
+                                }</span>
+                                // Handle docker-&lt;containerid&gt;.scope format
+                                <span class="cov8" title="1">if strings.HasPrefix(part, "docker-") &amp;&amp; strings.HasSuffix(part, ".scope") </span><span class="cov8" title="1">{
+                                        id := strings.TrimPrefix(part, "docker-")
+                                        id = strings.TrimSuffix(id, ".scope")
+                                        if len(id) == 64 &amp;&amp; isHexString(id) </span><span class="cov8" title="1">{
+                                                return id
+                                        }</span>
+                                }
+                        }
+                }
+        }
+
+        <span class="cov8" title="1">return ""</span>
+}
+
+// isHexString checks if a string contains only hexadecimal characters
+func isHexString(s string) bool <span class="cov8" title="1">{
+        for _, c := range s </span><span class="cov8" title="1">{
+                if !((c &gt;= '0' &amp;&amp; c &lt;= '9') || (c &gt;= 'a' &amp;&amp; c &lt;= 'f') || (c &gt;= 'A' &amp;&amp; c &lt;= 'F')) </span><span class="cov8" title="1">{
+                        return false
+                }</span>
+        }
+        <span class="cov8" title="1">return true</span>
+}
+
+// GetProcessByPID retrieves information for a specific process by PID
+func (p *ProcessCollector) GetProcessByPID(pid int) (*ProcessInfo, error) <span class="cov8" title="1">{
+        return p.getProcessInfo(pid)
+}</span>
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
