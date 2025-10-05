@@ -2,149 +2,150 @@
   "master": {
     "tasks": [
       {
-        "id": 11,
-        "title": "Implement App Backend Core Infrastructure",
-        "description": "Create the main app component that receives and processes probe reports, implementing the core HTTP/gRPC server infrastructure with report aggregation and basic topology generation",
-        "details": "Build upon existing probe infrastructure by creating pkg/app package with: HTTP server using Go's net/http with middleware for authentication, logging, CORS; report receiver endpoints (/api/v1/reports, /api/v1/agents/*); report aggregation engine that merges data from multiple probes; basic topology graph generation from collected host, container, process, and network data; in-memory data store with time-series capabilities for 15-second sparklines; WebSocket support for real-time updates to UI. Leverage existing probe.ReportData structure and extend with graph relationships.",
-        "testStrategy": "Unit tests for report processing, integration tests with existing probe agents, load testing with multiple concurrent probe connections, WebSocket connection testing",
+        "id": "21",
+        "title": "Implement App Backend Server with Report Aggregation",
+        "description": "Create the central app backend server that receives reports from probes, aggregates data, and provides REST/WebSocket APIs for the UI",
+        "details": "Build a Go HTTP server using gin-gonic or chi router that handles: 1) REST API endpoints for probe registration, report submission, and data queries 2) WebSocket server for real-time UI updates 3) Report aggregation engine that merges probe data into topology views 4) Time-series metrics storage with 15-second resolution 5) Background cleanup of old data. Structure: cmd/app/main.go, pkg/app/{server.go, handlers.go, aggregator.go, websocket.go}, internal/storage/. Use existing probe client patterns for configuration and structure.",
+        "testStrategy": "Unit tests for handlers, integration tests for report aggregation, WebSocket connection tests, load testing with multiple concurrent probes",
         "priority": "high",
         "dependencies": [],
-        "status": "pending",
-        "subtasks": []
+        "status": "in-progress",
+        "subtasks": [],
+        "updatedAt": "2025-10-05T20:47:05.902Z"
       },
       {
-        "id": 12,
-        "title": "Build Time-Series Metrics Storage and Processing",
-        "description": "Implement efficient time-series data storage for metrics with 15-second resolution sparklines, data retention policies, and aggregation capabilities",
-        "details": "Create pkg/metrics package with: time-series database interface supporting in-memory storage initially (Redis/InfluxDB later); 15-second resolution metric collection from existing ContainerStats, HostInfo, ProcessInfo; metric aggregation functions (avg, max, min, p95) over time windows; data retention policies (24h full resolution, 7d hourly, 30d daily); efficient storage format for sparkline data; metric query API supporting time range filtering. Integrate with existing probe collectors' metric data structures.",
-        "testStrategy": "Performance tests for metric ingestion rates, memory usage validation, retention policy verification, query performance benchmarks",
+        "id": "22",
+        "title": "Enhance Probe Agent with Kubernetes Integration",
+        "description": "Extend the existing probe agent to collect Kubernetes resources (pods, services, deployments, namespaces) and their relationships",
+        "details": "Add kubernetes collector to existing probe structure: 1) Create pkg/probe/kubernetes.go with KubernetesCollector struct 2) Use client-go library to connect to K8s API 3) Collect pods, services, deployments, namespaces with labels/annotations 4) Map container IDs to pod names 5) Add K8s data to existing ReportData struct 6) Update probe.go to include kubernetes collector when running in K8s environment. Follow existing collector patterns from docker.go and host.go.",
+        "testStrategy": "Unit tests with mock K8s client, integration tests in kind/minikube cluster, verify pod-container mapping accuracy",
         "priority": "high",
         "dependencies": [
-          11
+          "21"
         ],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": 13,
-        "title": "Develop Interactive Web UI with Topology Visualization",
-        "description": "Create React-based web interface with D3.js/Cytoscape.js for real-time topology visualization, supporting multiple view modes and interactive graph navigation",
-        "details": "Build web/ui directory with: React 18+ application using TypeScript; D3.js or Cytoscape.js for force-directed graph layout; multiple topology views (Processes, Containers, Hosts, Services) as specified in PRD; real-time WebSocket integration for live updates; interactive features (zoom, pan, node selection, drill-down); responsive design for desktop/tablet; node detail panels showing metrics with sparklines; search and filter components. Use existing topology data from app backend.",
-        "testStrategy": "Cross-browser compatibility testing, responsive design validation, WebSocket connection stability tests, graph performance with 1000+ nodes, user interaction testing",
+        "id": "23",
+        "title": "Develop React-based Web UI with Topology Visualization",
+        "description": "Create a modern React frontend with interactive topology graph visualization using D3.js or Cytoscape.js",
+        "details": "Build React application: 1) Setup with Vite/Create React App in web/ directory 2) Components: TopologyGraph, NodeDetailsPanel, ViewSelector, SearchBar, FilterPanel 3) Use Cytoscape.js for force-directed graph layout 4) Implement multiple views (Processes, Containers, Hosts, Pods, Services) 5) WebSocket integration for real-time updates 6) Context panel showing node details and metrics 7) Responsive design with CSS-in-JS (styled-components) 8) State management with Redux Toolkit or Zustand",
+        "testStrategy": "Component unit tests with React Testing Library, E2E tests with Playwright, visual regression tests, performance tests for large graphs",
         "priority": "high",
         "dependencies": [
-          11,
-          12
+          "21"
         ],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": 14,
-        "title": "Implement Container Control and Management Features",
-        "description": "Extend existing Docker integration to support container lifecycle operations (start, stop, pause, restart, delete) with secure execution and audit logging",
-        "details": "Enhance existing orchestrator.go and Docker client integration: extend Orchestrator struct with control plane methods; implement container operations API endpoints (/api/v1/containers/{id}/start, /stop, /pause, /restart, /delete); add bulk operations support for multi-container actions; integrate with existing Docker client in probe package; implement secure WebSocket tunneling for real-time operations; audit logging for all control actions; error handling and rollback mechanisms. Build on existing StopTask/ScheduleTask foundation.",
-        "testStrategy": "Container operation validation, bulk operation testing, security validation for WebSocket tunnels, audit log verification, error handling edge cases",
+        "id": "24",
+        "title": "Implement Time-Series Metrics Storage and API",
+        "description": "Create efficient time-series storage for metrics with 15-second resolution and query APIs for sparklines and historical data",
+        "details": "Implement metrics storage system: 1) Create pkg/storage/timeseries.go with in-memory storage using ring buffers 2) Store CPU, memory, network I/O metrics per container/host/process 3) Implement retention policies (default 1 hour for 15s resolution) 4) REST API endpoints: /api/v1/metrics/{nodeType}/{nodeId} 5) Background aggregation to generate sparkline data 6) Optional: Integration with Prometheus TSDB for persistence 7) Compression for efficient memory usage",
+        "testStrategy": "Performance tests for metric ingestion rates, query response time benchmarks, memory usage profiling, retention policy validation",
         "priority": "medium",
         "dependencies": [
-          11,
-          13
+          "21"
         ],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": 15,
-        "title": "Add Container Terminal and Log Viewing Capabilities",
-        "description": "Implement secure container exec/terminal access and real-time log streaming through WebSocket connections with xterm.js integration",
-        "details": "Create pkg/terminal package with: Docker exec API integration using existing Docker client; secure WebSocket terminal proxy with authentication; xterm.js frontend terminal emulator; real-time log streaming from Docker logs API; session management for multiple concurrent terminals; terminal resize handling and copy/paste support; log filtering and search capabilities; download logs functionality. Extend existing UI with terminal components.",
-        "testStrategy": "Terminal session security testing, concurrent connection limits, log streaming performance, terminal resize functionality, session persistence validation",
+        "id": "25",
+        "title": "Add Container Control and Management Features",
+        "description": "Implement container lifecycle management operations (start, stop, pause, restart, remove) through the web UI",
+        "details": "Container control system: 1) Add control endpoints to app server: POST /api/v1/containers/{id}/{action} 2) Proxy control commands to appropriate probe agents 3) Add control buttons to UI node details panel 4) Implement WebSocket notifications for operation status 5) Add bulk operations for multiple containers 6) Error handling and user feedback 7) RBAC integration to control access to operations 8) Audit logging for all control actions",
+        "testStrategy": "Unit tests for control handlers, integration tests with real containers, permission verification tests, error handling validation",
         "priority": "medium",
         "dependencies": [
-          14
+          "21",
+          "23"
         ],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": 16,
-        "title": "Integrate Kubernetes API and Orchestrator Support",
-        "description": "Add Kubernetes client-go integration to discover and manage pods, services, deployments, and namespaces, extending the existing probe collectors",
-        "details": "Create pkg/k8s package with: Kubernetes client-go integration; extend existing probe collectors with K8s resource discovery; pod, service, deployment, namespace information collection; K8s resource relationship mapping to existing topology graph; RBAC integration with K8s permissions; support for labels, annotations, and custom resources; namespace filtering and multi-cluster support. Enhance existing probe.ProbeConfig with K8s options.",
-        "testStrategy": "K8s cluster integration testing, RBAC permission validation, multi-namespace discovery verification, resource relationship accuracy, performance with large clusters",
+        "id": "26",
+        "title": "Develop Container Logs Viewer and Terminal Access",
+        "description": "Create real-time log streaming and interactive terminal access for containers through the web UI",
+        "details": "Log and terminal features: 1) WebSocket-based log streaming from Docker API 2) Terminal component using xterm.js library 3) WebSocket proxy for container exec sessions 4) Log viewer with search, filtering, and export functionality 5) Multiple terminal tabs support 6) Session management and cleanup 7) Security: TTY encryption and session timeout 8) UI components: LogViewer, Terminal, TabManager 9) Backend: pkg/app/logs.go, pkg/app/terminal.go",
+        "testStrategy": "Terminal session tests, log streaming performance tests, security validation for exec access, memory leak tests for long sessions",
         "priority": "medium",
         "dependencies": [
-          11,
-          12
+          "23",
+          "25"
         ],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": 17,
-        "title": "Build Plugin Architecture and SDK",
-        "description": "Design and implement HTTP-based plugin system for extensibility, allowing custom metrics, controls, and data sources with hot-reload support",
-        "details": "Create pkg/plugins package with: HTTP-based plugin API specification; plugin registration and discovery system; Go SDK for plugin development; plugin types (metrics, control, reporter) as defined in PRD; hot-reload plugin support without restart; plugin configuration management; sandboxed plugin execution; plugin lifecycle management (load, unload, update). Create examples/ directory with sample plugins.",
-        "testStrategy": "Plugin isolation testing, hot-reload functionality validation, SDK usability testing, plugin performance impact measurement, security sandboxing verification",
+        "id": "27",
+        "title": "Implement Search and Filtering System",
+        "description": "Add comprehensive search and filtering capabilities across all topology entities with saved filter configurations",
+        "details": "Search and filter system: 1) Full-text search index for all node metadata 2) Filter API: /api/v1/search?q={query}&filters={json} 3) Filter types: labels, resource type, metrics thresholds, namespace 4) Real-time filtering of topology graph 5) Search component with autocomplete 6) Filter sidebar with checkboxes and sliders 7) Save/load filter configurations 8) Search highlighting in results 9) Backend: pkg/search/indexer.go, pkg/search/filters.go",
+        "testStrategy": "Search performance tests with large datasets, filter accuracy validation, UI responsiveness tests, saved configuration persistence tests",
         "priority": "low",
         "dependencies": [
-          11,
-          12
+          "23",
+          "24"
         ],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": 18,
-        "title": "Implement Security Layer with RBAC and TLS",
-        "description": "Add comprehensive security features including TLS encryption, role-based access control, API authentication, and audit logging throughout the system",
-        "details": "Create pkg/auth package with: TLS/SSL encryption for all communications (extend existing client); JWT-based API authentication; role-based access control (RBAC) system; integration with K8s RBAC when available; secure WebSocket connections for terminal/logs; audit logging for all operations; API rate limiting and request validation; secure credential storage. Enhance existing client.Client with TLS support.",
-        "testStrategy": "Security penetration testing, TLS certificate validation, RBAC permission enforcement testing, audit log completeness verification, authentication bypass prevention",
-        "priority": "high",
+        "id": "28",
+        "title": "Create Plugin Architecture and SDK",
+        "description": "Develop extensible plugin system for custom metrics, control actions, and UI components",
+        "details": "Plugin system: 1) HTTP-based plugin API specification 2) Plugin registration and discovery in app server 3) Plugin types: metrics, control, reporter 4) Go SDK: pkg/plugin/sdk/ with client library 5) Plugin manifest format (YAML) 6) Hot-reload capability 7) Example plugins: sample-metrics, custom-control 8) Plugin UI integration points 9) Security: plugin sandboxing and validation 10) Documentation and development guide",
+        "testStrategy": "Plugin lifecycle tests, SDK functionality validation, hot-reload testing, security boundary verification, example plugin integration tests",
+        "priority": "low",
         "dependencies": [
-          11,
-          13,
-          14
+          "21",
+          "23"
         ],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": 19,
-        "title": "Create Deployment Infrastructure and Documentation",
-        "description": "Develop Kubernetes manifests, Docker Compose files, Helm charts, and comprehensive documentation for various deployment scenarios",
-        "details": "Create deployments/ directory with: Kubernetes DaemonSet for probe agents; Kubernetes Deployment for app component; Service and Ingress configurations; ConfigMap and Secret templates; Helm chart with configurable values; Docker Compose for local development; Dockerfile optimizations for both probe and app; deployment documentation covering standalone, cloud, and K8s modes; installation scripts and health check endpoints.",
-        "testStrategy": "Multi-environment deployment testing, Helm chart validation, Docker Compose functionality verification, documentation accuracy review, upgrade/rollback testing",
+        "id": "29",
+        "title": "Enhance Network Topology Discovery and Visualization",
+        "description": "Improve network connection mapping with service-to-service communication patterns and traffic flow visualization",
+        "details": "Network topology enhancements: 1) Extend existing NetworkCollector to track connection patterns 2) Service discovery and mapping 3) Traffic flow visualization with animated edges 4) Connection strength based on byte volumes 5) Network metrics: latency, bandwidth, error rates 6) Service mesh integration (future: Istio, Linkerd) 7) Network security group visualization 8) Protocol analysis (HTTP, gRPC, TCP, UDP) 9) Edge bundling for complex topologies",
+        "testStrategy": "Network discovery accuracy tests, performance with high-connection environments, visualization rendering tests, service mapping validation",
         "priority": "medium",
         "dependencies": [
-          11,
-          16,
-          18
+          "22",
+          "23"
         ],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": 20,
-        "title": "Optimize Performance and Add Production Monitoring",
-        "description": "Implement performance optimizations for large-scale deployments, add Prometheus metrics export, and create comprehensive monitoring dashboards",
-        "details": "Create pkg/monitoring package with: Prometheus metrics export for app and probe components; performance optimization for 1000+ nodes and 10,000+ containers; efficient graph compression algorithms; database query optimization; memory usage profiling and optimization; HTTP/2 support for better performance; caching layers for frequently accessed data; health check endpoints with detailed status; Grafana dashboard templates for system monitoring.",
-        "testStrategy": "Load testing with target scale (1000+ nodes, 10,000+ containers), memory leak detection, Prometheus metrics accuracy validation, performance regression testing, monitoring dashboard functionality",
+        "id": "30",
+        "title": "Implement Deployment Packaging and Documentation",
+        "description": "Create comprehensive deployment options including Kubernetes manifests, Docker Compose, Helm charts, and documentation",
+        "details": "Deployment and documentation: 1) Kubernetes manifests: DaemonSet for probe, Deployment for app, Service/Ingress for UI 2) Helm chart with configurable values 3) Docker Compose for local development 4) Multi-architecture container images (amd64, arm64) 5) Installation scripts and Makefile 6) Comprehensive documentation: README.md, docs/installation.md, docs/configuration.md, docs/api.md 7) Architecture diagrams and screenshots 8) Troubleshooting guide 9) Security best practices guide",
+        "testStrategy": "Deployment validation in different K8s versions, Helm chart testing, Docker Compose validation, documentation accuracy verification, installation script testing",
         "priority": "medium",
         "dependencies": [
-          11,
-          12,
-          13,
-          18
+          "21",
+          "22",
+          "23"
         ],
         "status": "pending",
         "subtasks": []
       }
     ],
     "metadata": {
-      "created": "2025-10-05T20:34:48.686Z",
-      "updated": "2025-10-05T20:34:48.687Z",
-      "description": "Tasks for master context"
+      "version": "1.0.0",
+      "lastModified": "2025-10-05T20:47:05.902Z",
+      "taskCount": 10,
+      "completedCount": 0,
+      "tags": [
+        "master"
+      ]
     }
   }
 }

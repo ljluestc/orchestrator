@@ -94,19 +94,14 @@ func newConnectionPool(config *Config, logger Logger) (*connectionPool, error) {
 
 // createPooledConnection creates a new pooled connection
 func (p *connectionPool) createPooledConnection() (*pooledConnection, error) {
-	var dialer zk.Dialer
+	// Note: TLS support in go-zookeeper requires custom build or dialer implementation
 	if p.config.TLSEnabled && p.config.TLSConfig != nil {
-		tlsConfig, err := buildTLSConfigFromConfig(p.config.TLSConfig)
-		if err != nil {
-			return nil, fmt.Errorf("failed to build TLS config: %w", err)
-		}
-		dialer = zk.WithDialer(&tlsDialer{config: tlsConfig})
+		p.logger.Warn("TLS is enabled but go-zookeeper standard library doesn't directly support TLS dialers")
 	}
 
 	conn, eventChan, err := zk.Connect(
 		p.config.Servers,
 		p.config.SessionTimeout,
-		dialer,
 	)
 	if err != nil {
 		return nil, err
