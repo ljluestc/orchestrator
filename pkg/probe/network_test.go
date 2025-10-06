@@ -319,7 +319,7 @@ func TestNetworkCollector_CollectWithProcessResolution(t *testing.T) {
 
 	// Should have collected connections
 	assert.GreaterOrEqual(t, info.TotalConnections, 0)
-	
+
 	// Process resolution might not work in all environments, so we just verify it doesn't panic
 	_ = info
 }
@@ -409,7 +409,7 @@ func TestNetworkCollector_CollectWithPermissionDenied(t *testing.T) {
 
 	collector := NewNetworkCollectorWithPath(tmpDir, true, 100, false)
 	info, err := collector.Collect()
-	
+
 	// Should handle permission denied gracefully - might return error
 	if err != nil {
 		// Expected error for permission denied

@@ -1,0 +1,287 @@
+version: '3.8'
+
+services:
+  # Zookeeper cluster for coordination
+  zookeeper-1:
+    image: zookeeper:3.8
+    container_name: zookeeper-1
+    ports:
+      - "2181:2181"
+    environment:
+      ZOO_MY_ID: 1
+      ZOO_SERVERS: server.1=0.0.0.0:2888:3888;2181 server.2=zookeeper-2:2888:3888;2181 server.3=zookeeper-3:2888:3888;2181
+    volumes:
+      - zk-data-1:/data
+      - zk-logs-1:/datalog
+    networks:
+      - orchestrator-network
+
+  zookeeper-2:
+    image: zookeeper:3.8
+    container_name: zookeeper-2
+    ports:
+      - "2182:2181"
+    environment:
+      ZOO_MY_ID: 2
+      ZOO_SERVERS: server.1=zookeeper-1:2888:3888;2181 server.2=0.0.0.0:2888:3888;2181 server.3=zookeeper-3:2888:3888;2181
+    volumes:
+      - zk-data-2:/data
+      - zk-logs-2:/datalog
+    networks:
+      - orchestrator-network
+    depends_on:
+      - zookeeper-1
+
+  zookeeper-3:
+    image: zookeeper:3.8
+    container_name: zookeeper-3
+    ports:
+      - "2183:2181"
+    environment:
+      ZOO_MY_ID: 3
+      ZOO_SERVERS: server.1=zookeeper-1:2888:3888;2181 server.2=zookeeper-2:2888:3888;2181 server.3=0.0.0.0:2888:3888;2181
+    volumes:
+      - zk-data-3:/data
+      - zk-logs-3:/datalog
+    networks:
+      - orchestrator-network
+    depends_on:
+      - zookeeper-1
+      - zookeeper-2
+
+  # Mesos Master
+  mesos-master:
+    image: mesosphere/mesos:1.11.0
+    container_name: mesos-master
+    ports:
+      - "5050:5050"
+    environment:
+      MESOS_ZK: zk://zookeeper-1:2181,zookeeper-2:2181,zookeeper-3:2181/mesos
+      MESOS_QUORUM: 2
+      MESOS_WORK_DIR: /var/lib/mesos
+      MESOS_LOG_DIR: /var/log/mesos
+    volumes:
+      - mesos-master-data:/var/lib/mesos
+      - mesos-master-logs:/var/log/mesos
+    networks:
+      - orchestrator-network
+    depends_on:
+      - zookeeper-1
+      - zookeeper-2
+      - zookeeper-3
+
+  # Marathon
+  marathon:
+    image: mesosphere/marathon:1.11.0
+    container_name: marathon
+    ports:
+      - "8080:8080"
+    environment:
+      MARATHON_MASTER: zk://zookeeper-1:2181,zookeeper-2:2181,zookeeper-3:2181/mesos
+      MARATHON_ZK: zk://zookeeper-1:2181,zookeeper-2:2181,zookeeper-3:2181/marathon
+      MARATHON_HOSTNAME: marathon
+    networks:
+      - orchestrator-network
+    depends_on:
+      - mesos-master
+
+  # Mesos Agent
+  mesos-agent:
+    image: mesosphere/mesos:1.11.0
+    container_name: mesos-agent
+    ports:
+      - "5051:5051"
+    environment:
+      MESOS_MASTER: zk://zookeeper-1:2181,zookeeper-2:2181,zookeeper-3:2181/mesos
+      MESOS_WORK_DIR: /var/lib/mesos
+      MESOS_LOG_DIR: /var/log/mesos
+      MESOS_CONTAINERIZERS: docker,mesos
+      MESOS_ISOLATION: cgroups/cpu,cgroups/mem
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - mesos-agent-data:/var/lib/mesos
+      - mesos-agent-logs:/var/log/mesos
+    networks:
+      - orchestrator-network
+    depends_on:
+      - mesos-master
+    privileged: true
+
+  # Orchestrator Application
+  orchestrator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: orchestrator
+    ports:
+      - "8081:8080"
+    environment:
+      ORCHESTRATOR_PORT: 8080
+      ZOOKEEPER_URL: zookeeper-1:2181,zookeeper-2:2181,zookeeper-3:2181
+    networks:
+      - orchestrator-network
+    depends_on:
+      - mesos-master
+      - marathon
+
+  # Probe Agent
+  probe-agent:
+    build:
+      context: ./cmd/probe-agent
+      dockerfile: Dockerfile
+    container_name: probe-agent
+    environment:
+      SERVER_URL: http://orchestrator:8080
+      AGENT_ID: probe-agent-1
+      COLLECT_INTERVAL: 30s
+      HEARTBEAT_INTERVAL: 60s
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+    networks:
+      - orchestrator-network
+    depends_on:
+      - orchestrator
+    privileged: true
+
+  # Monitoring Stack
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    networks:
+      - orchestrator-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+    networks:
+      - orchestrator-network
+    depends_on:
+      - prometheus
+
+  # Elasticsearch for logging
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.8.0
+    container_name: elasticsearch
+    ports:
+      - "9200:9200"
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    networks:
+      - orchestrator-network
+
+  # Kibana for log visualization
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.8.0
+    container_name: kibana
+    ports:
+      - "5601:5601"
+    environment:
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+    networks:
+      - orchestrator-network
+    depends_on:
+      - elasticsearch
+
+  # Logstash for log processing
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.8.0
+    container_name: logstash
+    ports:
+      - "5044:5044"
+    volumes:
+      - ./monitoring/logstash/pipeline:/usr/share/logstash/pipeline
+      - ./monitoring/logstash/config:/usr/share/logstash/config
+    networks:
+      - orchestrator-network
+    depends_on:
+      - elasticsearch
+
+  # HAProxy for load balancing
+  haproxy:
+    image: haproxy:2.6
+    container_name: haproxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./monitoring/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
+    networks:
+      - orchestrator-network
+    depends_on:
+      - marathon
+
+  # Redis for caching
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - orchestrator-network
+
+  # PostgreSQL for persistent storage
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: orchestrator
+      POSTGRES_USER: orchestrator
+      POSTGRES_PASSWORD: orchestrator
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - orchestrator-network
+
+volumes:
+  zk-data-1:
+  zk-data-2:
+  zk-data-3:
+  zk-logs-1:
+  zk-logs-2:
+  zk-logs-3:
+  mesos-master-data:
+  mesos-master-logs:
+  mesos-agent-data:
+  mesos-agent-logs:
+  prometheus-data:
+  grafana-data:
+  elasticsearch-data:
+  redis-data:
+  postgres-data:
+
+networks:
+  orchestrator-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

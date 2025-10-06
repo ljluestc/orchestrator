@@ -237,7 +237,7 @@ func TestClient_GetConfig(t *testing.T) {
 	config, err := client.GetConfig(ctx)
 	require.NoError(t, err)
 	require.NotNil(t, config)
-	
+
 	// Verify config structure
 	assert.Contains(t, config, "collection_interval")
 	assert.Contains(t, config, "max_processes")
@@ -259,7 +259,7 @@ func TestClient_SendReportErrorHandling(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	
+
 	// This should not panic, but might return an error
 	// We're testing error handling paths
 	_ = client.SendReport(ctx, report)

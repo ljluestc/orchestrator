@@ -45,19 +45,19 @@ type ContainerStats struct {
 
 // DockerInfo contains aggregated Docker information
 type DockerInfo struct {
-	Containers       []ContainerInfo `json:"containers"`
-	TotalContainers  int             `json:"total_containers"`
-	RunningContainers int            `json:"running_containers"`
-	PausedContainers int             `json:"paused_containers"`
-	StoppedContainers int            `json:"stopped_containers"`
-	Images           int             `json:"images"`
-	DockerVersion    string          `json:"docker_version"`
-	Timestamp        time.Time       `json:"timestamp"`
+	Containers        []ContainerInfo `json:"containers"`
+	TotalContainers   int             `json:"total_containers"`
+	RunningContainers int             `json:"running_containers"`
+	PausedContainers  int             `json:"paused_containers"`
+	StoppedContainers int             `json:"stopped_containers"`
+	Images            int             `json:"images"`
+	DockerVersion     string          `json:"docker_version"`
+	Timestamp         time.Time       `json:"timestamp"`
 }
 
 // DockerCollector collects Docker container information
 type DockerCollector struct {
-	client      *client.Client
+	client       *client.Client
 	collectStats bool
 }
 
@@ -69,7 +69,7 @@ func NewDockerCollector(collectStats bool) (*DockerCollector, error) {
 	}
 
 	return &DockerCollector{
-		client:      cli,
+		client:       cli,
 		collectStats: collectStats,
 	}, nil
 }
@@ -77,7 +77,7 @@ func NewDockerCollector(collectStats bool) (*DockerCollector, error) {
 // NewDockerCollectorWithClient creates a Docker collector with custom client (for testing)
 func NewDockerCollectorWithClient(cli *client.Client, collectStats bool) *DockerCollector {
 	return &DockerCollector{
-		client:      cli,
+		client:       cli,
 		collectStats: collectStats,
 	}
 }
@@ -87,7 +87,7 @@ func (d *DockerCollector) Collect(ctx context.Context) (*DockerInfo, error) {
 	if d.client == nil {
 		return nil, fmt.Errorf("Docker client is nil")
 	}
-	
+
 	info := &DockerInfo{
 		Timestamp: time.Now(),
 	}

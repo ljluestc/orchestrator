@@ -171,22 +171,22 @@ func TestProcessCollector_ExtractContainerID(t *testing.T) {
 	collector := NewProcessCollector(true, 0)
 
 	testCases := []struct {
-		name        string
-		cgroupData  string
-		expectedID  string
+		name       string
+		cgroupData string
+		expectedID string
 	}{
 		{
-			name: "docker_cgroup_v2",
+			name:       "docker_cgroup_v2",
 			cgroupData: `0::/docker/a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2`,
 			expectedID: "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2",
 		},
 		{
-			name: "docker_cgroup_scope",
+			name:       "docker_cgroup_scope",
 			cgroupData: `0::/system.slice/docker-a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2.scope`,
 			expectedID: "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2",
 		},
 		{
-			name: "no_docker",
+			name:       "no_docker",
 			cgroupData: `0::/user.slice/user-1000.slice/session-1.scope`,
 			expectedID: "",
 		},

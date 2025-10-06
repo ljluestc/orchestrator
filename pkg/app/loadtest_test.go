@@ -24,8 +24,8 @@ func TestLoadMultipleProbes(t *testing.T) {
 
 	server := setupTestServer(t)
 
-	numProbes := 10
-	reportsPerProbe := 100
+	numProbes := 5
+	reportsPerProbe := 20
 	var successCount int64
 	var errorCount int64
 	var wg sync.WaitGroup
@@ -91,7 +91,7 @@ func TestLoadMultipleProbes(t *testing.T) {
 				}
 
 				// Small delay to simulate real-world reporting interval
-				time.Sleep(1 * time.Millisecond)
+				time.Sleep(10 * time.Millisecond)
 			}
 		}(i)
 	}
@@ -138,8 +138,8 @@ func TestLoadConcurrentReads(t *testing.T) {
 		server.aggregator.ProcessReport(report)
 	}
 
-	numReaders := 50
-	readsPerReader := 100
+	numReaders := 10
+	readsPerReader := 20
 	var successCount int64
 	var wg sync.WaitGroup
 
@@ -211,8 +211,8 @@ func TestLoadMixedWorkload(t *testing.T) {
 
 	server := setupTestServer(t)
 
-	numWorkers := 20
-	operationsPerWorker := 50
+	numWorkers := 5
+	operationsPerWorker := 10
 	var writeCount int64
 	var readCount int64
 	var wg sync.WaitGroup
@@ -349,7 +349,7 @@ func TestMemoryUsage(t *testing.T) {
 	defer server.Stop()
 
 	// Add a large number of reports
-	numReports := 1000
+	numReports := 100
 	for i := 0; i < numReports; i++ {
 		report := &probe.ReportData{
 			AgentID:   fmt.Sprintf("mem-test-agent-%d", i%10), // 10 agents

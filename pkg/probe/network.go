@@ -23,12 +23,12 @@ type NetworkConnection struct {
 
 // NetworkInfo contains aggregated network information
 type NetworkInfo struct {
-	Connections        []NetworkConnection `json:"connections"`
-	TotalConnections   int                 `json:"total_connections"`
-	TCPConnections     int                 `json:"tcp_connections"`
-	UDPConnections     int                 `json:"udp_connections"`
-	ListeningPorts     []ListeningPort     `json:"listening_ports"`
-	Timestamp          time.Time           `json:"timestamp"`
+	Connections      []NetworkConnection `json:"connections"`
+	TotalConnections int                 `json:"total_connections"`
+	TCPConnections   int                 `json:"tcp_connections"`
+	UDPConnections   int                 `json:"udp_connections"`
+	ListeningPorts   []ListeningPort     `json:"listening_ports"`
+	Timestamp        time.Time           `json:"timestamp"`
 }
 
 // ListeningPort represents a listening port
@@ -42,10 +42,10 @@ type ListeningPort struct {
 
 // NetworkCollector collects network connection information
 type NetworkCollector struct {
-	procPath          string
-	includeLocalhost  bool
-	maxConnections    int
-	resolveProcesses  bool
+	procPath         string
+	includeLocalhost bool
+	maxConnections   int
+	resolveProcesses bool
 }
 
 // NewNetworkCollector creates a new network collector

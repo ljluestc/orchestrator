@@ -12,32 +12,32 @@ import (
 
 // ProcessInfo contains information about a running process
 type ProcessInfo struct {
-	PID       int               `json:"pid"`
-	Name      string            `json:"name"`
-	Cmdline   string            `json:"cmdline"`
-	State     string            `json:"state"`
-	PPID      int               `json:"ppid"`
-	UID       int               `json:"uid"`
-	GID       int               `json:"gid"`
-	Threads   int               `json:"threads"`
-	CPUTime   uint64            `json:"cpu_time"`
-	MemoryMB  uint64            `json:"memory_mb"`
-	OpenFiles int               `json:"open_files"`
-	Cgroup    string            `json:"cgroup,omitempty"` // Docker container ID if applicable
+	PID       int    `json:"pid"`
+	Name      string `json:"name"`
+	Cmdline   string `json:"cmdline"`
+	State     string `json:"state"`
+	PPID      int    `json:"ppid"`
+	UID       int    `json:"uid"`
+	GID       int    `json:"gid"`
+	Threads   int    `json:"threads"`
+	CPUTime   uint64 `json:"cpu_time"`
+	MemoryMB  uint64 `json:"memory_mb"`
+	OpenFiles int    `json:"open_files"`
+	Cgroup    string `json:"cgroup,omitempty"` // Docker container ID if applicable
 }
 
 // ProcessesInfo contains aggregated process information
 type ProcessesInfo struct {
-	Processes     []ProcessInfo `json:"processes"`
-	TotalProcesses int          `json:"total_processes"`
-	Timestamp     time.Time     `json:"timestamp"`
+	Processes      []ProcessInfo `json:"processes"`
+	TotalProcesses int           `json:"total_processes"`
+	Timestamp      time.Time     `json:"timestamp"`
 }
 
 // ProcessCollector collects process information
 type ProcessCollector struct {
-	procPath       string
-	includeAll     bool // if false, only include processes in containers
-	maxProcesses   int  // limit number of processes to collect (0 = no limit)
+	procPath     string
+	includeAll   bool // if false, only include processes in containers
+	maxProcesses int  // limit number of processes to collect (0 = no limit)
 }
 
 // NewProcessCollector creates a new process collector

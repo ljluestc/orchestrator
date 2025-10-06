@@ -256,11 +256,11 @@ func (h *Handlers) GetStats(c *gin.Context) {
 	h.server.mu.RUnlock()
 
 	stats := gin.H{
-		"agents":           agentCount,
+		"agents":            agentCount,
 		"websocket_clients": h.server.wsHub.GetClientCount(),
-		"storage":          h.server.storage.GetStats(),
-		"topology":         h.server.aggregator.GetStats(),
-		"uptime":           time.Since(h.server.startTime).String(),
+		"storage":           h.server.storage.GetStats(),
+		"topology":          h.server.aggregator.GetStats(),
+		"uptime":            time.Since(h.server.startTime).String(),
 	}
 
 	c.JSON(http.StatusOK, stats)

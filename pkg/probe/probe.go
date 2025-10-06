@@ -12,19 +12,19 @@ import (
 // ProbeConfig contains configuration for the probe agent
 type ProbeConfig struct {
 	// Client configuration
-	ServerURL      string
-	AgentID        string
-	APIKey         string
+	ServerURL string
+	AgentID   string
+	APIKey    string
 
 	// Collection intervals
 	CollectionInterval time.Duration
 	HeartbeatInterval  time.Duration
 
 	// Feature flags
-	CollectHost      bool
-	CollectDocker    bool
-	CollectProcesses bool
-	CollectNetwork   bool
+	CollectHost        bool
+	CollectDocker      bool
+	CollectProcesses   bool
+	CollectNetwork     bool
 	CollectDockerStats bool
 
 	// Limits
@@ -32,8 +32,8 @@ type ProbeConfig struct {
 	MaxConnections int
 
 	// Network options
-	IncludeLocalhost  bool
-	ResolveProcesses  bool
+	IncludeLocalhost bool
+	ResolveProcesses bool
 
 	// Process options
 	IncludeAllProcesses bool
@@ -52,11 +52,13 @@ type Probe struct {
 	processCollector *ProcessCollector
 	networkCollector *NetworkCollector
 
-	hostname         string
-	running          bool
-	mu               sync.RWMutex
-	stopCh           chan struct{}
-	wg               sync.WaitGroup
+	hostname string
+	running  bool
+	mu       sync.RWMutex
+	stopCh   chan struct{}
+	wg       sync.WaitGroup
+	ctx      context.Context
+	cancel   context.CancelFunc
 }
 
 // NewProbe creates a new probe agent
@@ -145,13 +147,16 @@ func (p *Probe) Start(ctx context.Context) error {
 
 	log.Printf("Starting probe agent (ID: %s, Hostname: %s)", p.config.AgentID, p.hostname)
 
+	// Create a context with cancellation for this probe instance
+	p.ctx, p.cancel = context.WithCancel(ctx)
+
 	// Register agent
 	metadata := map[string]string{
 		"version": "1.0.0",
 		"os":      "linux",
 	}
 
-	if err := p.client.RegisterAgent(ctx, p.hostname, metadata); err != nil {
+	if err := p.client.RegisterAgent(p.ctx, p.hostname, metadata); err != nil {
 		log.Printf("Warning: Failed to register agent: %v", err)
 	} else {
 		log.Printf("Agent registered successfully")
@@ -159,11 +164,11 @@ func (p *Probe) Start(ctx context.Context) error {
 
 	// Start collection loop
 	p.wg.Add(1)
-	go p.collectionLoop(ctx)
+	go p.collectionLoop(p.ctx)
 
 	// Start heartbeat loop
 	p.wg.Add(1)
-	go p.heartbeatLoop(ctx)
+	go p.heartbeatLoop(p.ctx)
 
 	log.Printf("Probe agent started")
 
@@ -181,6 +186,11 @@ func (p *Probe) Stop() error {
 	p.mu.Unlock()
 
 	log.Printf("Stopping probe agent...")
+
+	// Cancel the context to signal goroutines to stop
+	if p.cancel != nil {
+		p.cancel()
+	}
 
 	// Signal goroutines to stop
 	select {
@@ -219,7 +229,13 @@ func (p *Probe) collectionLoop(ctx context.Context) {
 	for {
 		select {
 		case <-ticker.C:
-			p.collectAndSend(ctx)
+			// Check if context is cancelled before collecting
+			select {
+			case <-ctx.Done():
+				return
+			default:
+				p.collectAndSend(ctx)
+			}
 		case <-p.stopCh:
 			return
 		case <-ctx.Done():
@@ -251,6 +267,13 @@ func (p *Probe) heartbeatLoop(ctx context.Context) {
 
 // collectAndSend collects data from all collectors and sends it to the server
 func (p *Probe) collectAndSend(ctx context.Context) {
+	// Check if context is cancelled before starting
+	select {
+	case <-ctx.Done():
+		return
+	default:
+	}
+
 	report := &ReportData{
 		Hostname: p.hostname,
 	}
@@ -322,8 +345,20 @@ func (p *Probe) collectAndSend(ctx context.Context) {
 		}()
 	}
 
-	// Wait for all collectors to finish
-	wg.Wait()
+	// Wait for all collectors to finish with context cancellation
+	done := make(chan struct{})
+	go func() {
+		wg.Wait()
+		close(done)
+	}()
+
+	select {
+	case <-done:
+		// All collectors finished
+	case <-ctx.Done():
+		// Context cancelled, return immediately
+		return
+	}
 
 	// Send report with retry
 	if err := p.client.SendReportWithRetry(ctx, report, p.config.RetryAttempts, p.config.RetryDelay); err != nil {

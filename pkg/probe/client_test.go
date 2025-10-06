@@ -384,3 +384,136 @@ func TestClient_CustomTimeout(t *testing.T) {
 	// Verify custom timeout is set
 	assert.Equal(t, 5*time.Second, client.httpClient.Timeout)
 }
+
+func TestClient_SendReportWithRequestCreationError(t *testing.T) {
+	// Test SendReport with invalid URL that causes request creation to fail
+	client := NewClient(ClientConfig{
+		ServerURL: "://invalid-url",
+		AgentID:   "test-agent",
+	})
+
+	report := &ReportData{
+		Timestamp: time.Now(),
+		AgentID:   "test-agent",
+		Hostname:  "test-host",
+	}
+
+	err := client.SendReport(context.Background(), report)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "failed to create request")
+}
+
+func TestClient_SendReportWithServerError(t *testing.T) {
+	// Test SendReport with server returning error status
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Internal server error"))
+	}))
+	defer server.Close()
+
+	client := NewClient(ClientConfig{
+		ServerURL: server.URL,
+		AgentID:   "test-agent",
+	})
+
+	report := &ReportData{
+		Timestamp: time.Now(),
+		AgentID:   "test-agent",
+		Hostname:  "test-host",
+	}
+
+	err := client.SendReport(context.Background(), report)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "server returned error status 500")
+}
+
+func TestClient_SendReportWithAcceptedStatus(t *testing.T) {
+	// Test SendReport with server returning 202 Accepted
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusAccepted)
+	}))
+	defer server.Close()
+
+	client := NewClient(ClientConfig{
+		ServerURL: server.URL,
+		AgentID:   "test-agent",
+	})
+
+	report := &ReportData{
+		Timestamp: time.Now(),
+		AgentID:   "test-agent",
+		Hostname:  "test-host",
+	}
+
+	err := client.SendReport(context.Background(), report)
+	assert.NoError(t, err)
+}
+
+func TestClient_PingWithServerError(t *testing.T) {
+	// Test Ping with server returning error status
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Internal server error"))
+	}))
+	defer server.Close()
+
+	client := NewClient(ClientConfig{
+		ServerURL: server.URL,
+		AgentID:   "test-agent",
+	})
+	err := client.Ping(context.Background())
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "ping failed with status: 500")
+}
+
+func TestClient_GetConfigWithServerError(t *testing.T) {
+	// Test GetConfig with server returning error status
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Internal server error"))
+	}))
+	defer server.Close()
+
+	client := NewClient(ClientConfig{
+		ServerURL: server.URL,
+		AgentID:   "test-agent",
+	})
+	config, err := client.GetConfig(context.Background())
+	assert.Error(t, err)
+	assert.Nil(t, config)
+	assert.Contains(t, err.Error(), "failed to get config, status 500")
+}
+
+func TestClient_RegisterAgentWithServerError(t *testing.T) {
+	// Test RegisterAgent with server returning error status
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Internal server error"))
+	}))
+	defer server.Close()
+
+	client := NewClient(ClientConfig{
+		ServerURL: server.URL,
+		AgentID:   "test-agent",
+	})
+	err := client.RegisterAgent(context.Background(), "test-hostname", map[string]string{"key": "value"})
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "registration failed with status 500")
+}
+
+func TestClient_HeartbeatWithServerError(t *testing.T) {
+	// Test Heartbeat with server returning error status
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Internal server error"))
+	}))
+	defer server.Close()
+
+	client := NewClient(ClientConfig{
+		ServerURL: server.URL,
+		AgentID:   "test-agent",
+	})
+	err := client.Heartbeat(context.Background())
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "heartbeat failed with status: 500")
+}

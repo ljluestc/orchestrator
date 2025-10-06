@@ -11,21 +11,21 @@ import (
 
 // HostInfo contains collected host system information
 type HostInfo struct {
-	Hostname     string            `json:"hostname"`
-	KernelVersion string           `json:"kernel_version"`
-	Uptime       time.Duration     `json:"uptime"`
-	BootTime     time.Time         `json:"boot_time"`
-	CPUInfo      CPUInfo           `json:"cpu_info"`
-	MemoryInfo   MemoryInfo        `json:"memory_info"`
-	LoadAverage  LoadAverage       `json:"load_average"`
-	Timestamp    time.Time         `json:"timestamp"`
+	Hostname      string        `json:"hostname"`
+	KernelVersion string        `json:"kernel_version"`
+	Uptime        time.Duration `json:"uptime"`
+	BootTime      time.Time     `json:"boot_time"`
+	CPUInfo       CPUInfo       `json:"cpu_info"`
+	MemoryInfo    MemoryInfo    `json:"memory_info"`
+	LoadAverage   LoadAverage   `json:"load_average"`
+	Timestamp     time.Time     `json:"timestamp"`
 }
 
 // CPUInfo contains CPU-related information
 type CPUInfo struct {
-	Model      string  `json:"model"`
-	Cores      int     `json:"cores"`
-	Usage      float64 `json:"usage"` // percentage
+	Model string  `json:"model"`
+	Cores int     `json:"cores"`
+	Usage float64 `json:"usage"` // percentage
 }
 
 // MemoryInfo contains memory-related information

@@ -29,11 +29,11 @@ func TestNewProbe(t *testing.T) {
 func TestNewProbeWithDefaults(t *testing.T) {
 	// Test with zero values to trigger defaults
 	config := ProbeConfig{
-		ServerURL:           "http://localhost:8080",
-		CollectionInterval:  0,
-		HeartbeatInterval:   0,
-		RetryAttempts:       0,
-		RetryDelay:          0,
+		ServerURL:          "http://localhost:8080",
+		CollectionInterval: 0,
+		HeartbeatInterval:  0,
+		RetryAttempts:      0,
+		RetryDelay:         0,
 	}
 
 	probe, err := NewProbe(config)
@@ -62,7 +62,7 @@ func TestNewProbeWithHostnameError(t *testing.T) {
 	// Test hostname error by mocking os.Hostname
 	// We can't easily mock os.Hostname, but we can test the error handling
 	// by creating a config that would cause other errors
-	
+
 	config := ProbeConfig{
 		ServerURL: "", // Invalid server URL
 	}
@@ -104,8 +104,8 @@ func TestNewProbeWithCollectors(t *testing.T) {
 func TestNewProbeWithDockerError(t *testing.T) {
 	// Test Docker collector creation error
 	config := ProbeConfig{
-		ServerURL:      "http://localhost:8080",
-		CollectDocker:  true,
+		ServerURL:          "http://localhost:8080",
+		CollectDocker:      true,
 		CollectDockerStats: true,
 	}
 
@@ -146,7 +146,10 @@ func TestProbeStart(t *testing.T) {
 
 func TestProbeStop(t *testing.T) {
 	config := ProbeConfig{
-		ServerURL: "http://localhost:8080",
+		ServerURL:          "http://localhost:8080",
+		CollectionInterval: 1 * time.Second,        // Longer interval to reduce load
+		RetryAttempts:      1,                      // Reduce retry attempts
+		RetryDelay:         100 * time.Millisecond, // Shorter retry delay
 	}
 
 	probe, err := NewProbe(config)
@@ -158,11 +161,14 @@ func TestProbeStop(t *testing.T) {
 	assert.Contains(t, err.Error(), "probe is not running")
 
 	// Test normal stop
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 
 	err = probe.Start(ctx)
 	assert.NoError(t, err)
+
+	// Wait a bit for the probe to start
+	time.Sleep(100 * time.Millisecond)
 
 	err = probe.Stop()
 	assert.NoError(t, err)
@@ -207,11 +213,11 @@ func TestProbeStartStopCycle(t *testing.T) {
 
 func TestProbeCollectionLoop(t *testing.T) {
 	config := ProbeConfig{
-		ServerURL:           "http://localhost:8080",
-		CollectionInterval:  100 * time.Millisecond,
-		CollectHost:         true,
-		CollectProcesses:    true,
-		CollectNetwork:      true,
+		ServerURL:          "http://localhost:8080",
+		CollectionInterval: 100 * time.Millisecond,
+		CollectHost:        true,
+		CollectProcesses:   true,
+		CollectNetwork:     true,
 	}
 
 	probe, err := NewProbe(config)
@@ -234,8 +240,8 @@ func TestProbeCollectionLoop(t *testing.T) {
 
 func TestProbeHeartbeatLoop(t *testing.T) {
 	config := ProbeConfig{
-		ServerURL:          "http://localhost:8080",
-		HeartbeatInterval:  100 * time.Millisecond,
+		ServerURL:         "http://localhost:8080",
+		HeartbeatInterval: 100 * time.Millisecond,
 	}
 
 	probe, err := NewProbe(config)
@@ -258,9 +264,9 @@ func TestProbeHeartbeatLoop(t *testing.T) {
 
 func TestProbeContextCancellation(t *testing.T) {
 	config := ProbeConfig{
-		ServerURL:           "http://localhost:8080",
-		CollectionInterval:  50 * time.Millisecond,
-		HeartbeatInterval:   50 * time.Millisecond,
+		ServerURL:          "http://localhost:8080",
+		CollectionInterval: 50 * time.Millisecond,
+		HeartbeatInterval:  50 * time.Millisecond,
 	}
 
 	probe, err := NewProbe(config)
@@ -283,16 +289,17 @@ func TestProbeContextCancellation(t *testing.T) {
 
 func TestProbeCollectAndSend(t *testing.T) {
 	config := ProbeConfig{
-		ServerURL:           "http://localhost:8080",
-		CollectHost:         true,
-		CollectProcesses:    true,
-		CollectNetwork:      true,
+		ServerURL:        "http://localhost:8080",
+		CollectHost:      true,
+		CollectProcesses: true,
+		CollectNetwork:   true,
 	}
 
 	probe, err := NewProbe(config)
 	assert.NoError(t, err)
 
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	// Test collectAndSend directly
 	probe.collectAndSend(ctx)
@@ -314,7 +321,8 @@ func TestProbeCollectAndSendWithDocker(t *testing.T) {
 		t.Skip("Docker not available, skipping test")
 	}
 
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	// Test collectAndSend with Docker collector
 	probe.collectAndSend(ctx)
@@ -336,6 +344,8 @@ func TestProbeCollectAndSendWithAllCollectors(t *testing.T) {
 		IncludeLocalhost:    true,
 		ResolveProcesses:    true,
 		IncludeAllProcesses: true,
+		RetryAttempts:       1,                      // Reduce retry attempts
+		RetryDelay:          100 * time.Millisecond, // Shorter retry delay
 	}
 
 	probe, err := NewProbe(config)
@@ -344,7 +354,8 @@ func TestProbeCollectAndSendWithAllCollectors(t *testing.T) {
 		t.Skip("Docker not available, skipping test")
 	}
 
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
 
 	// Test collectAndSend with all collectors
 	probe.collectAndSend(ctx)
@@ -413,12 +424,12 @@ func TestProbeWithLongRunning(t *testing.T) {
 	}
 
 	config := ProbeConfig{
-		ServerURL:           "http://localhost:8080",
-		CollectionInterval:  1 * time.Second,
-		HeartbeatInterval:   2 * time.Second,
-		CollectHost:         true,
-		CollectProcesses:    true,
-		CollectNetwork:      true,
+		ServerURL:          "http://localhost:8080",
+		CollectionInterval: 1 * time.Second,
+		HeartbeatInterval:  2 * time.Second,
+		CollectHost:        true,
+		CollectProcesses:   true,
+		CollectNetwork:     true,
 	}
 
 	probe, err := NewProbe(config)

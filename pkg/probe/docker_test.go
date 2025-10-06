@@ -2,6 +2,7 @@ package probe
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"testing"
 	"time"
@@ -185,7 +186,7 @@ func TestNewDockerCollectorWithClient(t *testing.T) {
 	collector := NewDockerCollectorWithClient(nil, false)
 	assert.NotNil(t, collector)
 	assert.False(t, collector.collectStats)
-	
+
 	collector2 := NewDockerCollectorWithClient(nil, true)
 	assert.NotNil(t, collector2)
 	assert.True(t, collector2.collectStats)
@@ -195,7 +196,7 @@ func TestDockerCollector_GetContainerStats(t *testing.T) {
 	// Test getContainerStats method with mock data
 	// This tests the internal method that has 0% coverage
 	collector := NewDockerCollectorWithClient(nil, true)
-	
+
 	// This will panic because we don't have a real client, so we'll test it differently
 	// We'll test that the method exists by checking if it can be called
 	// and that it handles the nil client gracefully
@@ -205,7 +206,7 @@ func TestDockerCollector_GetContainerStats(t *testing.T) {
 			t.Logf("Expected panic with nil client: %v", r)
 		}
 	}()
-	
+
 	ctx := context.Background()
 	_, err := collector.getContainerStats(ctx, "test-container")
 	// This line won't be reached due to panic, but we need it for coverage
@@ -223,7 +224,7 @@ func TestDockerCollector_CollectWithNilClient(t *testing.T) {
 	// Test Collect method with nil client
 	collector := NewDockerCollectorWithClient(nil, false)
 	ctx := context.Background()
-	
+
 	info, err := collector.Collect(ctx)
 	assert.Error(t, err) // Should return error with nil client
 	assert.Nil(t, info)
@@ -233,7 +234,7 @@ func TestDockerCollector_CollectWithStatsNilClient(t *testing.T) {
 	// Test Collect method with nil client and stats enabled
 	collector := NewDockerCollectorWithClient(nil, true)
 	ctx := context.Background()
-	
+
 	info, err := collector.Collect(ctx)
 	assert.Error(t, err) // Should return error with nil client
 	assert.Nil(t, info)
@@ -243,14 +244,14 @@ func TestDockerCollector_GetContainerStatsWithNilClient(t *testing.T) {
 	// Test getContainerStats with nil client - should panic
 	collector := NewDockerCollectorWithClient(nil, false)
 	ctx := context.Background()
-	
+
 	defer func() {
 		if r := recover(); r != nil {
 			// Expected to panic with nil client
 			t.Logf("Expected panic with nil client: %v", r)
 		}
 	}()
-	
+
 	_, err := collector.getContainerStats(ctx, "test-container")
 	// This line won't be reached due to panic, but we need it for coverage
 	_ = err
@@ -260,7 +261,7 @@ func TestDockerCollector_CollectWithEmptyContainerList(t *testing.T) {
 	// Test Collect method with empty container list
 	collector := NewDockerCollectorWithClient(nil, false)
 	ctx := context.Background()
-	
+
 	info, err := collector.Collect(ctx)
 	assert.Error(t, err) // Should return error with nil client
 	assert.Nil(t, info)
@@ -270,7 +271,7 @@ func TestDockerCollector_CollectWithStatsEnabled(t *testing.T) {
 	// Test Collect method with stats enabled but nil client
 	collector := NewDockerCollectorWithClient(nil, true)
 	ctx := context.Background()
-	
+
 	info, err := collector.Collect(ctx)
 	assert.Error(t, err) // Should return error with nil client
 	assert.Nil(t, info)
@@ -283,13 +284,13 @@ func TestDockerCollector_CollectWithValidClient(t *testing.T) {
 		t.Skip("Docker not available, skipping test")
 	}
 	defer collector.Close()
-	
+
 	ctx := context.Background()
 	info, err := collector.Collect(ctx)
 	if err != nil && strings.Contains(err.Error(), "Cannot connect to the Docker daemon") {
 		t.Skip("Docker not available, skipping test")
 	}
-	
+
 	// If Docker is available, should succeed
 	if err == nil {
 		assert.NotNil(t, info)
@@ -304,13 +305,13 @@ func TestDockerCollector_CollectWithStatsEnabledValidClient(t *testing.T) {
 		t.Skip("Docker not available, skipping test")
 	}
 	defer collector.Close()
-	
+
 	ctx := context.Background()
 	info, err := collector.Collect(ctx)
 	if err != nil && strings.Contains(err.Error(), "Cannot connect to the Docker daemon") {
 		t.Skip("Docker not available, skipping test")
 	}
-	
+
 	// If Docker is available, should succeed
 	if err == nil {
 		assert.NotNil(t, info)
@@ -323,7 +324,7 @@ func TestDockerCollector_CollectWithContextCancellation(t *testing.T) {
 	collector := NewDockerCollectorWithClient(nil, false)
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel() // Cancel immediately
-	
+
 	info, err := collector.Collect(ctx)
 	assert.Error(t, err) // Should return error with cancelled context
 	assert.Nil(t, info)
@@ -334,11 +335,46 @@ func TestDockerCollector_CollectWithTimeout(t *testing.T) {
 	collector := NewDockerCollectorWithClient(nil, false)
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Nanosecond)
 	defer cancel()
-	
+
 	// Wait for timeout
 	time.Sleep(1 * time.Millisecond)
-	
+
 	info, err := collector.Collect(ctx)
 	assert.Error(t, err) // Should return error with timeout
 	assert.Nil(t, info)
+}
+
+func TestDockerCollector_CollectWithNilClientComprehensive(t *testing.T) {
+	// Test collect with nil client
+	collector := &DockerCollector{
+		client:       nil,
+		collectStats: true,
+	}
+
+	_, err := collector.Collect(context.Background())
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "Docker client is nil")
+}
+
+func TestDockerCollector_GetContainerStatsWithNilClientComprehensive(t *testing.T) {
+	// Test get container stats with nil client
+	collector := &DockerCollector{
+		client:       nil,
+		collectStats: true,
+	}
+
+	// This should panic due to nil client, so we expect a panic
+	defer func() {
+		if r := recover(); r != nil {
+			// Expected panic due to nil client
+			panicStr := fmt.Sprintf("%v", r)
+			assert.Contains(t, panicStr, "invalid memory address or nil pointer dereference")
+		} else {
+			t.Error("Expected panic but didn't get one")
+		}
+	}()
+
+	_, err := collector.getContainerStats(context.Background(), "test-container")
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "Docker client is nil")
 }
