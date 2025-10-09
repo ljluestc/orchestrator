@@ -138,7 +138,9 @@ func TestScheduleTask(t *testing.T) {
 	task := Task{ID: "test-task", Image: "alpine"}
 
 	err := o.ScheduleTask(task)
-	if err != nil && strings.Contains(err.Error(), "Cannot connect to the Docker daemon") {
+	if err != nil && (strings.Contains(err.Error(), "Cannot connect to the Docker daemon") || 
+		strings.Contains(err.Error(), "docker daemon is not running") ||
+		strings.Contains(err.Error(), "The system cannot find the file specified")) {
 		t.Skip("Docker not available, skipping test")
 	}
 	assert.NoError(t, err, "Should schedule task without error")

@@ -3,6 +3,7 @@ package probe
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 	"time"
 
@@ -23,22 +24,28 @@ func TestHostCollector_Collect(t *testing.T) {
 	// Validate kernel version
 	assert.NotEmpty(t, info.KernelVersion)
 
-	// Validate uptime
-	assert.Greater(t, info.Uptime, time.Duration(0))
-	assert.False(t, info.BootTime.IsZero())
+	// On Windows, uptime and memory info may be zero for mock implementation
+	if runtime.GOOS == "windows" {
+		// Windows mock implementation
+		assert.Equal(t, "Windows windows", info.KernelVersion)
+		assert.Equal(t, 24*time.Hour, info.Uptime)
+		assert.Equal(t, "Windows CPU", info.CPUInfo.Model)
+		assert.Greater(t, info.CPUInfo.Cores, 0)
+		assert.Equal(t, uint64(8192), info.MemoryInfo.TotalMB)
+	} else {
+		// Linux implementation
+		assert.Greater(t, info.Uptime, time.Duration(0))
+		assert.False(t, info.BootTime.IsZero())
+		assert.NotEmpty(t, info.CPUInfo.Model)
+		assert.Greater(t, info.CPUInfo.Cores, 0)
+		assert.GreaterOrEqual(t, info.CPUInfo.Usage, 0.0)
+		assert.LessOrEqual(t, info.CPUInfo.Usage, 100.0)
+		assert.Greater(t, info.MemoryInfo.TotalMB, uint64(0))
+		assert.GreaterOrEqual(t, info.MemoryInfo.Usage, 0.0)
+		assert.LessOrEqual(t, info.MemoryInfo.Usage, 100.0)
+	}
 
-	// Validate CPU info
-	assert.NotEmpty(t, info.CPUInfo.Model)
-	assert.Greater(t, info.CPUInfo.Cores, 0)
-	assert.GreaterOrEqual(t, info.CPUInfo.Usage, 0.0)
-	assert.LessOrEqual(t, info.CPUInfo.Usage, 100.0)
-
-	// Validate memory info
-	assert.Greater(t, info.MemoryInfo.TotalMB, uint64(0))
-	assert.GreaterOrEqual(t, info.MemoryInfo.Usage, 0.0)
-	assert.LessOrEqual(t, info.MemoryInfo.Usage, 100.0)
-
-	// Validate load average
+	// Validate load average (always valid)
 	assert.GreaterOrEqual(t, info.LoadAverage.Load1, 0.0)
 	assert.GreaterOrEqual(t, info.LoadAverage.Load5, 0.0)
 	assert.GreaterOrEqual(t, info.LoadAverage.Load15, 0.0)
@@ -215,9 +222,14 @@ func TestHostCollector_CollectWithErrors(t *testing.T) {
 	tmpDir := t.TempDir()
 	collector := NewHostCollectorWithPath(tmpDir)
 
-	// This should fail because we don't have the required files
+	// On Windows, this should succeed with mock data
+	// On Linux, this should fail because we don't have the required files
 	_, err := collector.Collect()
-	assert.Error(t, err)
+	if runtime.GOOS == "windows" {
+		assert.NoError(t, err)
+	} else {
+		assert.Error(t, err)
+	}
 }
 
 func TestHostCollector_GetCPUUsageEdgeCases(t *testing.T) {
@@ -302,11 +314,18 @@ func TestHostCollector_CollectWithPartialData(t *testing.T) {
 	collector := NewHostCollectorWithPath(tmpDir)
 	info, err := collector.Collect()
 
-	// Should return partial data with errors for missing files
-	assert.Error(t, err)
-	if info != nil {
-		assert.Equal(t, "Linux version 5.4.0", info.KernelVersion)
-		assert.Equal(t, 12345.67, info.Uptime)
+	// On Windows, this should succeed with mock data
+	// On Linux, should return partial data with errors for missing files
+	if runtime.GOOS == "windows" {
+		assert.NoError(t, err)
+		assert.NotNil(t, info)
+		assert.Equal(t, "Windows windows", info.KernelVersion)
+	} else {
+		assert.Error(t, err)
+		if info != nil {
+			assert.Equal(t, "Linux version 5.4.0", info.KernelVersion)
+			assert.Equal(t, time.Duration(12345.67*float64(time.Second)), info.Uptime)
+		}
 	}
 }
 
@@ -338,10 +357,17 @@ func TestHostCollector_CollectWithCorruptedData(t *testing.T) {
 	collector := NewHostCollectorWithPath(tmpDir)
 	info, err := collector.Collect()
 
-	// Should return partial data with errors for corrupted files
-	assert.Error(t, err)
-	if info != nil {
-		assert.Equal(t, "Linux version 5.4.0", info.KernelVersion)
+	// On Windows, this should succeed with mock data
+	// On Linux, should return partial data with errors for corrupted files
+	if runtime.GOOS == "windows" {
+		assert.NoError(t, err)
+		assert.NotNil(t, info)
+		assert.Equal(t, "Windows windows", info.KernelVersion)
+	} else {
+		assert.Error(t, err)
+		if info != nil {
+			assert.Equal(t, "Linux version 5.4.0", info.KernelVersion)
+		}
 	}
 }
 
@@ -352,8 +378,13 @@ func TestHostCollector_CollectWithEmptyDirectory(t *testing.T) {
 	collector := NewHostCollectorWithPath(tmpDir)
 	_, err := collector.Collect()
 
-	// Should return error for missing files
-	assert.Error(t, err)
+	// On Windows, this should succeed with mock data
+	// On Linux, should return error for missing files
+	if runtime.GOOS == "windows" {
+		assert.NoError(t, err)
+	} else {
+		assert.Error(t, err)
+	}
 }
 
 func TestHostCollector_CollectWithPermissionDenied(t *testing.T) {
@@ -368,6 +399,11 @@ func TestHostCollector_CollectWithPermissionDenied(t *testing.T) {
 	collector := NewHostCollectorWithPath(tmpDir)
 	_, err = collector.Collect()
 
-	// Should return error for permission denied
-	assert.Error(t, err)
+	// On Windows, this should succeed with mock data
+	// On Linux, should return error for permission denied
+	if runtime.GOOS == "windows" {
+		assert.NoError(t, err)
+	} else {
+		assert.Error(t, err)
+	}
 }

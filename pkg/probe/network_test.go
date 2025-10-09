@@ -3,6 +3,7 @@ package probe
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -188,6 +189,11 @@ func TestNetworkCollector_ParseConnectionLine(t *testing.T) {
 }
 
 func TestNetworkCollector_WithMockProcFS(t *testing.T) {
+	// Skip this test on Windows as it uses Linux-specific proc filesystem
+	if runtime.GOOS == "windows" {
+		t.Skip("Skipping Linux-specific test on Windows")
+	}
+
 	// Create temporary proc directory
 	tmpDir := t.TempDir()
 	netDir := filepath.Join(tmpDir, "net")
@@ -340,6 +346,11 @@ func TestNetworkCollector_CollectWithLimits(t *testing.T) {
 }
 
 func TestNetworkCollector_CollectWithEmptyProcFS(t *testing.T) {
+	// Skip this test on Windows as it uses Linux-specific proc filesystem
+	if runtime.GOOS == "windows" {
+		t.Skip("Skipping Linux-specific test on Windows")
+	}
+
 	// Test with empty proc filesystem
 	tmpDir := t.TempDir()
 	netDir := filepath.Join(tmpDir, "net")
@@ -365,6 +376,11 @@ func TestNetworkCollector_CollectWithEmptyProcFS(t *testing.T) {
 }
 
 func TestNetworkCollector_CollectWithCorruptedFiles(t *testing.T) {
+	// Skip this test on Windows as it uses Linux-specific proc filesystem
+	if runtime.GOOS == "windows" {
+		t.Skip("Skipping Linux-specific test on Windows")
+	}
+
 	// Test with corrupted network files
 	tmpDir := t.TempDir()
 	netDir := filepath.Join(tmpDir, "net")
@@ -392,6 +408,11 @@ func TestNetworkCollector_CollectWithCorruptedFiles(t *testing.T) {
 }
 
 func TestNetworkCollector_CollectWithPermissionDenied(t *testing.T) {
+	// Skip this test on Windows as it uses Linux-specific proc filesystem
+	if runtime.GOOS == "windows" {
+		t.Skip("Skipping Linux-specific test on Windows")
+	}
+
 	// Test with permission denied files
 	tmpDir := t.TempDir()
 	netDir := filepath.Join(tmpDir, "net")
@@ -422,6 +443,10 @@ func TestNetworkCollector_CollectWithPermissionDenied(t *testing.T) {
 }
 
 func TestNetworkCollector_CollectWithInvalidData(t *testing.T) {
+	// Skip this test on Windows as it uses Linux-specific proc filesystem
+	if runtime.GOOS == "windows" {
+		t.Skip("Skipping Linux-specific test on Windows")
+	}
 	// Test with invalid network data
 	tmpDir := t.TempDir()
 	netDir := filepath.Join(tmpDir, "net")
@@ -449,6 +474,10 @@ func TestNetworkCollector_CollectWithInvalidData(t *testing.T) {
 }
 
 func TestNetworkCollector_CollectWithVeryLargeFiles(t *testing.T) {
+	// Skip this test on Windows as it uses Linux-specific proc filesystem
+	if runtime.GOOS == "windows" {
+		t.Skip("Skipping Linux-specific test on Windows")
+	}
 	// Test with very large network files
 	tmpDir := t.TempDir()
 	netDir := filepath.Join(tmpDir, "net")

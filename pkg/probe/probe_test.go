@@ -2,6 +2,8 @@ package probe
 
 import (
 	"context"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"testing"
 	"time"
@@ -288,17 +290,25 @@ func TestProbeContextCancellation(t *testing.T) {
 }
 
 func TestProbeCollectAndSend(t *testing.T) {
+	// Create a mock server
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
 	config := ProbeConfig{
-		ServerURL:        "http://localhost:8080",
+		ServerURL:        server.URL,
 		CollectHost:      true,
 		CollectProcesses: true,
 		CollectNetwork:   true,
+		RetryAttempts:    1, // Reduce retries for faster test
+		RetryDelay:       100 * time.Millisecond,
 	}
 
 	probe, err := NewProbe(config)
 	assert.NoError(t, err)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 
 	// Test collectAndSend directly

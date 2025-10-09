@@ -3,6 +3,7 @@ package probe
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"testing"
 
@@ -33,6 +34,11 @@ func TestProcessCollector_Collect(t *testing.T) {
 }
 
 func TestProcessCollector_GetProcessByPID(t *testing.T) {
+	// Skip this test on Windows as it uses Linux-specific proc filesystem
+	if runtime.GOOS == "windows" {
+		t.Skip("Skipping Linux-specific test on Windows")
+	}
+
 	collector := NewProcessCollector(true, 0)
 
 	// Get current process
@@ -230,6 +236,10 @@ func TestProcessCollector_IsHexString(t *testing.T) {
 }
 
 func TestProcessCollector_WithMockProcFS(t *testing.T) {
+	// Skip this test on Windows as it uses Linux-specific proc filesystem
+	if runtime.GOOS == "windows" {
+		t.Skip("Skipping Linux-specific test on Windows")
+	}
 	// Create temporary proc directory
 	tmpDir := t.TempDir()
 
@@ -321,7 +331,14 @@ func TestProcessCollector_CollectWithErrors(t *testing.T) {
 	info, err := collector.Collect()
 	require.NoError(t, err)
 	require.NotNil(t, info)
-	assert.Equal(t, 0, info.TotalProcesses)
+	
+	// On Windows, this should return 1 mock process
+	// On Linux, this should return 0 processes
+	if runtime.GOOS == "windows" {
+		assert.Equal(t, 1, info.TotalProcesses)
+	} else {
+		assert.Equal(t, 0, info.TotalProcesses)
+	}
 }
 
 func TestProcessCollector_ParseStatusFileEdgeCases(t *testing.T) {
