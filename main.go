@@ -93,6 +93,15 @@ func runOrchestrator(ctx context.Context) {
 		}
 	}()
 
+	// Start topology collector to bridge app server and topology manager
+	collector := topology.NewCollector("collector-1", "http://localhost:8082", nil)
+	collector.Manager = topologyManager
+	go func() {
+		if err := collector.Start(); err != nil {
+			log.Printf("Topology collector error: %v", err)
+		}
+	}()
+
 	// Start Web UI
 	webUI := ui.NewWebUI("web-ui-1", 9090, "http://localhost:8082")
 	go func() {

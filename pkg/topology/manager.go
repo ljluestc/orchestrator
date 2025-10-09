@@ -237,8 +237,10 @@ func (m *Manager) setupRoutes() *mux.Router {
 	// Topology endpoints
 	v1.HandleFunc("/topology", m.handleGetTopology).Methods("GET")
 	v1.HandleFunc("/topology/nodes", m.handleGetNodes).Methods("GET")
+	v1.HandleFunc("/topology/nodes", m.handleAddNode).Methods("POST")
 	v1.HandleFunc("/topology/nodes/{id}", m.handleGetNode).Methods("GET")
 	v1.HandleFunc("/topology/edges", m.handleGetEdges).Methods("GET")
+	v1.HandleFunc("/topology/edges", m.handleAddEdge).Methods("POST")
 	v1.HandleFunc("/topology/edges/{id}", m.handleGetEdge).Methods("GET")
 	v1.HandleFunc("/topology/search", m.handleSearch).Methods("GET")
 	v1.HandleFunc("/topology/filter", m.handleFilter).Methods("POST")
@@ -1065,6 +1067,71 @@ func (m *Manager) matchesMetricsFilter(node *Node, metricsFilter *MetricsFilter)
 	}
 	
 	return true
+}
+
+// handleAddNode handles POST requests to add a new node
+func (m *Manager) handleAddNode(w http.ResponseWriter, r *http.Request) {
+	var node Node
+	if err := json.NewDecoder(r.Body).Decode(&node); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	
+	// Validate required fields
+	if node.ID == "" {
+		http.Error(w, "node ID is required", http.StatusBadRequest)
+		return
+	}
+	
+	if node.Type == "" {
+		http.Error(w, "node type is required", http.StatusBadRequest)
+		return
+	}
+	
+	// Add the node
+	m.AddNode(&node)
+	
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(map[string]string{
+		"status": "created",
+		"id":     node.ID,
+	})
+}
+
+// handleAddEdge handles POST requests to add a new edge
+func (m *Manager) handleAddEdge(w http.ResponseWriter, r *http.Request) {
+	var edge Edge
+	if err := json.NewDecoder(r.Body).Decode(&edge); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	
+	// Validate required fields
+	if edge.ID == "" {
+		http.Error(w, "edge ID is required", http.StatusBadRequest)
+		return
+	}
+	
+	if edge.Source == "" {
+		http.Error(w, "edge source is required", http.StatusBadRequest)
+		return
+	}
+	
+	if edge.Target == "" {
+		http.Error(w, "edge target is required", http.StatusBadRequest)
+		return
+	}
+	
+	// Add the edge
+	m.AddEdge(&edge)
+	
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(map[string]string{
+		"status": "created",
+		"id":     edge.ID,
+	})
 }
 
 func (m *Manager) handleHealth(w http.ResponseWriter, r *http.Request) {

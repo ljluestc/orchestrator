@@ -2,8 +2,10 @@ package topology
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 	"time"
 
 	"github.com/ljluestc/orchestrator/pkg/probe"
@@ -71,9 +73,154 @@ func (c *Collector) collectFromProbes() {
 
 // collectProbeData collects data from all probe agents
 func (c *Collector) collectProbeData() {
-	// For now, generate mock data since we don't have a direct probe client
-	// In a real implementation, this would collect from actual probe agents
-	c.generateMockData()
+	// Fetch topology data from the app server
+	if err := c.fetchTopologyFromAppServer(); err != nil {
+		log.Printf("Failed to fetch topology from app server: %v", err)
+		// Fall back to mock data if app server is not available
+		c.generateMockData()
+	}
+}
+
+// fetchTopologyFromAppServer fetches topology data from the app server
+func (c *Collector) fetchTopologyFromAppServer() error {
+	// App server runs on port 8080
+	appServerURL := "http://localhost:8080"
+	
+	client := &http.Client{
+		Timeout: 10 * time.Second,
+	}
+	
+	resp, err := client.Get(appServerURL + "/api/v1/query/topology")
+	if err != nil {
+		return fmt.Errorf("failed to fetch topology from app server: %w", err)
+	}
+	defer resp.Body.Close()
+	
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("app server returned status %d", resp.StatusCode)
+	}
+	
+	var topologyResponse struct {
+		Topology struct {
+			Nodes map[string]interface{} `json:"nodes"`
+			Edges map[string]interface{} `json:"edges"`
+		} `json:"topology"`
+	}
+	
+	if err := json.NewDecoder(resp.Body).Decode(&topologyResponse); err != nil {
+		return fmt.Errorf("failed to decode topology response: %w", err)
+	}
+	
+	// Process nodes
+	for nodeID, nodeData := range topologyResponse.Topology.Nodes {
+		if node, err := c.convertToNode(nodeID, nodeData); err == nil {
+			c.Manager.AddNode(node)
+		} else {
+			log.Printf("Failed to convert node %s: %v", nodeID, err)
+		}
+	}
+	
+	// Process edges
+	for edgeID, edgeData := range topologyResponse.Topology.Edges {
+		if edge, err := c.convertToEdge(edgeID, edgeData); err == nil {
+			c.Manager.AddEdge(edge)
+		} else {
+			log.Printf("Failed to convert edge %s: %v", edgeID, err)
+		}
+	}
+	
+	log.Printf("Successfully fetched topology from app server: %d nodes, %d edges", 
+		len(topologyResponse.Topology.Nodes), len(topologyResponse.Topology.Edges))
+	
+	return nil
+}
+
+// convertToNode converts app server node data to topology manager node
+func (c *Collector) convertToNode(nodeID string, nodeData interface{}) (*Node, error) {
+	nodeMap, ok := nodeData.(map[string]interface{})
+	if !ok {
+		return nil, fmt.Errorf("invalid node data format")
+	}
+	
+	node := &Node{
+		ID:   nodeID,
+		Type: getString(nodeMap, "type"),
+		Name: getString(nodeMap, "name"),
+		Metadata: map[string]interface{}{
+			"source": "app_server",
+		},
+	}
+	
+	// Copy metadata from app server
+	if metadata, ok := nodeMap["metadata"]; ok {
+		if metadataMap, ok := metadata.(map[string]interface{}); ok {
+			for k, v := range metadataMap {
+				node.Metadata[k] = v
+			}
+		}
+	}
+	
+	// Set parent ID if available
+	if parentID, ok := nodeMap["parent_id"]; ok {
+		if parentStr, ok := parentID.(string); ok {
+			node.Metadata["parent_id"] = parentStr
+		}
+	}
+	
+	return node, nil
+}
+
+// convertToEdge converts app server edge data to topology manager edge
+func (c *Collector) convertToEdge(edgeID string, edgeData interface{}) (*Edge, error) {
+	edgeMap, ok := edgeData.(map[string]interface{})
+	if !ok {
+		return nil, fmt.Errorf("invalid edge data format")
+	}
+	
+	edge := &Edge{
+		ID:     edgeID,
+		Source: getString(edgeMap, "source"),
+		Target: getString(edgeMap, "target"),
+		Type:   getString(edgeMap, "type"),
+		Metadata: map[string]interface{}{
+			"source": "app_server",
+		},
+	}
+	
+	// Copy metadata from app server
+	if metadata, ok := edgeMap["metadata"]; ok {
+		if metadataMap, ok := metadata.(map[string]interface{}); ok {
+			for k, v := range metadataMap {
+				edge.Metadata[k] = v
+			}
+		}
+	}
+	
+	// Set protocol if available
+	if protocol, ok := edgeMap["protocol"]; ok {
+		if protocolStr, ok := protocol.(string); ok {
+			edge.Metadata["protocol"] = protocolStr
+		}
+	}
+	
+	// Set connections count if available
+	if connections, ok := edgeMap["connections"]; ok {
+		if connFloat, ok := connections.(float64); ok {
+			edge.Metadata["connections"] = int(connFloat)
+		}
+	}
+	
+	return edge, nil
+}
+
+// getString safely extracts a string value from a map
+func getString(m map[string]interface{}, key string) string {
+	if val, ok := m[key]; ok {
+		if str, ok := val.(string); ok {
+			return str
+		}
+	}
+	return ""
 }
 
 // collectAgentData collects data from a specific agent
