@@ -78,7 +78,7 @@ func runOrchestrator(ctx context.Context) {
 	}()
 
 	// Start Marathon
-	marathon := marathon.NewMarathon("marathon-1", *hostname, 8080, "http://localhost:5050")
+	marathon := marathon.NewMarathon("marathon-1", *hostname, 8081, "http://localhost:5050")
 	go func() {
 		if err := marathon.Start(); err != nil {
 			log.Printf("Marathon error: %v", err)
