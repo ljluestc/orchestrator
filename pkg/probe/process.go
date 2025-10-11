@@ -123,7 +123,7 @@ func (p *ProcessCollector) collectLinux(info *ProcessesInfo) (*ProcessesInfo, er
 func (p *ProcessCollector) collectWindows(info *ProcessesInfo) (*ProcessesInfo, error) {
 	// For Windows, we'll create a basic implementation
 	// In a real implementation, you would use Windows APIs or WMI
-	
+
 	// Create a mock process for testing
 	mockProcess := ProcessInfo{
 		PID:       1,

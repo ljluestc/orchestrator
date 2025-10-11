@@ -1,0 +1,78 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Experiment
+metadata:
+  name: orchestrator-experiment
+  namespace: orchestrator
+  labels:
+    app.kubernetes.io/name: orchestrator
+    app.kubernetes.io/component: experiment
+spec:
+  duration: 30m
+  progressDeadlineSeconds: 1800
+  templates:
+  - name: baseline
+    replicas: 1
+    selector:
+      matchLabels:
+        app.kubernetes.io/name: orchestrator
+        experiment: baseline
+    template:
+      metadata:
+        labels:
+          app.kubernetes.io/name: orchestrator
+          experiment: baseline
+      spec:
+        serviceAccountName: orchestrator
+        containers:
+        - name: orchestrator
+          image: orchestrator:stable
+          ports:
+          - containerPort: 8080
+          envFrom:
+          - configMapRef:
+              name: orchestrator-config
+          resources:
+            requests:
+              cpu: 500m
+              memory: 512Mi
+            limits:
+              cpu: 2000m
+              memory: 2Gi
+  - name: canary
+    replicas: 1
+    selector:
+      matchLabels:
+        app.kubernetes.io/name: orchestrator
+        experiment: canary
+    template:
+      metadata:
+        labels:
+          app.kubernetes.io/name: orchestrator
+          experiment: canary
+      spec:
+        serviceAccountName: orchestrator
+        containers:
+        - name: orchestrator
+          image: orchestrator:canary
+          ports:
+          - containerPort: 8080
+          envFrom:
+          - configMapRef:
+              name: orchestrator-config
+          resources:
+            requests:
+              cpu: 500m
+              memory: 512Mi
+            limits:
+              cpu: 2000m
+              memory: 2Gi
+  analyses:
+  - name: success-rate-comparison
+    templateName: success-rate
+    args:
+    - name: baseline-hash
+      valueFrom:
+        podTemplateHashValue: baseline
+    - name: canary-hash
+      valueFrom:
+        podTemplateHashValue: canary

@@ -1,0 +1,25 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: orchestrator
+
+resources:
+  - namespace.yaml
+  - rbac.yaml
+  - configmap.yaml
+  - service.yaml
+  - deployment.yaml
+  - daemonset.yaml
+  - ingress.yaml
+
+commonLabels:
+  app.kubernetes.io/managed-by: kustomize
+  app.kubernetes.io/part-of: orchestrator
+
+images:
+  - name: orchestrator
+    newName: your-registry/orchestrator
+    newTag: latest
+  - name: probe-agent
+    newName: your-registry/probe-agent
+    newTag: latest

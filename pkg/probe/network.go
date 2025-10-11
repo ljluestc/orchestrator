@@ -122,7 +122,7 @@ func (n *NetworkCollector) collectLinux(info *NetworkInfo) (*NetworkInfo, error)
 func (n *NetworkCollector) collectWindows(info *NetworkInfo) (*NetworkInfo, error) {
 	// For Windows, we'll create a basic implementation
 	// In a real implementation, you would use Windows APIs or netstat
-	
+
 	// Create mock connections for testing
 	mockConnections := []NetworkConnection{
 		{

@@ -1,0 +1,107 @@
+# Mesos Agent DaemonSet (Task 3)
+apiVersion: v1
+kind: Service
+metadata:
+  name: mesos-agent
+  labels:
+    app: mesos-agent
+spec:
+  clusterIP: None
+  ports:
+  - port: 5051
+    name: api
+  selector:
+    app: mesos-agent
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: mesos-agent
+spec:
+  selector:
+    matchLabels:
+      app: mesos-agent
+  template:
+    metadata:
+      labels:
+        app: mesos-agent
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "5051"
+    spec:
+      hostNetwork: true
+      hostPID: true
+      containers:
+      - name: mesos-agent
+        image: mesosphere/mesos-agent:1.11.0
+        securityContext:
+          privileged: true
+        ports:
+        - containerPort: 5051
+          name: api
+        env:
+        - name: MESOS_MASTER
+          value: "zk://zookeeper-0.zookeeper-headless:2181,zookeeper-1.zookeeper-headless:2181,zookeeper-2.zookeeper-headless:2181/mesos"
+        - name: MESOS_LOG_DIR
+          value: "/var/log/mesos"
+        - name: MESOS_WORK_DIR
+          value: "/var/lib/mesos"
+        - name: MESOS_CONTAINERIZERS
+          value: "docker,mesos"
+        - name: MESOS_DOCKER_SOCK
+          value: "/var/run/docker.sock"
+        - name: MESOS_ISOLATION
+          value: "cgroups/cpu,cgroups/mem,disk/du,network/cni,filesystem/linux,docker/runtime"
+        - name: MESOS_IMAGE_PROVIDERS
+          value: "docker"
+        - name: MESOS_RESOURCES
+          value: "cpus:4;mem:8192;disk:20000;ports:[31000-32000]"
+        - name: MESOS_ATTRIBUTES
+          value: "rack:default"
+        - name: MESOS_HOSTNAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: MESOS_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: MESOS_PORT
+          value: "5051"
+        - name: MESOS_SYSTEMD_ENABLE_SUPPORT
+          value: "false"
+        - name: MESOS_LAUNCHER
+          value: "posix"
+        - name: MESOS_IMAGE_PROVISIONER_BACKEND
+          value: "copy"
+        resources:
+          requests:
+            cpu: 500m
+            memory: 512Mi
+        volumeMounts:
+        - name: docker-sock
+          mountPath: /var/run/docker.sock
+        - name: sys
+          mountPath: /sys
+        - name: cgroup
+          mountPath: /sys/fs/cgroup
+        - name: log-dir
+          mountPath: /var/log/mesos
+        - name: work-dir
+          mountPath: /var/lib/mesos
+      volumes:
+      - name: docker-sock
+        hostPath:
+          path: /var/run/docker.sock
+      - name: sys
+        hostPath:
+          path: /sys
+      - name: cgroup
+        hostPath:
+          path: /sys/fs/cgroup
+      - name: log-dir
+        hostPath:
+          path: /var/log/mesos
+      - name: work-dir
+        hostPath:
+          path: /var/lib/mesos

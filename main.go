@@ -20,15 +20,15 @@ import (
 
 var (
 	// Command line flags
-	mode           = flag.String("mode", "orchestrator", "Mode: orchestrator, mesos-master, mesos-agent, marathon, migration, topology, web-ui")
-	hostname       = flag.String("hostname", "localhost", "Hostname")
-	port           = flag.Int("port", 8080, "Port")
-	masterURL      = flag.String("master", "http://localhost:5050", "Mesos master URL")
-	zookeeperURL   = flag.String("zookeeper", "localhost:2181", "Zookeeper URL")
-	agentID        = flag.String("agent-id", "", "Agent ID")
-	frameworkID    = flag.String("framework-id", "", "Framework ID")
-	sourceCluster  = flag.String("source-cluster", "cluster-a", "Source Zookeeper cluster")
-	targetCluster  = flag.String("target-cluster", "cluster-b", "Target Zookeeper cluster")
+	mode          = flag.String("mode", "orchestrator", "Mode: orchestrator, mesos-master, mesos-agent, marathon, migration, topology, web-ui")
+	hostname      = flag.String("hostname", "localhost", "Hostname")
+	port          = flag.Int("port", 8080, "Port")
+	masterURL     = flag.String("master", "http://localhost:5050", "Mesos master URL")
+	zookeeperURL  = flag.String("zookeeper", "localhost:2181", "Zookeeper URL")
+	agentID       = flag.String("agent-id", "", "Agent ID")
+	frameworkID   = flag.String("framework-id", "", "Framework ID")
+	sourceCluster = flag.String("source-cluster", "cluster-a", "Source Zookeeper cluster")
+	targetCluster = flag.String("target-cluster", "cluster-b", "Target Zookeeper cluster")
 )
 
 func main() {
@@ -68,7 +68,7 @@ func main() {
 
 func runOrchestrator(ctx context.Context) {
 	log.Println("Starting Mesos-Docker Orchestration Platform")
-	
+
 	// Start Mesos Master
 	master := mesos.NewMaster("master-1", *hostname, 5050, *zookeeperURL)
 	go func() {
@@ -117,9 +117,9 @@ func runOrchestrator(ctx context.Context) {
 
 func runMesosMaster(ctx context.Context) {
 	log.Printf("Starting Mesos Master on %s:%d", *hostname, *port)
-	
+
 	master := mesos.NewMaster("master-1", *hostname, *port, *zookeeperURL)
-	
+
 	if err := master.Start(); err != nil {
 		log.Fatalf("Failed to start Mesos master: %v", err)
 	}
@@ -129,11 +129,11 @@ func runMesosAgent(ctx context.Context) {
 	if *agentID == "" {
 		*agentID = fmt.Sprintf("agent-%d", time.Now().UnixNano())
 	}
-	
+
 	log.Printf("Starting Mesos Agent %s on %s:%d", *agentID, *hostname, *port)
-	
+
 	agent := mesos.NewAgent(*agentID, *hostname, *port, *masterURL)
-	
+
 	if err := agent.Start(); err != nil {
 		log.Fatalf("Failed to start Mesos agent: %v", err)
 	}
@@ -143,11 +143,11 @@ func runMarathon(ctx context.Context) {
 	if *frameworkID == "" {
 		*frameworkID = "marathon-1"
 	}
-	
+
 	log.Printf("Starting Marathon Framework %s on %s:%d", *frameworkID, *hostname, *port)
-	
+
 	marathon := marathon.NewMarathon(*frameworkID, *hostname, *port, *masterURL)
-	
+
 	if err := marathon.Start(); err != nil {
 		log.Fatalf("Failed to start Marathon: %v", err)
 	}
@@ -155,23 +155,23 @@ func runMarathon(ctx context.Context) {
 
 func runMigration(ctx context.Context) {
 	log.Printf("Starting Zookeeper Migration Manager")
-	
+
 	source := &migration.ZookeeperCluster{
 		ID:     *sourceCluster,
 		Hosts:  []string{"localhost:2181"},
 		Port:   2181,
 		Status: "active",
 	}
-	
+
 	target := &migration.ZookeeperCluster{
 		ID:     *targetCluster,
 		Hosts:  []string{"localhost:2182"},
 		Port:   2182,
 		Status: "inactive",
 	}
-	
+
 	migrationManager := migration.NewMigrationManager("migration-1", source, target)
-	
+
 	if err := migrationManager.Start(); err != nil {
 		log.Fatalf("Failed to start migration manager: %v", err)
 	}
@@ -289,7 +289,7 @@ func startWebUI(ctx context.Context) {
 		w.Header().Set("Content-Type", "text/html")
 		w.Write([]byte(html))
 	})
-	
+
 	go func() {
 		log.Println("Starting web UI on :9090")
 		if err := http.ListenAndServe(":9090", nil); err != nil {
@@ -300,9 +300,9 @@ func startWebUI(ctx context.Context) {
 
 func runTopology(ctx context.Context) {
 	log.Printf("Starting Topology Manager on %s:%d", *hostname, *port)
-	
+
 	topologyManager := topology.NewManager("topology-1")
-	
+
 	if err := topologyManager.Start(); err != nil {
 		log.Fatalf("Failed to start topology manager: %v", err)
 	}
@@ -310,9 +310,9 @@ func runTopology(ctx context.Context) {
 
 func runWebUI(ctx context.Context) {
 	log.Printf("Starting Web UI on %s:%d", *hostname, *port)
-	
+
 	webUI := ui.NewWebUI("web-ui-1", *port, "http://localhost:8082")
-	
+
 	if err := webUI.Start(); err != nil {
 		log.Fatalf("Failed to start web UI: %v", err)
 	}

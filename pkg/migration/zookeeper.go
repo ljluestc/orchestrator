@@ -14,17 +14,17 @@ import (
 
 // MigrationManager manages Zookeeper cluster migration
 type MigrationManager struct {
-	ID              string
-	SourceCluster   *ZookeeperCluster
-	TargetCluster   *ZookeeperCluster
-	MesosMasters    []*MesosMaster
-	MesosAgents     []*MesosAgent
-	Status          string
-	CurrentPhase    int
-	Phases          []*MigrationPhase
-	SyncStatus      *SyncStatus
-	mu              sync.RWMutex
-	server          *http.Server
+	ID            string
+	SourceCluster *ZookeeperCluster
+	TargetCluster *ZookeeperCluster
+	MesosMasters  []*MesosMaster
+	MesosAgents   []*MesosAgent
+	Status        string
+	CurrentPhase  int
+	Phases        []*MigrationPhase
+	SyncStatus    *SyncStatus
+	mu            sync.RWMutex
+	server        *http.Server
 }
 
 // ZookeeperCluster represents a Zookeeper cluster
@@ -68,42 +68,42 @@ type MigrationPhase struct {
 
 // SyncStatus represents synchronization status
 type SyncStatus struct {
-	SourceCluster   string
-	TargetCluster   string
-	LastSync        time.Time
-	SyncLag         time.Duration
-	Conflicts       []*SyncConflict
-	TotalPaths      int
-	SyncedPaths     int
-	FailedPaths     int
-	Status          string
+	SourceCluster string
+	TargetCluster string
+	LastSync      time.Time
+	SyncLag       time.Duration
+	Conflicts     []*SyncConflict
+	TotalPaths    int
+	SyncedPaths   int
+	FailedPaths   int
+	Status        string
 }
 
 // SyncConflict represents a synchronization conflict
 type SyncConflict struct {
-	Path      string
+	Path        string
 	SourceValue string
 	TargetValue string
-	Timestamp time.Time
-	Resolution string
+	Timestamp   time.Time
+	Resolution  string
 }
 
 // ValidationResult represents validation results
 type ValidationResult struct {
-	Passed     bool
-	Checks     []*ValidationCheck
-	Errors     []string
-	Warnings   []string
-	Timestamp  time.Time
+	Passed    bool
+	Checks    []*ValidationCheck
+	Errors    []string
+	Warnings  []string
+	Timestamp time.Time
 }
 
 // ValidationCheck represents a validation check
 type ValidationCheck struct {
-	Name        string
-	Status      string
-	Message     string
-	Required    bool
-	Timestamp   time.Time
+	Name      string
+	Status    string
+	Message   string
+	Required  bool
+	Timestamp time.Time
 }
 
 // NewMigrationManager creates a new migration manager
@@ -195,17 +195,17 @@ func createMigrationPhases() []*MigrationPhase {
 // Start starts the migration manager
 func (m *MigrationManager) Start() error {
 	router := m.setupRoutes()
-	
+
 	m.server = &http.Server{
 		Addr:    ":8080",
 		Handler: router,
 	}
 
 	log.Printf("Starting migration manager %s", m.ID)
-	
+
 	// Start sync monitoring
 	go m.startSyncMonitoring()
-	
+
 	return m.server.ListenAndServe()
 }
 
@@ -219,30 +219,30 @@ func (m *MigrationManager) Stop() error {
 // setupRoutes sets up HTTP routes
 func (m *MigrationManager) setupRoutes() *mux.Router {
 	router := mux.NewRouter()
-	
+
 	// API v1 routes
 	v1 := router.PathPrefix("/api/v1").Subrouter()
-	
+
 	// Migration status
 	v1.HandleFunc("/migration/status", m.handleMigrationStatus).Methods("GET")
 	v1.HandleFunc("/migration/phases", m.handleListPhases).Methods("GET")
 	v1.HandleFunc("/migration/phases/{id}/start", m.handleStartPhase).Methods("POST")
 	v1.HandleFunc("/migration/phases/{id}/validate", m.handleValidatePhase).Methods("POST")
 	v1.HandleFunc("/migration/phases/{id}/rollback", m.handleRollbackPhase).Methods("POST")
-	
+
 	// Sync status
 	v1.HandleFunc("/sync/status", m.handleSyncStatus).Methods("GET")
 	v1.HandleFunc("/sync/start", m.handleStartSync).Methods("POST")
 	v1.HandleFunc("/sync/stop", m.handleStopSync).Methods("POST")
 	v1.HandleFunc("/sync/conflicts", m.handleListConflicts).Methods("GET")
-	
+
 	// Cluster management
 	v1.HandleFunc("/clusters", m.handleListClusters).Methods("GET")
 	v1.HandleFunc("/clusters/{id}/status", m.handleClusterStatus).Methods("GET")
-	
+
 	// Health check
 	router.HandleFunc("/health", m.handleHealth).Methods("GET")
-	
+
 	return router
 }
 
@@ -250,7 +250,7 @@ func (m *MigrationManager) setupRoutes() *mux.Router {
 func (m *MigrationManager) startSyncMonitoring() {
 	ticker := time.NewTicker(10 * time.Second)
 	defer ticker.Stop()
-	
+
 	for {
 		select {
 		case <-ticker.C:
@@ -263,20 +263,20 @@ func (m *MigrationManager) startSyncMonitoring() {
 func (m *MigrationManager) updateSyncStatus() {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	if m.SyncStatus.Status == "running" {
 		m.SyncStatus.LastSync = time.Now()
 		m.SyncStatus.SyncLag = time.Since(m.SyncStatus.LastSync)
-		
+
 		// Simulate sync progress
 		if m.SyncStatus.TotalPaths == 0 {
 			m.SyncStatus.TotalPaths = 1000
 		}
-		
+
 		if m.SyncStatus.SyncedPaths < m.SyncStatus.TotalPaths {
 			m.SyncStatus.SyncedPaths += 10
 		}
-		
+
 		if m.SyncStatus.SyncedPaths >= m.SyncStatus.TotalPaths {
 			m.SyncStatus.Status = "completed"
 		}
@@ -287,14 +287,14 @@ func (m *MigrationManager) updateSyncStatus() {
 func (m *MigrationManager) StartMigration() error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	if m.Status != "initialized" {
 		return fmt.Errorf("migration already started or completed")
 	}
-	
+
 	m.Status = "running"
 	log.Printf("Starting migration from %s to %s", m.SourceCluster.ID, m.TargetCluster.ID)
-	
+
 	return nil
 }
 
@@ -302,40 +302,40 @@ func (m *MigrationManager) StartMigration() error {
 func (m *MigrationManager) StartPhase(phaseNumber int) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	if phaseNumber < 1 || phaseNumber > len(m.Phases) {
 		return fmt.Errorf("invalid phase number: %d", phaseNumber)
 	}
-	
+
 	phase := m.Phases[phaseNumber-1]
 	if phase.Status != "pending" {
 		return fmt.Errorf("phase %d is not pending", phaseNumber)
 	}
-	
+
 	phase.Status = "running"
 	now := time.Now()
 	phase.StartTime = &now
-	
+
 	log.Printf("Starting phase %d: %s", phaseNumber, phase.Name)
-	
+
 	// Simulate phase execution
 	go m.executePhase(phaseNumber)
-	
+
 	return nil
 }
 
 // executePhase executes a migration phase
 func (m *MigrationManager) executePhase(phaseNumber int) {
 	time.Sleep(5 * time.Second) // Simulate phase execution
-	
+
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	phase := m.Phases[phaseNumber-1]
 	phase.Status = "completed"
 	now := time.Now()
 	phase.EndTime = &now
-	
+
 	// Validate phase
 	phase.Validation = &ValidationResult{
 		Passed:    true,
@@ -344,7 +344,7 @@ func (m *MigrationManager) executePhase(phaseNumber int) {
 		Warnings:  []string{},
 		Timestamp: now,
 	}
-	
+
 	log.Printf("Completed phase %d: %s", phaseNumber, phase.Name)
 }
 
@@ -352,13 +352,13 @@ func (m *MigrationManager) executePhase(phaseNumber int) {
 func (m *MigrationManager) ValidatePhase(phaseNumber int) (*ValidationResult, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	if phaseNumber < 1 || phaseNumber > len(m.Phases) {
 		return nil, fmt.Errorf("invalid phase number: %d", phaseNumber)
 	}
-	
+
 	phase := m.Phases[phaseNumber-1]
-	
+
 	// Simulate validation
 	validation := &ValidationResult{
 		Passed:    true,
@@ -367,7 +367,7 @@ func (m *MigrationManager) ValidatePhase(phaseNumber int) (*ValidationResult, er
 		Warnings:  []string{},
 		Timestamp: time.Now(),
 	}
-	
+
 	// Add some validation checks
 	validation.Checks = append(validation.Checks, &ValidationCheck{
 		Name:      "Cluster Connectivity",
@@ -376,7 +376,7 @@ func (m *MigrationManager) ValidatePhase(phaseNumber int) (*ValidationResult, er
 		Required:  true,
 		Timestamp: time.Now(),
 	})
-	
+
 	validation.Checks = append(validation.Checks, &ValidationCheck{
 		Name:      "Data Consistency",
 		Status:    "passed",
@@ -384,9 +384,9 @@ func (m *MigrationManager) ValidatePhase(phaseNumber int) (*ValidationResult, er
 		Required:  true,
 		Timestamp: time.Now(),
 	})
-	
+
 	phase.Validation = validation
-	
+
 	return validation, nil
 }
 
@@ -394,24 +394,24 @@ func (m *MigrationManager) ValidatePhase(phaseNumber int) (*ValidationResult, er
 func (m *MigrationManager) RollbackPhase(phaseNumber int) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	if phaseNumber < 1 || phaseNumber > len(m.Phases) {
 		return fmt.Errorf("invalid phase number: %d", phaseNumber)
 	}
-	
+
 	phase := m.Phases[phaseNumber-1]
 	phase.Status = "rollback"
-	
+
 	log.Printf("Rolling back phase %d: %s", phaseNumber, phase.Name)
-	
+
 	// Execute rollback steps
 	for _, step := range phase.RollbackSteps {
 		log.Printf("Executing rollback step: %s", step)
 		time.Sleep(1 * time.Second) // Simulate rollback execution
 	}
-	
+
 	phase.Status = "rolled_back"
-	
+
 	return nil
 }
 
@@ -419,17 +419,17 @@ func (m *MigrationManager) RollbackPhase(phaseNumber int) error {
 func (m *MigrationManager) StartSync() error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	if m.SyncStatus.Status == "running" {
 		return fmt.Errorf("synchronization already running")
 	}
-	
+
 	m.SyncStatus.Status = "running"
 	m.SyncStatus.LastSync = time.Now()
-	
-	log.Printf("Started bidirectional synchronization between %s and %s", 
+
+	log.Printf("Started bidirectional synchronization between %s and %s",
 		m.SourceCluster.ID, m.TargetCluster.ID)
-	
+
 	return nil
 }
 
@@ -437,16 +437,16 @@ func (m *MigrationManager) StartSync() error {
 func (m *MigrationManager) StopSync() error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	if m.SyncStatus.Status != "running" {
 		return fmt.Errorf("synchronization not running")
 	}
-	
+
 	m.SyncStatus.Status = "stopped"
-	
-	log.Printf("Stopped synchronization between %s and %s", 
+
+	log.Printf("Stopped synchronization between %s and %s",
 		m.SourceCluster.ID, m.TargetCluster.ID)
-	
+
 	return nil
 }
 
@@ -454,16 +454,16 @@ func (m *MigrationManager) StopSync() error {
 func (m *MigrationManager) handleMigrationStatus(w http.ResponseWriter, r *http.Request) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-	
+
 	status := map[string]interface{}{
-		"id":            m.ID,
-		"status":        m.Status,
-		"current_phase": m.CurrentPhase,
-		"total_phases":  len(m.Phases),
+		"id":             m.ID,
+		"status":         m.Status,
+		"current_phase":  m.CurrentPhase,
+		"total_phases":   len(m.Phases),
 		"source_cluster": m.SourceCluster,
 		"target_cluster": m.TargetCluster,
 	}
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(status)
 }
@@ -471,7 +471,7 @@ func (m *MigrationManager) handleMigrationStatus(w http.ResponseWriter, r *http.
 func (m *MigrationManager) handleListPhases(w http.ResponseWriter, r *http.Request) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(m.Phases)
 }
@@ -479,37 +479,37 @@ func (m *MigrationManager) handleListPhases(w http.ResponseWriter, r *http.Reque
 func (m *MigrationManager) handleStartPhase(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	phaseID := vars["id"]
-	
+
 	var phaseNumber int
 	if _, err := fmt.Sscanf(phaseID, "%d", &phaseNumber); err != nil {
 		http.Error(w, "Invalid phase ID", http.StatusBadRequest)
 		return
 	}
-	
+
 	if err := m.StartPhase(phaseNumber); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	
+
 	w.WriteHeader(http.StatusOK)
 }
 
 func (m *MigrationManager) handleValidatePhase(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	phaseID := vars["id"]
-	
+
 	var phaseNumber int
 	if _, err := fmt.Sscanf(phaseID, "%d", &phaseNumber); err != nil {
 		http.Error(w, "Invalid phase ID", http.StatusBadRequest)
 		return
 	}
-	
+
 	validation, err := m.ValidatePhase(phaseNumber)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(validation)
 }
@@ -517,25 +517,25 @@ func (m *MigrationManager) handleValidatePhase(w http.ResponseWriter, r *http.Re
 func (m *MigrationManager) handleRollbackPhase(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	phaseID := vars["id"]
-	
+
 	var phaseNumber int
 	if _, err := fmt.Sscanf(phaseID, "%d", &phaseNumber); err != nil {
 		http.Error(w, "Invalid phase ID", http.StatusBadRequest)
 		return
 	}
-	
+
 	if err := m.RollbackPhase(phaseNumber); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	
+
 	w.WriteHeader(http.StatusOK)
 }
 
 func (m *MigrationManager) handleSyncStatus(w http.ResponseWriter, r *http.Request) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(m.SyncStatus)
 }
@@ -545,7 +545,7 @@ func (m *MigrationManager) handleStartSync(w http.ResponseWriter, r *http.Reques
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	
+
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -554,14 +554,14 @@ func (m *MigrationManager) handleStopSync(w http.ResponseWriter, r *http.Request
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	
+
 	w.WriteHeader(http.StatusOK)
 }
 
 func (m *MigrationManager) handleListConflicts(w http.ResponseWriter, r *http.Request) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(m.SyncStatus.Conflicts)
 }
@@ -569,9 +569,9 @@ func (m *MigrationManager) handleListConflicts(w http.ResponseWriter, r *http.Re
 func (m *MigrationManager) handleListClusters(w http.ResponseWriter, r *http.Request) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-	
+
 	clusters := []*ZookeeperCluster{m.SourceCluster, m.TargetCluster}
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(clusters)
 }
@@ -579,10 +579,10 @@ func (m *MigrationManager) handleListClusters(w http.ResponseWriter, r *http.Req
 func (m *MigrationManager) handleClusterStatus(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	clusterID := vars["id"]
-	
+
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-	
+
 	var cluster *ZookeeperCluster
 	if clusterID == m.SourceCluster.ID {
 		cluster = m.SourceCluster
@@ -592,7 +592,7 @@ func (m *MigrationManager) handleClusterStatus(w http.ResponseWriter, r *http.Re
 		http.NotFound(w, r)
 		return
 	}
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(cluster)
 }

@@ -1,0 +1,302 @@
+# Default values for orchestrator
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Global configuration
+global:
+  imagePullSecrets: []
+  # - name: registry-secret
+
+# Orchestrator application configuration
+orchestrator:
+  enabled: true
+  name: orchestrator
+
+  image:
+    repository: your-registry/orchestrator
+    pullPolicy: Always
+    tag: "latest"
+
+  replicaCount: 3
+
+  service:
+    type: ClusterIP
+    port: 8080
+    metricsPort: 9090
+    annotations:
+      prometheus.io/scrape: "true"
+      prometheus.io/port: "9090"
+      prometheus.io/path: "/metrics"
+
+  ingress:
+    enabled: true
+    className: nginx
+    annotations:
+      cert-manager.io/cluster-issuer: "letsencrypt-prod"
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    hosts:
+      - host: orchestrator.example.com
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: orchestrator-tls
+        hosts:
+          - orchestrator.example.com
+
+  resources:
+    requests:
+      cpu: 500m
+      memory: 512Mi
+    limits:
+      cpu: 2000m
+      memory: 2Gi
+
+  autoscaling:
+    enabled: false
+    minReplicas: 3
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80
+
+  env:
+    ORCHESTRATOR_PORT: "8080"
+    LOG_LEVEL: "info"
+    METRICS_ENABLED: "true"
+    PROMETHEUS_PORT: "9090"
+
+  envFrom:
+    - configMapRef:
+        name: orchestrator-config
+
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: 8080
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+  readinessProbe:
+    httpGet:
+      path: /ready
+      port: 8080
+    initialDelaySeconds: 10
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 3
+
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    fsGroup: 1000
+
+  podSecurityContext:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    capabilities:
+      drop:
+        - ALL
+
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            labelSelector:
+              matchExpressions:
+                - key: app.kubernetes.io/name
+                  operator: In
+                  values:
+                    - orchestrator
+            topologyKey: kubernetes.io/hostname
+
+# Probe agent configuration
+probeAgent:
+  enabled: true
+  name: probe-agent
+
+  image:
+    repository: your-registry/probe-agent
+    pullPolicy: Always
+    tag: "latest"
+
+  # DaemonSet ensures one probe per node
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+
+  env:
+    COLLECT_INTERVAL: "30s"
+    HEARTBEAT_INTERVAL: "60s"
+    LOG_LEVEL: "info"
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 100Mi
+    limits:
+      cpu: 500m
+      memory: 500Mi
+
+  # Probe needs privileged access for monitoring
+  privileged: true
+  hostPID: true
+  hostNetwork: true
+
+  tolerations:
+    - effect: NoSchedule
+      operator: Exists
+    - effect: NoExecute
+      operator: Exists
+
+  priorityClassName: system-node-critical
+
+# Argo Rollouts configuration for canary deployments
+argoRollouts:
+  enabled: true
+
+  rollout:
+    enabled: true
+
+    strategy:
+      canary:
+        # Percentage-based canary deployment
+        steps:
+          - setWeight: 10
+          - pause:
+              duration: 5m
+          - analysis:
+              templates:
+                - templateName: success-rate
+                - templateName: latency
+          - setWeight: 25
+          - pause:
+              duration: 5m
+          - setWeight: 50
+          - pause:
+              duration: 10m
+          - analysis:
+              templates:
+                - templateName: success-rate
+                - templateName: latency
+          - setWeight: 75
+          - pause:
+              duration: 5m
+          - setWeight: 100
+
+        # Traffic routing configuration
+        trafficRouting:
+          nginx:
+            stableIngress: orchestrator-ingress
+            additionalIngressAnnotations:
+              canary-by-header: X-Canary
+              canary-by-header-value: "true"
+
+        # Canary and stable services
+        canaryService: orchestrator-service-canary
+        stableService: orchestrator-service-stable
+
+        # Maximum surge during deployment
+        maxSurge: "25%"
+        maxUnavailable: 0
+
+        # Automatic rollback delay
+        abortScaleDownDelaySeconds: 30
+
+    analysis:
+      enabled: true
+
+      # Analysis templates
+      templates:
+        successRate:
+          enabled: true
+          interval: 1m
+          threshold: 0.95
+          failureLimit: 3
+
+        latency:
+          enabled: true
+          interval: 1m
+          p95Threshold: 1000
+          p99Threshold: 2000
+          failureLimit: 3
+
+        errorRate:
+          enabled: true
+          interval: 1m
+          threshold: 0.05
+          failureLimit: 3
+
+        cpuUsage:
+          enabled: true
+          interval: 1m
+          threshold: 0.80
+          failureLimit: 3
+
+        memoryUsage:
+          enabled: true
+          interval: 1m
+          threshold: 1610612736  # 1.5GB
+          failureLimit: 3
+
+      # Prometheus configuration
+      prometheus:
+        address: http://prometheus:9090
+
+# ServiceAccount and RBAC
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+rbac:
+  create: true
+
+# ConfigMap
+configMap:
+  create: true
+  data:
+    ZOOKEEPER_URL: "zookeeper-1:2181,zookeeper-2:2181,zookeeper-3:2181"
+
+# Monitoring integration
+monitoring:
+  enabled: true
+
+  prometheus:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+      interval: 30s
+      scrapeTimeout: 10s
+
+  grafana:
+    enabled: true
+    dashboards:
+      enabled: true
+
+# Network policies
+networkPolicy:
+  enabled: false
+  policyTypes:
+    - Ingress
+    - Egress
+
+# Pod Disruption Budget
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+# Node selector
+nodeSelector: {}
+
+# Tolerations
+tolerations: []
+
+# Additional labels
+labels: {}
+
+# Additional annotations
+annotations: {}

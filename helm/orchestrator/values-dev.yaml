@@ -1,0 +1,45 @@
+# Development environment values
+orchestrator:
+  replicaCount: 1
+
+  image:
+    tag: "dev"
+
+  ingress:
+    hosts:
+      - host: orchestrator-dev.example.com
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: orchestrator-dev-tls
+        hosts:
+          - orchestrator-dev.example.com
+
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+
+  env:
+    LOG_LEVEL: "debug"
+
+probeAgent:
+  image:
+    tag: "dev"
+
+argoRollouts:
+  rollout:
+    strategy:
+      canary:
+        steps:
+          - setWeight: 50
+          - pause:
+              duration: 2m
+          - setWeight: 100
+
+podDisruptionBudget:
+  enabled: false

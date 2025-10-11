@@ -1,0 +1,51 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: orchestrator
+
+bases:
+  - ../../base
+  - ../../argo-rollouts
+
+commonLabels:
+  environment: prod
+  app.kubernetes.io/environment: prod
+
+images:
+  - name: orchestrator
+    newName: your-registry/orchestrator
+    newTag: latest
+  - name: probe-agent
+    newName: your-registry/probe-agent
+    newTag: latest
+
+replicas:
+  - name: orchestrator
+    count: 3
+
+configMapGenerator:
+  - name: orchestrator-config
+    behavior: merge
+    literals:
+      - LOG_LEVEL=info
+      - METRICS_ENABLED=true
+      - PROMETHEUS_PORT=9090
+
+patchesStrategicMerge:
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: orchestrator
+    spec:
+      template:
+        spec:
+          containers:
+          - name: orchestrator
+            resources:
+              requests:
+                cpu: 500m
+                memory: 512Mi
+              limits:
+                cpu: 2000m
+                memory: 2Gi

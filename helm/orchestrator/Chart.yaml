@@ -1,0 +1,26 @@
+apiVersion: v2
+name: orchestrator
+description: A Helm chart for Orchestrator Platform with Canary Deployments
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - orchestrator
+  - mesos
+  - monitoring
+  - canary
+  - argocd
+home: https://github.com/your-org/orchestrator
+sources:
+  - https://github.com/your-org/orchestrator
+maintainers:
+  - name: Orchestrator Team
+    email: team@example.com
+dependencies:
+  - name: argo-rollouts
+    version: "2.32.0"
+    repository: "https://argoproj.github.io/argo-helm"
+    condition: argoRollouts.enabled
+annotations:
+  category: Infrastructure
+  licenses: Apache-2.0

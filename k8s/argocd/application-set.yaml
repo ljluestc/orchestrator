@@ -1,0 +1,60 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: orchestrator-envs
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: orchestrator
+    app.kubernetes.io/component: argocd-appset
+spec:
+  generators:
+    - list:
+        elements:
+          - env: dev
+            replicaCount: "1"
+            ingressHost: orchestrator-dev.example.com
+            imageTag: dev
+          - env: staging
+            replicaCount: "2"
+            ingressHost: orchestrator-staging.example.com
+            imageTag: staging
+          - env: prod
+            replicaCount: "3"
+            ingressHost: orchestrator.example.com
+            imageTag: latest
+  template:
+    metadata:
+      name: 'orchestrator-{{env}}'
+      namespace: argocd
+      labels:
+        app.kubernetes.io/name: orchestrator
+        app.kubernetes.io/environment: '{{env}}'
+    spec:
+      project: orchestrator
+      source:
+        repoURL: https://github.com/your-org/orchestrator.git
+        targetRevision: HEAD
+        path: 'k8s/overlays/{{env}}'
+        kustomize:
+          commonLabels:
+            environment: '{{env}}'
+          images:
+            - orchestrator=your-registry/orchestrator:{{imageTag}}
+            - probe-agent=your-registry/probe-agent:{{imageTag}}
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: 'orchestrator-{{env}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+          allowEmpty: false
+        syncOptions:
+          - CreateNamespace=true
+          - PrunePropagationPolicy=foreground
+        retry:
+          limit: 5
+          backoff:
+            duration: 5s
+            factor: 2
+            maxDuration: 3m

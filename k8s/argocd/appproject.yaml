@@ -1,0 +1,53 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: orchestrator
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: orchestrator
+    app.kubernetes.io/component: argocd-project
+spec:
+  description: Orchestrator Platform Project
+  sourceRepos:
+    - 'https://github.com/your-org/orchestrator.git'
+    - 'https://charts.bitnami.com/bitnami'
+  destinations:
+    - namespace: orchestrator
+      server: https://kubernetes.default.svc
+    - namespace: argocd
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+  namespaceResourceWhitelist:
+    - group: '*'
+      kind: '*'
+  roles:
+    - name: read-only
+      description: Read-only access to orchestrator applications
+      policies:
+        - p, proj:orchestrator:read-only, applications, get, orchestrator/*, allow
+      groups:
+        - orchestrator-viewers
+    - name: admin
+      description: Admin access to orchestrator applications
+      policies:
+        - p, proj:orchestrator:admin, applications, *, orchestrator/*, allow
+      groups:
+        - orchestrator-admins
+  orphanedResources:
+    warn: true
+  syncWindows:
+    - kind: allow
+      schedule: '0 9-17 * * *'
+      duration: 8h
+      applications:
+        - orchestrator
+      manualSync: true
+    - kind: deny
+      schedule: '0 0-6,18-23 * * *'
+      duration: 12h
+      applications:
+        - orchestrator
+      manualSync: false
+      timeZone: UTC

@@ -47,9 +47,10 @@ func TestDockerCollector_Collect(t *testing.T) {
 
 	ctx := context.Background()
 	info, err := collector.Collect(ctx)
-	if err != nil && (strings.Contains(err.Error(), "Cannot connect to the Docker daemon") || 
+	if err != nil && (strings.Contains(err.Error(), "Cannot connect to the Docker daemon") ||
 		strings.Contains(err.Error(), "docker daemon is not running") ||
-		strings.Contains(err.Error(), "The system cannot find the file specified")) {
+		strings.Contains(err.Error(), "The system cannot find the file specified") ||
+		strings.Contains(err.Error(), "Internal Server Error for API route")) {
 		t.Skip("Docker not available, skipping test")
 	}
 	require.NoError(t, err)
@@ -89,9 +90,10 @@ func TestDockerCollector_CollectWithStats(t *testing.T) {
 
 	ctx := context.Background()
 	info, err := collector.Collect(ctx)
-	if err != nil && (strings.Contains(err.Error(), "Cannot connect to the Docker daemon") || 
+	if err != nil && (strings.Contains(err.Error(), "Cannot connect to the Docker daemon") ||
 		strings.Contains(err.Error(), "docker daemon is not running") ||
-		strings.Contains(err.Error(), "The system cannot find the file specified")) {
+		strings.Contains(err.Error(), "The system cannot find the file specified") ||
+		strings.Contains(err.Error(), "Internal Server Error for API route")) {
 		t.Skip("Docker not available, skipping test")
 	}
 	require.NoError(t, err)

@@ -141,7 +141,8 @@ benchmark: ## Run benchmarks
 
 pre-commit: ## Run pre-commit checks
 	@echo "$(BLUE)Running pre-commit checks...$(NC)"
-	@.git/hooks/pre-commit
+	@chmod +x .pre-commit-hook
+	@./.pre-commit-hook
 	@echo "$(GREEN)Pre-commit checks passed!$(NC)"
 
 check-coverage: test-coverage ## Check if coverage meets threshold
@@ -195,6 +196,7 @@ uninstall: ## Remove installed binaries
 # Git hooks
 install-hooks: ## Install git hooks
 	@echo "$(BLUE)Installing git hooks...$(NC)"
+	@cp .pre-commit-hook .git/hooks/pre-commit
 	@chmod +x .git/hooks/pre-commit
 	@echo "$(GREEN)Git hooks installed!$(NC)"
 

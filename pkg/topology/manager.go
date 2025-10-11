@@ -30,53 +30,53 @@ type Manager struct {
 
 // Node represents a node in the topology graph
 type Node struct {
-	ID          string                 `json:"id"`
-	Type        string                 `json:"type"` // host, container, process, pod, service
-	Name        string                 `json:"name"`
-	Status      string                 `json:"status"` // healthy, warning, critical, unknown
-	Metadata    map[string]interface{} `json:"metadata"`
-	Metrics     *NodeMetrics           `json:"metrics"`
-	Position    *Position              `json:"position,omitempty"`
-	Size        *Size                  `json:"size,omitempty"`
-	Color       string                 `json:"color,omitempty"`
-	CreatedAt   time.Time              `json:"created_at"`
-	UpdatedAt   time.Time              `json:"updated_at"`
-	LastSeen    time.Time              `json:"last_seen"`
+	ID        string                 `json:"id"`
+	Type      string                 `json:"type"` // host, container, process, pod, service
+	Name      string                 `json:"name"`
+	Status    string                 `json:"status"` // healthy, warning, critical, unknown
+	Metadata  map[string]interface{} `json:"metadata"`
+	Metrics   *NodeMetrics           `json:"metrics"`
+	Position  *Position              `json:"position,omitempty"`
+	Size      *Size                  `json:"size,omitempty"`
+	Color     string                 `json:"color,omitempty"`
+	CreatedAt time.Time              `json:"created_at"`
+	UpdatedAt time.Time              `json:"updated_at"`
+	LastSeen  time.Time              `json:"last_seen"`
 }
 
 // Edge represents a connection between nodes
 type Edge struct {
-	ID          string                 `json:"id"`
-	Source      string                 `json:"source"`
-	Target      string                 `json:"target"`
-	Type        string                 `json:"type"` // network, process, container, service
-	Weight      float64                `json:"weight"`
-	Metadata    map[string]interface{} `json:"metadata"`
-	Metrics     *EdgeMetrics           `json:"metrics"`
-	CreatedAt   time.Time              `json:"created_at"`
-	UpdatedAt   time.Time              `json:"updated_at"`
+	ID        string                 `json:"id"`
+	Source    string                 `json:"source"`
+	Target    string                 `json:"target"`
+	Type      string                 `json:"type"` // network, process, container, service
+	Weight    float64                `json:"weight"`
+	Metadata  map[string]interface{} `json:"metadata"`
+	Metrics   *EdgeMetrics           `json:"metrics"`
+	CreatedAt time.Time              `json:"created_at"`
+	UpdatedAt time.Time              `json:"updated_at"`
 }
 
 // View represents a specific topology view
 type View struct {
-	ID          string   `json:"id"`
-	Name        string   `json:"name"`
-	Description string   `json:"description"`
-	NodeTypes   []string `json:"node_types"`
-	EdgeTypes   []string `json:"edge_types"`
-	Filter      *Filter  `json:"filter,omitempty"`
-	Layout      *Layout  `json:"layout,omitempty"`
+	ID          string    `json:"id"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	NodeTypes   []string  `json:"node_types"`
+	EdgeTypes   []string  `json:"edge_types"`
+	Filter      *Filter   `json:"filter,omitempty"`
+	Layout      *Layout   `json:"layout,omitempty"`
 	CreatedAt   time.Time `json:"created_at"`
 }
 
 // Filter represents filtering criteria
 type Filter struct {
-	Search     string                 `json:"search,omitempty"`
-	NodeTypes  []string               `json:"node_types,omitempty"`
-	Status     []string               `json:"status,omitempty"`
-	Labels     map[string]string      `json:"labels,omitempty"`
-	Metadata   map[string]interface{} `json:"metadata,omitempty"`
-	Metrics    *MetricsFilter         `json:"metrics,omitempty"`
+	Search    string                 `json:"search,omitempty"`
+	NodeTypes []string               `json:"node_types,omitempty"`
+	Status    []string               `json:"status,omitempty"`
+	Labels    map[string]string      `json:"labels,omitempty"`
+	Metadata  map[string]interface{} `json:"metadata,omitempty"`
+	Metrics   *MetricsFilter         `json:"metrics,omitempty"`
 }
 
 // MetricsFilter represents metrics-based filtering
@@ -127,22 +127,22 @@ type NodeMetrics struct {
 
 // EdgeMetrics represents edge metrics
 type EdgeMetrics struct {
-	BytesIn     *Sparkline `json:"bytes_in,omitempty"`
-	BytesOut    *Sparkline `json:"bytes_out,omitempty"`
-	PacketsIn   *Sparkline `json:"packets_in,omitempty"`
-	PacketsOut  *Sparkline `json:"packets_out,omitempty"`
-	Latency     *Sparkline `json:"latency,omitempty"`
-	ErrorRate   *Sparkline `json:"error_rate,omitempty"`
+	BytesIn    *Sparkline `json:"bytes_in,omitempty"`
+	BytesOut   *Sparkline `json:"bytes_out,omitempty"`
+	PacketsIn  *Sparkline `json:"packets_in,omitempty"`
+	PacketsOut *Sparkline `json:"packets_out,omitempty"`
+	Latency    *Sparkline `json:"latency,omitempty"`
+	ErrorRate  *Sparkline `json:"error_rate,omitempty"`
 }
 
 // Sparkline represents a time-series sparkline
 type Sparkline struct {
-	Values []float64 `json:"values"`
-	Times  []int64   `json:"times"`
-	Min    float64   `json:"min"`
-	Max    float64   `json:"max"`
-	Avg    float64   `json:"avg"`
-	Current float64  `json:"current"`
+	Values  []float64 `json:"values"`
+	Times   []int64   `json:"times"`
+	Min     float64   `json:"min"`
+	Max     float64   `json:"max"`
+	Avg     float64   `json:"avg"`
+	Current float64   `json:"current"`
 }
 
 // Metrics represents overall metrics
@@ -196,23 +196,23 @@ func NewManager(id string) *Manager {
 // Start starts the topology manager
 func (m *Manager) Start() error {
 	router := m.setupRoutes()
-	
+
 	m.server = &http.Server{
 		Addr:    ":8082",
 		Handler: router,
 	}
 
 	log.Printf("Starting topology manager on :8082")
-	
+
 	// Initialize default views
 	m.initializeDefaultViews()
-	
+
 	// Start metrics collection
 	go m.startMetricsCollection()
-	
+
 	// Start WebSocket cleanup
 	go m.startWebSocketCleanup()
-	
+
 	return m.server.ListenAndServe()
 }
 
@@ -221,7 +221,7 @@ func (m *Manager) Stop() error {
 	if m.updateTicker != nil {
 		m.updateTicker.Stop()
 	}
-	
+
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	return m.server.Shutdown(ctx)
@@ -230,10 +230,10 @@ func (m *Manager) Stop() error {
 // setupRoutes sets up HTTP routes
 func (m *Manager) setupRoutes() *mux.Router {
 	router := mux.NewRouter()
-	
+
 	// API v1 routes
 	v1 := router.PathPrefix("/api/v1").Subrouter()
-	
+
 	// Topology endpoints
 	v1.HandleFunc("/topology", m.handleGetTopology).Methods("GET")
 	v1.HandleFunc("/topology/nodes", m.handleGetNodes).Methods("GET")
@@ -244,19 +244,19 @@ func (m *Manager) setupRoutes() *mux.Router {
 	v1.HandleFunc("/topology/edges/{id}", m.handleGetEdge).Methods("GET")
 	v1.HandleFunc("/topology/search", m.handleSearch).Methods("GET")
 	v1.HandleFunc("/topology/filter", m.handleFilter).Methods("POST")
-	
+
 	// Views endpoints
 	v1.HandleFunc("/views", m.handleGetViews).Methods("GET")
 	v1.HandleFunc("/views/{id}", m.handleGetView).Methods("GET")
 	v1.HandleFunc("/views", m.handleCreateView).Methods("POST")
 	v1.HandleFunc("/views/{id}", m.handleUpdateView).Methods("PUT")
 	v1.HandleFunc("/views/{id}", m.handleDeleteView).Methods("DELETE")
-	
+
 	// Metrics endpoints
 	v1.HandleFunc("/metrics", m.handleGetMetrics).Methods("GET")
 	v1.HandleFunc("/metrics/nodes/{id}", m.handleGetNodeMetrics).Methods("GET")
 	v1.HandleFunc("/metrics/edges/{id}", m.handleGetEdgeMetrics).Methods("GET")
-	
+
 	// Container control endpoints
 	v1.HandleFunc("/containers/{id}/start", m.handleStartContainer).Methods("POST")
 	v1.HandleFunc("/containers/{id}/stop", m.handleStopContainer).Methods("POST")
@@ -265,13 +265,13 @@ func (m *Manager) setupRoutes() *mux.Router {
 	v1.HandleFunc("/containers/{id}/unpause", m.handleUnpauseContainer).Methods("POST")
 	v1.HandleFunc("/containers/{id}/logs", m.handleGetContainerLogs).Methods("GET")
 	v1.HandleFunc("/containers/{id}/exec", m.handleContainerExec).Methods("POST")
-	
+
 	// WebSocket endpoint
 	router.HandleFunc("/ws", m.handleWebSocket)
-	
+
 	// Health check
 	router.HandleFunc("/health", m.handleHealth).Methods("GET")
-	
+
 	return router
 }
 
@@ -279,7 +279,7 @@ func (m *Manager) setupRoutes() *mux.Router {
 func (m *Manager) initializeDefaultViews() {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	// Processes View
 	m.Views["processes"] = &View{
 		ID:          "processes",
@@ -294,7 +294,7 @@ func (m *Manager) initializeDefaultViews() {
 		},
 		CreatedAt: time.Now(),
 	}
-	
+
 	// Containers View
 	m.Views["containers"] = &View{
 		ID:          "containers",
@@ -309,7 +309,7 @@ func (m *Manager) initializeDefaultViews() {
 		},
 		CreatedAt: time.Now(),
 	}
-	
+
 	// Hosts View
 	m.Views["hosts"] = &View{
 		ID:          "hosts",
@@ -323,7 +323,7 @@ func (m *Manager) initializeDefaultViews() {
 		},
 		CreatedAt: time.Now(),
 	}
-	
+
 	// Pods View
 	m.Views["pods"] = &View{
 		ID:          "pods",
@@ -337,7 +337,7 @@ func (m *Manager) initializeDefaultViews() {
 		},
 		CreatedAt: time.Now(),
 	}
-	
+
 	// Services View
 	m.Views["services"] = &View{
 		ID:          "services",
@@ -357,7 +357,7 @@ func (m *Manager) initializeDefaultViews() {
 func (m *Manager) startMetricsCollection() {
 	m.updateTicker = time.NewTicker(15 * time.Second)
 	defer m.updateTicker.Stop()
-	
+
 	for {
 		select {
 		case <-m.updateTicker.C:
@@ -374,7 +374,7 @@ func (m *Manager) startMetricsCollection() {
 func (m *Manager) startWebSocketCleanup() {
 	ticker := time.NewTicker(30 * time.Second)
 	defer ticker.Stop()
-	
+
 	for {
 		select {
 		case <-ticker.C:
@@ -387,13 +387,13 @@ func (m *Manager) startWebSocketCleanup() {
 func (m *Manager) updateMetrics() {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	metrics := &Metrics{
-		TotalNodes:    len(m.Nodes),
-		TotalEdges:    len(m.Edges),
-		LastUpdated:   time.Now(),
+		TotalNodes:  len(m.Nodes),
+		TotalEdges:  len(m.Edges),
+		LastUpdated: time.Now(),
 	}
-	
+
 	for _, node := range m.Nodes {
 		switch node.Status {
 		case "healthy":
@@ -406,7 +406,7 @@ func (m *Manager) updateMetrics() {
 			metrics.UnknownNodes++
 		}
 	}
-	
+
 	m.Metrics["overall"] = metrics
 }
 
@@ -414,7 +414,7 @@ func (m *Manager) updateMetrics() {
 func (m *Manager) getMetrics() *Metrics {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-	
+
 	if metrics, exists := m.Metrics["overall"]; exists {
 		return metrics
 	}
@@ -425,13 +425,13 @@ func (m *Manager) getMetrics() *Metrics {
 func (m *Manager) AddNode(node *Node) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	node.CreatedAt = time.Now()
 	node.UpdatedAt = time.Now()
 	node.LastSeen = time.Now()
-	
+
 	m.Nodes[node.ID] = node
-	
+
 	// Broadcast update
 	go m.broadcastUpdate(&TopologyUpdate{
 		Type: "add",
@@ -443,14 +443,14 @@ func (m *Manager) AddNode(node *Node) {
 func (m *Manager) UpdateNode(node *Node) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	if existing, exists := m.Nodes[node.ID]; exists {
 		node.CreatedAt = existing.CreatedAt
 		node.UpdatedAt = time.Now()
 		node.LastSeen = time.Now()
-		
+
 		m.Nodes[node.ID] = node
-		
+
 		// Broadcast update
 		go m.broadcastUpdate(&TopologyUpdate{
 			Type: "update",
@@ -463,17 +463,17 @@ func (m *Manager) UpdateNode(node *Node) {
 func (m *Manager) RemoveNode(nodeID string) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	if node, exists := m.Nodes[nodeID]; exists {
 		delete(m.Nodes, nodeID)
-		
+
 		// Remove associated edges
 		for edgeID, edge := range m.Edges {
 			if edge.Source == nodeID || edge.Target == nodeID {
 				delete(m.Edges, edgeID)
 			}
 		}
-		
+
 		// Broadcast update
 		go m.broadcastUpdate(&TopologyUpdate{
 			Type: "remove",
@@ -486,12 +486,12 @@ func (m *Manager) RemoveNode(nodeID string) {
 func (m *Manager) AddEdge(edge *Edge) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	edge.CreatedAt = time.Now()
 	edge.UpdatedAt = time.Now()
-	
+
 	m.Edges[edge.ID] = edge
-	
+
 	// Broadcast update
 	go m.broadcastUpdate(&TopologyUpdate{
 		Type: "add",
@@ -503,13 +503,13 @@ func (m *Manager) AddEdge(edge *Edge) {
 func (m *Manager) UpdateEdge(edge *Edge) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	if existing, exists := m.Edges[edge.ID]; exists {
 		edge.CreatedAt = existing.CreatedAt
 		edge.UpdatedAt = time.Now()
-		
+
 		m.Edges[edge.ID] = edge
-		
+
 		// Broadcast update
 		go m.broadcastUpdate(&TopologyUpdate{
 			Type: "update",
@@ -522,10 +522,10 @@ func (m *Manager) UpdateEdge(edge *Edge) {
 func (m *Manager) RemoveEdge(edgeID string) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	if edge, exists := m.Edges[edgeID]; exists {
 		delete(m.Edges, edgeID)
-		
+
 		// Broadcast update
 		go m.broadcastUpdate(&TopologyUpdate{
 			Type: "remove",
@@ -538,13 +538,13 @@ func (m *Manager) RemoveEdge(edgeID string) {
 func (m *Manager) broadcastUpdate(update *TopologyUpdate) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-	
+
 	data, err := json.Marshal(update)
 	if err != nil {
 		log.Printf("Error marshaling update: %v", err)
 		return
 	}
-	
+
 	for _, subscriber := range m.Subscribers {
 		select {
 		case subscriber.Send <- data:
@@ -558,7 +558,7 @@ func (m *Manager) broadcastUpdate(update *TopologyUpdate) {
 func (m *Manager) cleanupWebSocketConnections() {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	now := time.Now()
 	for id, subscriber := range m.Subscribers {
 		if now.Sub(subscriber.LastPing) > 2*time.Minute {
@@ -573,14 +573,14 @@ func (m *Manager) cleanupWebSocketConnections() {
 func (m *Manager) handleGetTopology(w http.ResponseWriter, r *http.Request) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-	
+
 	topology := map[string]interface{}{
-		"nodes": m.Nodes,
-		"edges": m.Edges,
-		"views": m.Views,
+		"nodes":   m.Nodes,
+		"edges":   m.Edges,
+		"views":   m.Views,
 		"metrics": m.getMetrics(),
 	}
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(topology)
 }
@@ -588,12 +588,12 @@ func (m *Manager) handleGetTopology(w http.ResponseWriter, r *http.Request) {
 func (m *Manager) handleGetNodes(w http.ResponseWriter, r *http.Request) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-	
+
 	nodes := make([]*Node, 0, len(m.Nodes))
 	for _, node := range m.Nodes {
 		nodes = append(nodes, node)
 	}
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(nodes)
 }
@@ -601,16 +601,16 @@ func (m *Manager) handleGetNodes(w http.ResponseWriter, r *http.Request) {
 func (m *Manager) handleGetNode(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	nodeID := vars["id"]
-	
+
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-	
+
 	node, exists := m.Nodes[nodeID]
 	if !exists {
 		http.NotFound(w, r)
 		return
 	}
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(node)
 }
@@ -618,12 +618,12 @@ func (m *Manager) handleGetNode(w http.ResponseWriter, r *http.Request) {
 func (m *Manager) handleGetEdges(w http.ResponseWriter, r *http.Request) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-	
+
 	edges := make([]*Edge, 0, len(m.Edges))
 	for _, edge := range m.Edges {
 		edges = append(edges, edge)
 	}
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(edges)
 }
@@ -631,16 +631,16 @@ func (m *Manager) handleGetEdges(w http.ResponseWriter, r *http.Request) {
 func (m *Manager) handleGetEdge(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	edgeID := vars["id"]
-	
+
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-	
+
 	edge, exists := m.Edges[edgeID]
 	if !exists {
 		http.NotFound(w, r)
 		return
 	}
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(edge)
 }
@@ -651,17 +651,17 @@ func (m *Manager) handleSearch(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Query parameter 'q' is required", http.StatusBadRequest)
 		return
 	}
-	
+
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-	
+
 	results := make([]*Node, 0)
 	for _, node := range m.Nodes {
 		if m.matchesSearch(node, query) {
 			results = append(results, node)
 		}
 	}
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(results)
 }
@@ -672,17 +672,17 @@ func (m *Manager) handleFilter(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	
+
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-	
+
 	results := make([]*Node, 0)
 	for _, node := range m.Nodes {
 		if m.matchesFilter(node, &filter) {
 			results = append(results, node)
 		}
 	}
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(results)
 }
@@ -690,12 +690,12 @@ func (m *Manager) handleFilter(w http.ResponseWriter, r *http.Request) {
 func (m *Manager) handleGetViews(w http.ResponseWriter, r *http.Request) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-	
+
 	views := make([]*View, 0, len(m.Views))
 	for _, view := range m.Views {
 		views = append(views, view)
 	}
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(views)
 }
@@ -703,16 +703,16 @@ func (m *Manager) handleGetViews(w http.ResponseWriter, r *http.Request) {
 func (m *Manager) handleGetView(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	viewID := vars["id"]
-	
+
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-	
+
 	view, exists := m.Views[viewID]
 	if !exists {
 		http.NotFound(w, r)
 		return
 	}
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(view)
 }
@@ -723,13 +723,13 @@ func (m *Manager) handleCreateView(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	
+
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	view.CreatedAt = time.Now()
 	m.Views[view.ID] = &view
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(view)
 }
@@ -737,20 +737,20 @@ func (m *Manager) handleCreateView(w http.ResponseWriter, r *http.Request) {
 func (m *Manager) handleUpdateView(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	viewID := vars["id"]
-	
+
 	var view View
 	if err := json.NewDecoder(r.Body).Decode(&view); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	
+
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	if existing, exists := m.Views[viewID]; exists {
 		view.CreatedAt = existing.CreatedAt
 		m.Views[viewID] = &view
-		
+
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(view)
 	} else {
@@ -761,10 +761,10 @@ func (m *Manager) handleUpdateView(w http.ResponseWriter, r *http.Request) {
 func (m *Manager) handleDeleteView(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	viewID := vars["id"]
-	
+
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	delete(m.Views, viewID)
 	w.WriteHeader(http.StatusOK)
 }
@@ -777,16 +777,16 @@ func (m *Manager) handleGetMetrics(w http.ResponseWriter, r *http.Request) {
 func (m *Manager) handleGetNodeMetrics(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	nodeID := vars["id"]
-	
+
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-	
+
 	node, exists := m.Nodes[nodeID]
 	if !exists {
 		http.NotFound(w, r)
 		return
 	}
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(node.Metrics)
 }
@@ -794,16 +794,16 @@ func (m *Manager) handleGetNodeMetrics(w http.ResponseWriter, r *http.Request) {
 func (m *Manager) handleGetEdgeMetrics(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	edgeID := vars["id"]
-	
+
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-	
+
 	edge, exists := m.Edges[edgeID]
 	if !exists {
 		http.NotFound(w, r)
 		return
 	}
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(edge.Metrics)
 }
@@ -812,60 +812,60 @@ func (m *Manager) handleGetEdgeMetrics(w http.ResponseWriter, r *http.Request) {
 func (m *Manager) handleStartContainer(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	containerID := vars["id"]
-	
+
 	// In a real implementation, this would call Docker API
 	log.Printf("Starting container %s", containerID)
-	
+
 	w.WriteHeader(http.StatusOK)
 }
 
 func (m *Manager) handleStopContainer(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	containerID := vars["id"]
-	
+
 	// In a real implementation, this would call Docker API
 	log.Printf("Stopping container %s", containerID)
-	
+
 	w.WriteHeader(http.StatusOK)
 }
 
 func (m *Manager) handleRestartContainer(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	containerID := vars["id"]
-	
+
 	// In a real implementation, this would call Docker API
 	log.Printf("Restarting container %s", containerID)
-	
+
 	w.WriteHeader(http.StatusOK)
 }
 
 func (m *Manager) handlePauseContainer(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	containerID := vars["id"]
-	
+
 	// In a real implementation, this would call Docker API
 	log.Printf("Pausing container %s", containerID)
-	
+
 	w.WriteHeader(http.StatusOK)
 }
 
 func (m *Manager) handleUnpauseContainer(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	containerID := vars["id"]
-	
+
 	// In a real implementation, this would call Docker API
 	log.Printf("Unpausing container %s", containerID)
-	
+
 	w.WriteHeader(http.StatusOK)
 }
 
 func (m *Manager) handleGetContainerLogs(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	containerID := vars["id"]
-	
+
 	// In a real implementation, this would stream container logs
 	log.Printf("Getting logs for container %s", containerID)
-	
+
 	w.Header().Set("Content-Type", "text/plain")
 	w.Write([]byte("Container logs would be streamed here..."))
 }
@@ -873,10 +873,10 @@ func (m *Manager) handleGetContainerLogs(w http.ResponseWriter, r *http.Request)
 func (m *Manager) handleContainerExec(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	containerID := vars["id"]
-	
+
 	// In a real implementation, this would establish a WebSocket for terminal
 	log.Printf("Executing command in container %s", containerID)
-	
+
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -887,7 +887,7 @@ func (m *Manager) handleWebSocket(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer conn.Close()
-	
+
 	subscriber := &Subscriber{
 		ID:       fmt.Sprintf("subscriber-%d", time.Now().UnixNano()),
 		Conn:     conn,
@@ -895,20 +895,20 @@ func (m *Manager) handleWebSocket(w http.ResponseWriter, r *http.Request) {
 		Send:     make(chan []byte, 256),
 		Done:     make(chan bool),
 	}
-	
+
 	m.mu.Lock()
 	m.Subscribers[subscriber.ID] = subscriber
 	m.mu.Unlock()
-	
+
 	// Send initial topology
 	topology := m.getTopologyForSubscriber(subscriber)
 	if data, err := json.Marshal(topology); err == nil {
 		subscriber.Send <- data
 	}
-	
+
 	// Handle WebSocket messages
 	go m.handleWebSocketMessages(subscriber)
-	
+
 	// Send updates
 	for {
 		select {
@@ -930,14 +930,14 @@ func (m *Manager) handleWebSocketMessages(subscriber *Subscriber) {
 		m.mu.Unlock()
 		subscriber.Conn.Close()
 	}()
-	
+
 	subscriber.Conn.SetReadDeadline(time.Now().Add(60 * time.Second))
 	subscriber.Conn.SetPongHandler(func(string) error {
 		subscriber.LastPing = time.Now()
 		subscriber.Conn.SetReadDeadline(time.Now().Add(60 * time.Second))
 		return nil
 	})
-	
+
 	for {
 		_, _, err := subscriber.Conn.ReadMessage()
 		if err != nil {
@@ -952,25 +952,25 @@ func (m *Manager) handleWebSocketMessages(subscriber *Subscriber) {
 func (m *Manager) getTopologyForSubscriber(subscriber *Subscriber) map[string]interface{} {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-	
+
 	topology := map[string]interface{}{
-		"nodes": m.Nodes,
-		"edges": m.Edges,
-		"views": m.Views,
+		"nodes":   m.Nodes,
+		"edges":   m.Edges,
+		"views":   m.Views,
 		"metrics": m.getMetrics(),
 	}
-	
+
 	return topology
 }
 
 func (m *Manager) matchesSearch(node *Node, query string) bool {
 	query = strings.ToLower(query)
-	
+
 	// Search in name
 	if strings.Contains(strings.ToLower(node.Name), query) {
 		return true
 	}
-	
+
 	// Search in metadata
 	for _, value := range node.Metadata {
 		if str, ok := value.(string); ok {
@@ -979,7 +979,7 @@ func (m *Manager) matchesSearch(node *Node, query string) bool {
 			}
 		}
 	}
-	
+
 	return false
 }
 
@@ -997,7 +997,7 @@ func (m *Manager) matchesFilter(node *Node, filter *Filter) bool {
 			return false
 		}
 	}
-	
+
 	// Filter by status
 	if len(filter.Status) > 0 {
 		found := false
@@ -1011,7 +1011,7 @@ func (m *Manager) matchesFilter(node *Node, filter *Filter) bool {
 			return false
 		}
 	}
-	
+
 	// Filter by labels
 	if len(filter.Labels) > 0 {
 		for key, value := range filter.Labels {
@@ -1020,14 +1020,14 @@ func (m *Manager) matchesFilter(node *Node, filter *Filter) bool {
 			}
 		}
 	}
-	
+
 	// Filter by metrics
 	if filter.Metrics != nil {
 		if !m.matchesMetricsFilter(node, filter.Metrics) {
 			return false
 		}
 	}
-	
+
 	return true
 }
 
@@ -1035,7 +1035,7 @@ func (m *Manager) matchesMetricsFilter(node *Node, metricsFilter *MetricsFilter)
 	if node.Metrics == nil {
 		return false
 	}
-	
+
 	// CPU usage filter
 	if metricsFilter.CPUUsage != nil {
 		if node.Metrics.CPUUsage != nil {
@@ -1045,7 +1045,7 @@ func (m *Manager) matchesMetricsFilter(node *Node, metricsFilter *MetricsFilter)
 			}
 		}
 	}
-	
+
 	// Memory usage filter
 	if metricsFilter.MemoryUsage != nil {
 		if node.Metrics.MemoryUsage != nil {
@@ -1055,7 +1055,7 @@ func (m *Manager) matchesMetricsFilter(node *Node, metricsFilter *MetricsFilter)
 			}
 		}
 	}
-	
+
 	// Connections filter
 	if metricsFilter.Connections != nil {
 		if node.Metrics.Connections != nil {
@@ -1065,7 +1065,7 @@ func (m *Manager) matchesMetricsFilter(node *Node, metricsFilter *MetricsFilter)
 			}
 		}
 	}
-	
+
 	return true
 }
 
@@ -1076,21 +1076,21 @@ func (m *Manager) handleAddNode(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	
+
 	// Validate required fields
 	if node.ID == "" {
 		http.Error(w, "node ID is required", http.StatusBadRequest)
 		return
 	}
-	
+
 	if node.Type == "" {
 		http.Error(w, "node type is required", http.StatusBadRequest)
 		return
 	}
-	
+
 	// Add the node
 	m.AddNode(&node)
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(map[string]string{
@@ -1106,26 +1106,26 @@ func (m *Manager) handleAddEdge(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	
+
 	// Validate required fields
 	if edge.ID == "" {
 		http.Error(w, "edge ID is required", http.StatusBadRequest)
 		return
 	}
-	
+
 	if edge.Source == "" {
 		http.Error(w, "edge source is required", http.StatusBadRequest)
 		return
 	}
-	
+
 	if edge.Target == "" {
 		http.Error(w, "edge target is required", http.StatusBadRequest)
 		return
 	}
-	
+
 	// Add the edge
 	m.AddEdge(&edge)
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(map[string]string{

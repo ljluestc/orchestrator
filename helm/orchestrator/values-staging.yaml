@@ -1,0 +1,45 @@
+# Staging environment values
+orchestrator:
+  replicaCount: 2
+
+  image:
+    tag: "staging"
+
+  ingress:
+    hosts:
+      - host: orchestrator-staging.example.com
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: orchestrator-staging-tls
+        hosts:
+          - orchestrator-staging.example.com
+
+  resources:
+    requests:
+      cpu: 500m
+      memory: 512Mi
+    limits:
+      cpu: 1500m
+      memory: 1536Mi
+
+  env:
+    LOG_LEVEL: "info"
+
+probeAgent:
+  image:
+    tag: "staging"
+
+argoRollouts:
+  rollout:
+    strategy:
+      canary:
+        steps:
+          - setWeight: 20
+          - pause:
+              duration: 3m
+          - setWeight: 50
+          - pause:
+              duration: 5m
+          - setWeight: 100

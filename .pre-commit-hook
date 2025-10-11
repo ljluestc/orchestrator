@@ -1,0 +1,52 @@
+#!/bin/bash
+# Pre-commit hook for Go project
+
+set -e
+
+echo "Running pre-commit checks..."
+
+# Check if Go is installed
+if ! command -v go &> /dev/null; then
+    echo "Error: Go is not installed or not in PATH"
+    exit 1
+fi
+
+# Run go fmt
+echo "Running go fmt..."
+if ! go fmt ./...; then
+    echo "Error: go fmt failed"
+    exit 1
+fi
+
+# Run go vet
+echo "Running go vet..."
+if ! go vet ./...; then
+    echo "Error: go vet failed"
+    exit 1
+fi
+
+# Run tests
+echo "Running tests..."
+if ! go test ./... -v -timeout=60s; then
+    echo "Error: Tests failed"
+    exit 1
+fi
+
+# Run test coverage
+echo "Running test coverage..."
+if ! go test ./... -coverprofile=coverage.out -covermode=count; then
+    echo "Error: Test coverage failed"
+    exit 1
+fi
+
+# Check coverage threshold
+COVERAGE=$(go tool cover -func=coverage.out | tail -1 | awk '{print $3}' | sed 's/%//')
+THRESHOLD=80
+
+if (( $(echo "$COVERAGE < $THRESHOLD" | bc -l) )); then
+    echo "Error: Test coverage $COVERAGE% is below threshold $THRESHOLD%"
+    exit 1
+fi
+
+echo "Pre-commit checks passed!"
+echo "Test coverage: $COVERAGE%"

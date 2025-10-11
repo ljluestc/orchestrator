@@ -13,49 +13,49 @@ import (
 
 // Collector collects data from probe agents and feeds it to the topology manager
 type Collector struct {
-	ID            string
-	TopologyURL   string
-	ProbeClient   *probe.Client
-	Manager       *Manager
-	UpdateTicker  *time.Ticker
-	ctx           context.Context
-	cancel        context.CancelFunc
+	ID           string
+	TopologyURL  string
+	ProbeClient  *probe.Client
+	Manager      *Manager
+	UpdateTicker *time.Ticker
+	ctx          context.Context
+	cancel       context.CancelFunc
 }
 
 // NewCollector creates a new topology collector
 func NewCollector(id, topologyURL string, probeClient *probe.Client) *Collector {
 	ctx, cancel := context.WithCancel(context.Background())
-	
+
 	return &Collector{
-		ID:          id,
-		TopologyURL: topologyURL,
-		ProbeClient: probeClient,
+		ID:           id,
+		TopologyURL:  topologyURL,
+		ProbeClient:  probeClient,
 		UpdateTicker: time.NewTicker(30 * time.Second),
-		ctx:         ctx,
-		cancel:      cancel,
+		ctx:          ctx,
+		cancel:       cancel,
 	}
 }
 
 // Start starts the collector
 func (c *Collector) Start() error {
 	log.Printf("Starting topology collector %s", c.ID)
-	
+
 	// Start collecting data from probe agents
 	go c.collectFromProbes()
-	
+
 	// Start processing collected data
 	go c.processCollectedData()
-	
+
 	return nil
 }
 
 // Stop stops the collector
 func (c *Collector) Stop() error {
 	log.Printf("Stopping topology collector %s", c.ID)
-	
+
 	c.cancel()
 	c.UpdateTicker.Stop()
-	
+
 	return nil
 }
 
@@ -85,32 +85,32 @@ func (c *Collector) collectProbeData() {
 func (c *Collector) fetchTopologyFromAppServer() error {
 	// App server runs on port 8080
 	appServerURL := "http://localhost:8080"
-	
+
 	client := &http.Client{
 		Timeout: 10 * time.Second,
 	}
-	
+
 	resp, err := client.Get(appServerURL + "/api/v1/query/topology")
 	if err != nil {
 		return fmt.Errorf("failed to fetch topology from app server: %w", err)
 	}
 	defer resp.Body.Close()
-	
+
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("app server returned status %d", resp.StatusCode)
 	}
-	
+
 	var topologyResponse struct {
 		Topology struct {
 			Nodes map[string]interface{} `json:"nodes"`
 			Edges map[string]interface{} `json:"edges"`
 		} `json:"topology"`
 	}
-	
+
 	if err := json.NewDecoder(resp.Body).Decode(&topologyResponse); err != nil {
 		return fmt.Errorf("failed to decode topology response: %w", err)
 	}
-	
+
 	// Process nodes
 	for nodeID, nodeData := range topologyResponse.Topology.Nodes {
 		if node, err := c.convertToNode(nodeID, nodeData); err == nil {
@@ -119,7 +119,7 @@ func (c *Collector) fetchTopologyFromAppServer() error {
 			log.Printf("Failed to convert node %s: %v", nodeID, err)
 		}
 	}
-	
+
 	// Process edges
 	for edgeID, edgeData := range topologyResponse.Topology.Edges {
 		if edge, err := c.convertToEdge(edgeID, edgeData); err == nil {
@@ -128,10 +128,10 @@ func (c *Collector) fetchTopologyFromAppServer() error {
 			log.Printf("Failed to convert edge %s: %v", edgeID, err)
 		}
 	}
-	
-	log.Printf("Successfully fetched topology from app server: %d nodes, %d edges", 
+
+	log.Printf("Successfully fetched topology from app server: %d nodes, %d edges",
 		len(topologyResponse.Topology.Nodes), len(topologyResponse.Topology.Edges))
-	
+
 	return nil
 }
 
@@ -141,7 +141,7 @@ func (c *Collector) convertToNode(nodeID string, nodeData interface{}) (*Node, e
 	if !ok {
 		return nil, fmt.Errorf("invalid node data format")
 	}
-	
+
 	node := &Node{
 		ID:   nodeID,
 		Type: getString(nodeMap, "type"),
@@ -150,7 +150,7 @@ func (c *Collector) convertToNode(nodeID string, nodeData interface{}) (*Node, e
 			"source": "app_server",
 		},
 	}
-	
+
 	// Copy metadata from app server
 	if metadata, ok := nodeMap["metadata"]; ok {
 		if metadataMap, ok := metadata.(map[string]interface{}); ok {
@@ -159,14 +159,14 @@ func (c *Collector) convertToNode(nodeID string, nodeData interface{}) (*Node, e
 			}
 		}
 	}
-	
+
 	// Set parent ID if available
 	if parentID, ok := nodeMap["parent_id"]; ok {
 		if parentStr, ok := parentID.(string); ok {
 			node.Metadata["parent_id"] = parentStr
 		}
 	}
-	
+
 	return node, nil
 }
 
@@ -176,7 +176,7 @@ func (c *Collector) convertToEdge(edgeID string, edgeData interface{}) (*Edge, e
 	if !ok {
 		return nil, fmt.Errorf("invalid edge data format")
 	}
-	
+
 	edge := &Edge{
 		ID:     edgeID,
 		Source: getString(edgeMap, "source"),
@@ -186,7 +186,7 @@ func (c *Collector) convertToEdge(edgeID string, edgeData interface{}) (*Edge, e
 			"source": "app_server",
 		},
 	}
-	
+
 	// Copy metadata from app server
 	if metadata, ok := edgeMap["metadata"]; ok {
 		if metadataMap, ok := metadata.(map[string]interface{}); ok {
@@ -195,21 +195,21 @@ func (c *Collector) convertToEdge(edgeID string, edgeData interface{}) (*Edge, e
 			}
 		}
 	}
-	
+
 	// Set protocol if available
 	if protocol, ok := edgeMap["protocol"]; ok {
 		if protocolStr, ok := protocol.(string); ok {
 			edge.Metadata["protocol"] = protocolStr
 		}
 	}
-	
+
 	// Set connections count if available
 	if connections, ok := edgeMap["connections"]; ok {
 		if connFloat, ok := connections.(float64); ok {
 			edge.Metadata["connections"] = int(connFloat)
 		}
 	}
-	
+
 	return edge, nil
 }
 
@@ -281,9 +281,9 @@ func (c *Collector) generateMockData() {
 			Name:   fmt.Sprintf("host-%d.example.com", i),
 			Status: "healthy",
 			Metadata: map[string]interface{}{
-				"hostname": fmt.Sprintf("host-%d.example.com", i),
-				"kernel":   "Linux 5.4.0",
-				"cpu_cores": 8,
+				"hostname":     fmt.Sprintf("host-%d.example.com", i),
+				"kernel":       "Linux 5.4.0",
+				"cpu_cores":    8,
 				"memory_total": 16384,
 			},
 			Metrics: &NodeMetrics{
@@ -310,7 +310,7 @@ func (c *Collector) generateMockData() {
 		}
 		c.Manager.AddNode(hostNode)
 	}
-	
+
 	// Generate mock container nodes
 	for i := 0; i < 10; i++ {
 		containerNode := &Node{
@@ -319,10 +319,10 @@ func (c *Collector) generateMockData() {
 			Name:   fmt.Sprintf("app-%d", i),
 			Status: "healthy",
 			Metadata: map[string]interface{}{
-				"image":   "nginx:latest",
-				"state":   "running",
-				"ports":   []int{80, 443},
-				"labels":  map[string]string{"app": "web", "version": "1.0"},
+				"image":  "nginx:latest",
+				"state":  "running",
+				"ports":  []int{80, 443},
+				"labels": map[string]string{"app": "web", "version": "1.0"},
 			},
 			Metrics: &NodeMetrics{
 				CPUUsage: &Sparkline{
@@ -347,7 +347,7 @@ func (c *Collector) generateMockData() {
 			LastSeen:  time.Now(),
 		}
 		c.Manager.AddNode(containerNode)
-		
+
 		// Create edge from host to container
 		edge := &Edge{
 			ID:     fmt.Sprintf("host-%d-container-%d", i%3, i),
@@ -363,7 +363,7 @@ func (c *Collector) generateMockData() {
 		}
 		c.Manager.AddEdge(edge)
 	}
-	
+
 	// Generate mock process nodes
 	for i := 0; i < 20; i++ {
 		processNode := &Node{
@@ -392,7 +392,7 @@ func (c *Collector) generateMockData() {
 			LastSeen:  time.Now(),
 		}
 		c.Manager.AddNode(processNode)
-		
+
 		// Create edge from host to process
 		edge := &Edge{
 			ID:     fmt.Sprintf("host-%d-process-%d", i%3, i),

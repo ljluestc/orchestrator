@@ -41,21 +41,21 @@ type AgentInfo struct {
 
 // Framework represents a registered framework
 type Framework struct {
-	ID          string
-	Name        string
-	Principal   string
-	Role        string
-	Hostname    string
-	Port        int
-	Status      string
-	Tasks       map[string]*Task
-	Offers      []*ResourceOffer
+	ID           string
+	Name         string
+	Principal    string
+	Role         string
+	Hostname     string
+	Port         int
+	Status       string
+	Tasks        map[string]*Task
+	Offers       []*ResourceOffer
 	RegisteredAt time.Time
 }
 
 // Resources represents available resources on an agent
 type Resources struct {
-	CPUs  float64
+	CPUs   float64
 	Memory float64
 	Disk   float64
 	Ports  []PortRange
@@ -69,12 +69,12 @@ type PortRange struct {
 
 // ResourceOffer represents a resource offer to a framework
 type ResourceOffer struct {
-	ID        string
-	AgentID   string
-	Resources *Resources
+	ID          string
+	AgentID     string
+	Resources   *Resources
 	FrameworkID string
-	CreatedAt time.Time
-	ExpiresAt time.Time
+	CreatedAt   time.Time
+	ExpiresAt   time.Time
 }
 
 // Task represents a running task
@@ -100,16 +100,16 @@ type Command struct {
 
 // Container represents a container specification
 type Container struct {
-	Type  string
+	Type   string
 	Docker *DockerContainer
 }
 
 // DockerContainer represents Docker-specific container config
 type DockerContainer struct {
-	Image   string
-	Network string
+	Image        string
+	Network      string
 	PortMappings []PortMapping
-	Volumes []Volume
+	Volumes      []Volume
 }
 
 // PortMapping represents port mapping
@@ -128,15 +128,15 @@ type Volume struct {
 
 // ResourcePool manages cluster resources
 type ResourcePool struct {
-	TotalCPUs    float64
-	TotalMemory  float64
-	TotalDisk    float64
-	AvailableCPUs    float64
-	AvailableMemory  float64
-	AvailableDisk    float64
-	ReservedCPUs     float64
-	ReservedMemory   float64
-	ReservedDisk     float64
+	TotalCPUs       float64
+	TotalMemory     float64
+	TotalDisk       float64
+	AvailableCPUs   float64
+	AvailableMemory float64
+	AvailableDisk   float64
+	ReservedCPUs    float64
+	ReservedMemory  float64
+	ReservedDisk    float64
 }
 
 // ClusterState represents the current cluster state
@@ -162,7 +162,7 @@ func NewMaster(id, hostname string, port int, zookeeperURL string) *Master {
 		Frameworks:   make(map[string]*Framework),
 		Resources:    &ResourcePool{},
 		Offers:       make([]*ResourceOffer, 0),
-		State:        &ClusterState{
+		State: &ClusterState{
 			Version:     "1.0.0",
 			Agents:      make(map[string]*AgentInfo),
 			Frameworks:  make(map[string]*Framework),
@@ -176,23 +176,23 @@ func NewMaster(id, hostname string, port int, zookeeperURL string) *Master {
 // Start starts the Mesos master
 func (m *Master) Start() error {
 	router := m.setupRoutes()
-	
+
 	m.server = &http.Server{
 		Addr:    fmt.Sprintf(":%d", m.Port),
 		Handler: router,
 	}
 
 	log.Printf("Starting Mesos master on %s:%d", m.Hostname, m.Port)
-	
+
 	// Start leader election process
 	go m.startLeaderElection()
-	
+
 	// Start resource offer generation
 	go m.startResourceOffering()
-	
+
 	// Start agent health monitoring
 	go m.startAgentMonitoring()
-	
+
 	return m.server.ListenAndServe()
 }
 
@@ -206,38 +206,38 @@ func (m *Master) Stop() error {
 // setupRoutes sets up HTTP routes
 func (m *Master) setupRoutes() *mux.Router {
 	router := mux.NewRouter()
-	
+
 	// API v1 routes
 	v1 := router.PathPrefix("/api/v1").Subrouter()
-	
+
 	// Master info
 	v1.HandleFunc("/master/info", m.handleMasterInfo).Methods("GET")
 	v1.HandleFunc("/master/state", m.handleMasterState).Methods("GET")
-	
+
 	// Agent management
 	v1.HandleFunc("/agents", m.handleListAgents).Methods("GET")
 	v1.HandleFunc("/agents/{id}", m.handleGetAgent).Methods("GET")
 	v1.HandleFunc("/agents/{id}/tasks", m.handleGetAgentTasks).Methods("GET")
-	
+
 	// Framework management
 	v1.HandleFunc("/frameworks", m.handleListFrameworks).Methods("GET")
 	v1.HandleFunc("/frameworks", m.handleRegisterFramework).Methods("POST")
 	v1.HandleFunc("/frameworks/{id}", m.handleGetFramework).Methods("GET")
 	v1.HandleFunc("/frameworks/{id}/tasks", m.handleGetFrameworkTasks).Methods("GET")
-	
+
 	// Task management
 	v1.HandleFunc("/tasks", m.handleListTasks).Methods("GET")
 	v1.HandleFunc("/tasks/{id}", m.handleGetTask).Methods("GET")
 	v1.HandleFunc("/tasks/{id}/kill", m.handleKillTask).Methods("POST")
-	
+
 	// Resource offers
 	v1.HandleFunc("/offers", m.handleListOffers).Methods("GET")
 	v1.HandleFunc("/offers/{id}/accept", m.handleAcceptOffer).Methods("POST")
 	v1.HandleFunc("/offers/{id}/decline", m.handleDeclineOffer).Methods("POST")
-	
+
 	// Health check
 	router.HandleFunc("/health", m.handleHealth).Methods("GET")
-	
+
 	return router
 }
 
@@ -247,7 +247,7 @@ func (m *Master) startLeaderElection() {
 	// In a real implementation, this would use Zookeeper for leader election
 	ticker := time.NewTicker(30 * time.Second)
 	defer ticker.Stop()
-	
+
 	for {
 		select {
 		case <-ticker.C:
@@ -257,7 +257,7 @@ func (m *Master) startLeaderElection() {
 			m.IsLeader = true
 			m.State.Leader = m.ID
 			m.mu.Unlock()
-			
+
 			log.Printf("Master %s is the leader", m.ID)
 		}
 	}
@@ -267,7 +267,7 @@ func (m *Master) startLeaderElection() {
 func (m *Master) startResourceOffering() {
 	ticker := time.NewTicker(10 * time.Second)
 	defer ticker.Stop()
-	
+
 	for {
 		select {
 		case <-ticker.C:
@@ -280,7 +280,7 @@ func (m *Master) startResourceOffering() {
 func (m *Master) startAgentMonitoring() {
 	ticker := time.NewTicker(30 * time.Second)
 	defer ticker.Stop()
-	
+
 	for {
 		select {
 		case <-ticker.C:
@@ -293,7 +293,7 @@ func (m *Master) startAgentMonitoring() {
 func (m *Master) generateResourceOffers() {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	// Generate offers from available agent resources
 	for _, agent := range m.Agents {
 		if agent.Status == "active" && agent.Resources != nil {
@@ -304,12 +304,12 @@ func (m *Master) generateResourceOffers() {
 				CreatedAt: time.Now(),
 				ExpiresAt: time.Now().Add(5 * time.Minute),
 			}
-			
+
 			m.Offers = append(m.Offers, offer)
 			m.State.Offers = append(m.State.Offers, offer)
 		}
 	}
-	
+
 	// Send offers to frameworks
 	for _, framework := range m.Frameworks {
 		if framework.Status == "active" {
@@ -328,7 +328,7 @@ func (m *Master) sendOffersToFramework(framework *Framework) {
 func (m *Master) checkAgentHealth() {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	now := time.Now()
 	for id, agent := range m.Agents {
 		if now.Sub(agent.LastSeen) > 2*time.Minute {
@@ -342,12 +342,12 @@ func (m *Master) checkAgentHealth() {
 func (m *Master) RegisterAgent(agent *AgentInfo) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	agent.Status = "active"
 	agent.LastSeen = time.Now()
 	m.Agents[agent.ID] = agent
 	m.State.Agents[agent.ID] = agent
-	
+
 	// Update resource pool
 	if agent.Resources != nil {
 		m.Resources.TotalCPUs += agent.Resources.CPUs
@@ -357,7 +357,7 @@ func (m *Master) RegisterAgent(agent *AgentInfo) error {
 		m.Resources.AvailableMemory += agent.Resources.Memory
 		m.Resources.AvailableDisk += agent.Resources.Disk
 	}
-	
+
 	log.Printf("Registered agent %s (%s:%d)", agent.ID, agent.Hostname, agent.Port)
 	return nil
 }
@@ -366,15 +366,15 @@ func (m *Master) RegisterAgent(agent *AgentInfo) error {
 func (m *Master) RegisterFramework(framework *Framework) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	framework.Status = "active"
 	framework.RegisteredAt = time.Now()
 	framework.Tasks = make(map[string]*Task)
 	framework.Offers = make([]*ResourceOffer, 0)
-	
+
 	m.Frameworks[framework.ID] = framework
 	m.State.Frameworks[framework.ID] = framework
-	
+
 	log.Printf("Registered framework %s (%s)", framework.ID, framework.Name)
 	return nil
 }
@@ -383,28 +383,28 @@ func (m *Master) RegisterFramework(framework *Framework) error {
 func (m *Master) LaunchTask(task *Task) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	// Find the agent
 	agent, exists := m.Agents[task.AgentID]
 	if !exists {
 		return fmt.Errorf("agent %s not found", task.AgentID)
 	}
-	
+
 	// Update task state
 	task.State = "starting"
 	task.CreatedAt = time.Now()
-	
+
 	// Add to agent
 	agent.Tasks[task.ID] = task
-	
+
 	// Add to framework
 	if framework, exists := m.Frameworks[task.FrameworkID]; exists {
 		framework.Tasks[task.ID] = task
 	}
-	
+
 	// Add to global state
 	m.State.Tasks[task.ID] = task
-	
+
 	log.Printf("Launched task %s on agent %s", task.ID, task.AgentID)
 	return nil
 }
@@ -413,28 +413,28 @@ func (m *Master) LaunchTask(task *Task) error {
 func (m *Master) KillTask(taskID string) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	task, exists := m.State.Tasks[taskID]
 	if !exists {
 		return fmt.Errorf("task %s not found", taskID)
 	}
-	
+
 	// Update task state
 	task.State = "killed"
-	
+
 	// Remove from agent
 	if agent, exists := m.Agents[task.AgentID]; exists {
 		delete(agent.Tasks, taskID)
 	}
-	
+
 	// Remove from framework
 	if framework, exists := m.Frameworks[task.FrameworkID]; exists {
 		delete(framework.Tasks, taskID)
 	}
-	
+
 	// Remove from global state
 	delete(m.State.Tasks, taskID)
-	
+
 	log.Printf("Killed task %s", taskID)
 	return nil
 }
@@ -443,7 +443,7 @@ func (m *Master) KillTask(taskID string) error {
 func (m *Master) handleMasterInfo(w http.ResponseWriter, r *http.Request) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-	
+
 	info := map[string]interface{}{
 		"id":       m.ID,
 		"hostname": m.Hostname,
@@ -451,7 +451,7 @@ func (m *Master) handleMasterInfo(w http.ResponseWriter, r *http.Request) {
 		"leader":   m.IsLeader,
 		"version":  m.State.Version,
 	}
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(info)
 }
@@ -459,7 +459,7 @@ func (m *Master) handleMasterInfo(w http.ResponseWriter, r *http.Request) {
 func (m *Master) handleMasterState(w http.ResponseWriter, r *http.Request) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(m.State)
 }
@@ -467,12 +467,12 @@ func (m *Master) handleMasterState(w http.ResponseWriter, r *http.Request) {
 func (m *Master) handleListAgents(w http.ResponseWriter, r *http.Request) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-	
+
 	agents := make([]*AgentInfo, 0, len(m.Agents))
 	for _, agent := range m.Agents {
 		agents = append(agents, agent)
 	}
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(agents)
 }
@@ -480,16 +480,16 @@ func (m *Master) handleListAgents(w http.ResponseWriter, r *http.Request) {
 func (m *Master) handleGetAgent(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	agentID := vars["id"]
-	
+
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-	
+
 	agent, exists := m.Agents[agentID]
 	if !exists {
 		http.NotFound(w, r)
 		return
 	}
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(agent)
 }
@@ -497,21 +497,21 @@ func (m *Master) handleGetAgent(w http.ResponseWriter, r *http.Request) {
 func (m *Master) handleGetAgentTasks(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	agentID := vars["id"]
-	
+
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-	
+
 	agent, exists := m.Agents[agentID]
 	if !exists {
 		http.NotFound(w, r)
 		return
 	}
-	
+
 	tasks := make([]*Task, 0, len(agent.Tasks))
 	for _, task := range agent.Tasks {
 		tasks = append(tasks, task)
 	}
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(tasks)
 }
@@ -519,12 +519,12 @@ func (m *Master) handleGetAgentTasks(w http.ResponseWriter, r *http.Request) {
 func (m *Master) handleListFrameworks(w http.ResponseWriter, r *http.Request) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-	
+
 	frameworks := make([]*Framework, 0, len(m.Frameworks))
 	for _, framework := range m.Frameworks {
 		frameworks = append(frameworks, framework)
 	}
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(frameworks)
 }
@@ -535,12 +535,12 @@ func (m *Master) handleRegisterFramework(w http.ResponseWriter, r *http.Request)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	
+
 	if err := m.RegisterFramework(&framework); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(framework)
 }
@@ -548,16 +548,16 @@ func (m *Master) handleRegisterFramework(w http.ResponseWriter, r *http.Request)
 func (m *Master) handleGetFramework(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	frameworkID := vars["id"]
-	
+
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-	
+
 	framework, exists := m.Frameworks[frameworkID]
 	if !exists {
 		http.NotFound(w, r)
 		return
 	}
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(framework)
 }
@@ -565,21 +565,21 @@ func (m *Master) handleGetFramework(w http.ResponseWriter, r *http.Request) {
 func (m *Master) handleGetFrameworkTasks(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	frameworkID := vars["id"]
-	
+
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-	
+
 	framework, exists := m.Frameworks[frameworkID]
 	if !exists {
 		http.NotFound(w, r)
 		return
 	}
-	
+
 	tasks := make([]*Task, 0, len(framework.Tasks))
 	for _, task := range framework.Tasks {
 		tasks = append(tasks, task)
 	}
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(tasks)
 }
@@ -587,12 +587,12 @@ func (m *Master) handleGetFrameworkTasks(w http.ResponseWriter, r *http.Request)
 func (m *Master) handleListTasks(w http.ResponseWriter, r *http.Request) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-	
+
 	tasks := make([]*Task, 0, len(m.State.Tasks))
 	for _, task := range m.State.Tasks {
 		tasks = append(tasks, task)
 	}
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(tasks)
 }
@@ -600,16 +600,16 @@ func (m *Master) handleListTasks(w http.ResponseWriter, r *http.Request) {
 func (m *Master) handleGetTask(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	taskID := vars["id"]
-	
+
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-	
+
 	task, exists := m.State.Tasks[taskID]
 	if !exists {
 		http.NotFound(w, r)
 		return
 	}
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(task)
 }
@@ -617,19 +617,19 @@ func (m *Master) handleGetTask(w http.ResponseWriter, r *http.Request) {
 func (m *Master) handleKillTask(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	taskID := vars["id"]
-	
+
 	if err := m.KillTask(taskID); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	
+
 	w.WriteHeader(http.StatusOK)
 }
 
 func (m *Master) handleListOffers(w http.ResponseWriter, r *http.Request) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(m.Offers)
 }
@@ -637,20 +637,20 @@ func (m *Master) handleListOffers(w http.ResponseWriter, r *http.Request) {
 func (m *Master) handleAcceptOffer(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	offerID := vars["id"]
-	
+
 	// In a real implementation, this would accept the offer and launch tasks
 	log.Printf("Accepting offer %s", offerID)
-	
+
 	w.WriteHeader(http.StatusOK)
 }
 
 func (m *Master) handleDeclineOffer(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	offerID := vars["id"]
-	
+
 	// In a real implementation, this would decline the offer
 	log.Printf("Declining offer %s", offerID)
-	
+
 	w.WriteHeader(http.StatusOK)
 }
 

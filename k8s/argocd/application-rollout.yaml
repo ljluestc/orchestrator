@@ -1,0 +1,41 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: orchestrator-rollout
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: orchestrator
+    app.kubernetes.io/component: argocd-rollout
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/your-org/orchestrator.git
+    targetRevision: HEAD
+    path: k8s/argo-rollouts
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: orchestrator
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+  revisionHistoryLimit: 10
+  # Health assessment for Rollouts
+  ignoreDifferences:
+    - group: argoproj.io
+      kind: Rollout
+      jsonPointers:
+        - /spec/replicas

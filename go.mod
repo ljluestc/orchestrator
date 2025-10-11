@@ -7,8 +7,13 @@ toolchain go1.23.7
 require (
 	github.com/docker/docker v25.0.0+incompatible
 	github.com/gin-gonic/gin v1.11.0
+	github.com/go-zookeeper/zk v1.0.4
 	github.com/gorilla/websocket v1.5.3
+	github.com/hashicorp/consul/api v1.30.0
+	github.com/prometheus/client_golang v1.21.0
 	github.com/stretchr/testify v1.11.1
+	k8s.io/api v0.32.3
+	k8s.io/client-go v0.32.3
 )
 
 require (

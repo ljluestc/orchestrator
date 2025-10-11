@@ -1,0 +1,52 @@
+Thank you for installing {{ .Chart.Name }}!
+
+Your release is named {{ .Release.Name }}.
+
+To learn more about the release, try:
+
+  $ helm status {{ .Release.Name }} -n {{ .Release.Namespace }}
+  $ helm get all {{ .Release.Name }} -n {{ .Release.Namespace }}
+
+{{- if .Values.orchestrator.ingress.enabled }}
+
+The application is available at:
+{{- range .Values.orchestrator.ingress.hosts }}
+  - https://{{ .host }}
+{{- end }}
+{{- else }}
+
+To access the application, run:
+
+  $ kubectl port-forward -n {{ .Release.Namespace }} svc/{{ include "orchestrator.fullname" . }} 8080:8080
+
+Then visit: http://localhost:8080
+{{- end }}
+
+{{- if .Values.argoRollouts.enabled }}
+
+Argo Rollouts is enabled for canary deployments.
+
+To monitor rollout progress:
+
+  $ kubectl argo rollouts get rollout {{ include "orchestrator.fullname" . }} -n {{ .Release.Namespace }}
+  $ kubectl argo rollouts status {{ include "orchestrator.fullname" . }} -n {{ .Release.Namespace }}
+
+To promote the canary manually:
+
+  $ kubectl argo rollouts promote {{ include "orchestrator.fullname" . }} -n {{ .Release.Namespace }}
+
+To abort the rollout:
+
+  $ kubectl argo rollouts abort {{ include "orchestrator.fullname" . }} -n {{ .Release.Namespace }}
+{{- end }}
+
+{{- if .Values.monitoring.enabled }}
+
+Monitoring is enabled:
+  - Prometheus: http://prometheus:9090
+  - Grafana: http://grafana:3000
+{{- end }}
+
+For more information, visit:
+  - Documentation: {{ .Chart.Home }}
+  - Issues: {{ .Chart.Home }}/issues

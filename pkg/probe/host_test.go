@@ -407,3 +407,28 @@ func TestHostCollector_CollectWithPermissionDenied(t *testing.T) {
 		assert.Error(t, err)
 	}
 }
+
+func TestHostCollector_GetLoadAverage(t *testing.T) {
+	// Test getLoadAverage method
+	collector := NewHostCollector()
+	
+	loadAvg, err := collector.getLoadAverage()
+	if runtime.GOOS == "windows" {
+		// On Windows, we expect mock data
+		assert.NoError(t, err)
+		assert.NotNil(t, loadAvg)
+		assert.GreaterOrEqual(t, loadAvg.Load1, 0.0)
+		assert.GreaterOrEqual(t, loadAvg.Load5, 0.0)
+		assert.GreaterOrEqual(t, loadAvg.Load15, 0.0)
+	} else {
+		// On Linux, we expect real data or error
+		if err != nil {
+			assert.Error(t, err)
+		} else {
+			assert.NotNil(t, loadAvg)
+			assert.GreaterOrEqual(t, loadAvg.Load1, 0.0)
+			assert.GreaterOrEqual(t, loadAvg.Load5, 0.0)
+			assert.GreaterOrEqual(t, loadAvg.Load15, 0.0)
+		}
+	}
+}

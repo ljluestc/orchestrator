@@ -1,0 +1,151 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-notifications-cm
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: orchestrator
+    app.kubernetes.io/component: notifications
+data:
+  # Trigger definitions
+  trigger.on-deployed: |
+    - when: app.status.operationState.phase in ['Succeeded'] and app.status.health.status == 'Healthy'
+      send: [app-deployed]
+
+  trigger.on-sync-failed: |
+    - when: app.status.operationState.phase in ['Failed', 'Error']
+      send: [app-sync-failed]
+
+  trigger.on-health-degraded: |
+    - when: app.status.health.status == 'Degraded'
+      send: [app-health-degraded]
+
+  trigger.on-rollout-step-completed: |
+    - when: app.status.operationState.phase in ['Succeeded']
+      send: [rollout-step-completed]
+
+  # Template definitions
+  template.app-deployed: |
+    message: |
+      Application {{.app.metadata.name}} has been successfully deployed.
+      Environment: {{.app.metadata.labels.environment}}
+      Sync Status: {{.app.status.sync.status}}
+      Health Status: {{.app.status.health.status}}
+      Repository: {{.app.spec.source.repoURL}}
+      Revision: {{.app.status.sync.revision}}
+    slack:
+      attachments: |
+        [{
+          "title": "{{ .app.metadata.name}}",
+          "title_link":"{{.context.argocdUrl}}/applications/{{.app.metadata.name}}",
+          "color": "#18be52",
+          "fields": [
+            {
+              "title": "Environment",
+              "value": "{{.app.metadata.labels.environment}}",
+              "short": true
+            },
+            {
+              "title": "Sync Status",
+              "value": "{{.app.status.sync.status}}",
+              "short": true
+            },
+            {
+              "title": "Health Status",
+              "value": "{{.app.status.health.status}}",
+              "short": true
+            },
+            {
+              "title": "Revision",
+              "value": "{{.app.status.sync.revision}}",
+              "short": true
+            }
+          ]
+        }]
+
+  template.app-sync-failed: |
+    message: |
+      Application {{.app.metadata.name}} sync has failed.
+      Environment: {{.app.metadata.labels.environment}}
+      Sync Status: {{.app.status.sync.status}}
+      Error: {{.app.status.operationState.message}}
+    slack:
+      attachments: |
+        [{
+          "title": "{{ .app.metadata.name}}",
+          "title_link":"{{.context.argocdUrl}}/applications/{{.app.metadata.name}}",
+          "color": "#E96D76",
+          "fields": [
+            {
+              "title": "Environment",
+              "value": "{{.app.metadata.labels.environment}}",
+              "short": true
+            },
+            {
+              "title": "Sync Status",
+              "value": "{{.app.status.sync.status}}",
+              "short": true
+            },
+            {
+              "title": "Error",
+              "value": "{{.app.status.operationState.message}}",
+              "short": false
+            }
+          ]
+        }]
+
+  template.app-health-degraded: |
+    message: |
+      Application {{.app.metadata.name}} health is degraded.
+      Environment: {{.app.metadata.labels.environment}}
+      Health Status: {{.app.status.health.status}}
+      Health Message: {{.app.status.health.message}}
+    slack:
+      attachments: |
+        [{
+          "title": "{{ .app.metadata.name}}",
+          "title_link":"{{.context.argocdUrl}}/applications/{{.app.metadata.name}}",
+          "color": "#f4c030",
+          "fields": [
+            {
+              "title": "Environment",
+              "value": "{{.app.metadata.labels.environment}}",
+              "short": true
+            },
+            {
+              "title": "Health Status",
+              "value": "{{.app.status.health.status}}",
+              "short": true
+            },
+            {
+              "title": "Message",
+              "value": "{{.app.status.health.message}}",
+              "short": false
+            }
+          ]
+        }]
+
+  template.rollout-step-completed: |
+    message: |
+      Rollout step completed for {{.app.metadata.name}}.
+      Environment: {{.app.metadata.labels.environment}}
+      Current Step: {{.app.status.operationState.operation.sync.syncStrategy.hook.phase}}
+    slack:
+      attachments: |
+        [{
+          "title": "{{ .app.metadata.name}} - Rollout Progress",
+          "title_link":"{{.context.argocdUrl}}/applications/{{.app.metadata.name}}",
+          "color": "#18be52",
+          "fields": [
+            {
+              "title": "Environment",
+              "value": "{{.app.metadata.labels.environment}}",
+              "short": true
+            },
+            {
+              "title": "Status",
+              "value": "Step Completed",
+              "short": true
+            }
+          ]
+        }]

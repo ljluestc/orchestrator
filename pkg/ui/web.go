@@ -31,7 +31,7 @@ func NewWebUI(id string, port int, topologyURL string) *WebUI {
 // Start starts the web UI
 func (w *WebUI) Start() error {
 	router := w.setupRoutes()
-	
+
 	w.server = &http.Server{
 		Addr:    fmt.Sprintf(":%d", w.Port),
 		Handler: router,
@@ -51,15 +51,15 @@ func (w *WebUI) Stop() error {
 // setupRoutes sets up HTTP routes
 func (w *WebUI) setupRoutes() *mux.Router {
 	router := mux.NewRouter()
-	
+
 	// Main dashboard
 	router.HandleFunc("/", w.handleDashboard).Methods("GET")
 	router.HandleFunc("/dashboard", w.handleDashboard).Methods("GET")
-	
+
 	// Topology views
 	router.HandleFunc("/topology", w.handleTopology).Methods("GET")
 	router.HandleFunc("/topology/{view}", w.handleTopologyView).Methods("GET")
-	
+
 	// API proxy
 	api := router.PathPrefix("/api").Subrouter()
 	api.HandleFunc("/topology", w.handleAPIProxy).Methods("GET")
@@ -69,7 +69,7 @@ func (w *WebUI) setupRoutes() *mux.Router {
 	api.HandleFunc("/topology/filter", w.handleAPIProxy).Methods("POST")
 	api.HandleFunc("/views", w.handleAPIProxy).Methods("GET")
 	api.HandleFunc("/metrics", w.handleAPIProxy).Methods("GET")
-	
+
 	// Container control
 	api.HandleFunc("/containers/{id}/start", w.handleAPIProxy).Methods("POST")
 	api.HandleFunc("/containers/{id}/stop", w.handleAPIProxy).Methods("POST")
@@ -77,16 +77,16 @@ func (w *WebUI) setupRoutes() *mux.Router {
 	api.HandleFunc("/containers/{id}/pause", w.handleAPIProxy).Methods("POST")
 	api.HandleFunc("/containers/{id}/unpause", w.handleAPIProxy).Methods("POST")
 	api.HandleFunc("/containers/{id}/logs", w.handleAPIProxy).Methods("GET")
-	
+
 	// WebSocket proxy
 	router.HandleFunc("/ws", w.handleWebSocketProxy)
-	
+
 	// Static assets
 	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static/"))))
-	
+
 	// Health check
 	router.HandleFunc("/health", w.handleHealth).Methods("GET")
-	
+
 	return router
 }
 
@@ -892,7 +892,7 @@ func (w *WebUI) handleDashboard(wr http.ResponseWriter, r *http.Request) {
 </body>
 </html>
 `
-	
+
 	wr.Header().Set("Content-Type", "text/html")
 	wr.Write([]byte(tmpl))
 }
@@ -916,9 +916,9 @@ func (w *WebUI) handleAPIProxy(wr http.ResponseWriter, r *http.Request) {
 		"nodes": []interface{}{},
 		"edges": []interface{}{},
 		"metrics": map[string]interface{}{
-			"total_nodes": 0,
-			"total_edges": 0,
-			"healthy_nodes": 0,
+			"total_nodes":    0,
+			"total_edges":    0,
+			"healthy_nodes":  0,
 			"critical_nodes": 0,
 		},
 	})

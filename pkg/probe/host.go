@@ -127,7 +127,7 @@ func (h *HostCollector) collectLinux(info *HostInfo) (*HostInfo, error) {
 func (h *HostCollector) collectWindows(info *HostInfo) (*HostInfo, error) {
 	// Set basic Windows info
 	info.KernelVersion = "Windows " + runtime.GOOS
-	info.Uptime = 24 * time.Hour // Mock uptime for testing
+	info.Uptime = 24 * time.Hour                    // Mock uptime for testing
 	info.BootTime = time.Now().Add(-24 * time.Hour) // Mock boot time
 
 	// Get CPU info
@@ -140,10 +140,10 @@ func (h *HostCollector) collectWindows(info *HostInfo) (*HostInfo, error) {
 	// Get memory info (basic implementation)
 	info.MemoryInfo = MemoryInfo{
 		TotalMB:     8192, // Mock 8GB total memory
-		FreeMB:     4096,  // Mock 4GB free
+		FreeMB:      4096, // Mock 4GB free
 		AvailableMB: 6144, // Mock 6GB available
-		UsedMB:     2048,  // Mock 2GB used
-		Usage:      25.0,  // Mock 25% usage
+		UsedMB:      2048, // Mock 2GB used
+		Usage:       25.0, // Mock 25% usage
 	}
 
 	// Set load average to zero for Windows

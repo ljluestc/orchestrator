@@ -1,0 +1,85 @@
+# Production environment values
+orchestrator:
+  replicaCount: 3
+
+  image:
+    tag: "latest"
+
+  ingress:
+    enabled: true
+    hosts:
+      - host: orchestrator.example.com
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: orchestrator-tls
+        hosts:
+          - orchestrator.example.com
+
+  resources:
+    requests:
+      cpu: 500m
+      memory: 512Mi
+    limits:
+      cpu: 2000m
+      memory: 2Gi
+
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+
+  env:
+    LOG_LEVEL: "info"
+
+probeAgent:
+  image:
+    tag: "latest"
+
+argoRollouts:
+  enabled: true
+  rollout:
+    strategy:
+      canary:
+        steps:
+          - setWeight: 10
+          - pause:
+              duration: 5m
+          - analysis:
+              templates:
+                - templateName: success-rate
+                - templateName: latency
+                - templateName: error-rate
+          - setWeight: 25
+          - pause:
+              duration: 5m
+          - setWeight: 50
+          - pause:
+              duration: 10m
+          - analysis:
+              templates:
+                - templateName: success-rate
+                - templateName: latency
+                - templateName: error-rate
+          - setWeight: 75
+          - pause:
+              duration: 5m
+          - setWeight: 100
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 2
+
+monitoring:
+  enabled: true
+  prometheus:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+  grafana:
+    enabled: true
+    dashboards:
+      enabled: true

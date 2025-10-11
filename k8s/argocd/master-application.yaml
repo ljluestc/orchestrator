@@ -1,0 +1,137 @@
+# ArgoCD Master Application (Task 56)
+# Deploys all platform components
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: orchestrator-platform
+  namespace: argocd
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  project: orchestrator
+  source:
+    repoURL: https://github.com/ljluestc/orchestrator
+    targetRevision: HEAD
+    path: k8s/base
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: orchestrator
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+    - CreateNamespace=true
+    - PrunePropagationPolicy=foreground
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: zookeeper
+  namespace: argocd
+spec:
+  project: orchestrator
+  source:
+    repoURL: https://github.com/ljluestc/orchestrator
+    targetRevision: HEAD
+    path: k8s/base
+    directory:
+      include: zookeeper-statefulset.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: orchestrator
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: mesos-master
+  namespace: argocd
+spec:
+  project: orchestrator
+  source:
+    repoURL: https://github.com/ljluestc/orchestrator
+    targetRevision: HEAD
+    path: k8s/base
+    directory:
+      include: mesos-master-deployment.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: orchestrator
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: mesos-agent
+  namespace: argocd
+spec:
+  project: orchestrator
+  source:
+    repoURL: https://github.com/ljluestc/orchestrator
+    targetRevision: HEAD
+    path: k8s/base
+    directory:
+      include: mesos-agent-daemonset.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: orchestrator
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: marathon
+  namespace: argocd
+spec:
+  project: orchestrator
+  source:
+    repoURL: https://github.com/ljluestc/orchestrator
+    targetRevision: HEAD
+    path: k8s/base
+    directory:
+      include: marathon-deployment.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: orchestrator
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: prometheus
+  namespace: argocd
+spec:
+  project: orchestrator
+  source:
+    repoURL: https://github.com/ljluestc/orchestrator
+    targetRevision: HEAD
+    path: k8s/base
+    directory:
+      include: prometheus-deployment.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: orchestrator
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
