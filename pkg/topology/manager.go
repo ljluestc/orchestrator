@@ -423,14 +423,23 @@ func (m *Manager) getMetrics() *Metrics {
 
 // AddNode adds a node to the topology
 func (m *Manager) AddNode(node *Node) {
-	m.mu.Lock()
-	defer m.mu.Unlock()
+	if node == nil {
+		return // Ignore nil nodes
+	}
+	
+	if node.ID == "" {
+		return // Ignore nodes with empty ID
+	}
 
+	m.mu.Lock()
 	node.CreatedAt = time.Now()
 	node.UpdatedAt = time.Now()
 	node.LastSeen = time.Now()
-
 	m.Nodes[node.ID] = node
+	m.mu.Unlock()
+
+	// Update metrics (without holding the lock)
+	m.updateMetrics()
 
 	// Broadcast update
 	go m.broadcastUpdate(&TopologyUpdate{
@@ -462,9 +471,9 @@ func (m *Manager) UpdateNode(node *Node) {
 // RemoveNode removes a node from the topology
 func (m *Manager) RemoveNode(nodeID string) {
 	m.mu.Lock()
-	defer m.mu.Unlock()
-
-	if node, exists := m.Nodes[nodeID]; exists {
+	var node *Node
+	var exists bool
+	if node, exists = m.Nodes[nodeID]; exists {
 		delete(m.Nodes, nodeID)
 
 		// Remove associated edges
@@ -473,7 +482,13 @@ func (m *Manager) RemoveNode(nodeID string) {
 				delete(m.Edges, edgeID)
 			}
 		}
+	}
+	m.mu.Unlock()
 
+	// Update metrics (without holding the lock)
+	m.updateMetrics()
+
+	if exists {
 		// Broadcast update
 		go m.broadcastUpdate(&TopologyUpdate{
 			Type: "remove",
@@ -484,13 +499,34 @@ func (m *Manager) RemoveNode(nodeID string) {
 
 // AddEdge adds an edge to the topology
 func (m *Manager) AddEdge(edge *Edge) {
-	m.mu.Lock()
-	defer m.mu.Unlock()
+	if edge == nil {
+		return // Ignore nil edges
+	}
+	
+	if edge.ID == "" {
+		return // Ignore edges with empty ID
+	}
 
+	m.mu.RLock()
+	// Check if source and target nodes exist
+	if _, sourceExists := m.Nodes[edge.Source]; !sourceExists {
+		m.mu.RUnlock()
+		return // Ignore edges with nonexistent source
+	}
+	if _, targetExists := m.Nodes[edge.Target]; !targetExists {
+		m.mu.RUnlock()
+		return // Ignore edges with nonexistent target
+	}
+	m.mu.RUnlock()
+
+	m.mu.Lock()
 	edge.CreatedAt = time.Now()
 	edge.UpdatedAt = time.Now()
-
 	m.Edges[edge.ID] = edge
+	m.mu.Unlock()
+
+	// Update metrics (without holding the lock)
+	m.updateMetrics()
 
 	// Broadcast update
 	go m.broadcastUpdate(&TopologyUpdate{
@@ -521,11 +557,17 @@ func (m *Manager) UpdateEdge(edge *Edge) {
 // RemoveEdge removes an edge from the topology
 func (m *Manager) RemoveEdge(edgeID string) {
 	m.mu.Lock()
-	defer m.mu.Unlock()
-
-	if edge, exists := m.Edges[edgeID]; exists {
+	var edge *Edge
+	var exists bool
+	if edge, exists = m.Edges[edgeID]; exists {
 		delete(m.Edges, edgeID)
+	}
+	m.mu.Unlock()
 
+	// Update metrics (without holding the lock)
+	m.updateMetrics()
+
+	if exists {
 		// Broadcast update
 		go m.broadcastUpdate(&TopologyUpdate{
 			Type: "remove",
@@ -1137,4 +1179,188 @@ func (m *Manager) handleAddEdge(w http.ResponseWriter, r *http.Request) {
 func (m *Manager) handleHealth(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"status": "healthy"})
+}
+
+// GetNode retrieves a node by ID
+func (m *Manager) GetNode(nodeID string) (*Node, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	if node, exists := m.Nodes[nodeID]; exists {
+		return node, nil
+	}
+	return nil, fmt.Errorf("node not found: %s", nodeID)
+}
+
+// GetEdge retrieves an edge by ID
+func (m *Manager) GetEdge(edgeID string) (*Edge, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	if edge, exists := m.Edges[edgeID]; exists {
+		return edge, nil
+	}
+	return nil, fmt.Errorf("edge not found: %s", edgeID)
+}
+
+// ListNodes returns all nodes
+func (m *Manager) ListNodes() []*Node {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	nodes := make([]*Node, 0, len(m.Nodes))
+	for _, node := range m.Nodes {
+		nodes = append(nodes, node)
+	}
+	return nodes
+}
+
+// ListNodesByType returns nodes filtered by type
+func (m *Manager) ListNodesByType(nodeType string) []*Node {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	nodes := make([]*Node, 0)
+	for _, node := range m.Nodes {
+		if node.Type == nodeType {
+			nodes = append(nodes, node)
+		}
+	}
+	return nodes
+}
+
+// ListNodesByStatus returns nodes filtered by status
+func (m *Manager) ListNodesByStatus(status string) []*Node {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	nodes := make([]*Node, 0)
+	for _, node := range m.Nodes {
+		if node.Status == status {
+			nodes = append(nodes, node)
+		}
+	}
+	return nodes
+}
+
+// ListEdges returns all edges
+func (m *Manager) ListEdges() []*Edge {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	edges := make([]*Edge, 0, len(m.Edges))
+	for _, edge := range m.Edges {
+		edges = append(edges, edge)
+	}
+	return edges
+}
+
+// ListEdgesByType returns edges filtered by type
+func (m *Manager) ListEdgesByType(edgeType string) []*Edge {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	edges := make([]*Edge, 0)
+	for _, edge := range m.Edges {
+		if edge.Type == edgeType {
+			edges = append(edges, edge)
+		}
+	}
+	return edges
+}
+
+// ListEdgesBySource returns edges filtered by source node
+func (m *Manager) ListEdgesBySource(sourceID string) []*Edge {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	edges := make([]*Edge, 0)
+	for _, edge := range m.Edges {
+		if edge.Source == sourceID {
+			edges = append(edges, edge)
+		}
+	}
+	return edges
+}
+
+// ListEdgesByTarget returns edges filtered by target node
+func (m *Manager) ListEdgesByTarget(targetID string) []*Edge {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	edges := make([]*Edge, 0)
+	for _, edge := range m.Edges {
+		if edge.Target == targetID {
+			edges = append(edges, edge)
+		}
+	}
+	return edges
+}
+
+// SearchNodes searches nodes by name or metadata
+func (m *Manager) SearchNodes(query string) []*Node {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	nodes := make([]*Node, 0)
+	queryLower := strings.ToLower(query)
+	
+	for _, node := range m.Nodes {
+		// Search by name
+		if strings.Contains(strings.ToLower(node.Name), queryLower) {
+			nodes = append(nodes, node)
+			continue
+		}
+		
+		// Search by type
+		if strings.Contains(strings.ToLower(node.Type), queryLower) {
+			nodes = append(nodes, node)
+			continue
+		}
+		
+		// Search by status
+		if strings.Contains(strings.ToLower(node.Status), queryLower) {
+			nodes = append(nodes, node)
+			continue
+		}
+		
+		// Search by metadata values
+		for _, value := range node.Metadata {
+			if str, ok := value.(string); ok {
+				if strings.Contains(strings.ToLower(str), queryLower) {
+					nodes = append(nodes, node)
+					break
+				}
+			}
+		}
+	}
+	return nodes
+}
+
+// CreateView creates a new view
+func (m *Manager) CreateView(view *View) {
+	if view == nil {
+		return
+	}
+	
+	if view.ID == "" {
+		return
+	}
+
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	view.CreatedAt = time.Now()
+	m.Views[view.ID] = view
+}
+
+// GetView retrieves a view by ID
+func (m *Manager) GetView(viewID string) (*View, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	if view, exists := m.Views[viewID]; exists {
+		return view, nil
+	}
+	return nil, fmt.Errorf("view not found: %s", viewID)
 }

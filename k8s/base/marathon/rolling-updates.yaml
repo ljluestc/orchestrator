@@ -1,0 +1,402 @@
+---
+# Marathon Rolling Updates Configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: marathon-rolling-updates-config
+  namespace: orchestrator
+data:
+  rolling-updates.yaml: |
+    # Global rolling update configuration
+    global:
+      enabled: true
+      defaultStrategy: "rolling"
+      healthCheckDelay: "30s"
+      maxConcurrentUpdates: 5
+
+    # Default rolling update policy
+    defaults:
+      rolling:
+        batchSize: 0  # 0 = auto-calculate (10% of instances)
+        minHealthyPercent: 0.9
+        pauseTime: "30s"
+        autoRollback: true
+        healthCheckGrace: "60s"
+
+      canary:
+        stages:
+          - name: "10%"
+            weight: 10
+            duration: "5m"
+            pauseBeforeNext: false
+          - name: "25%"
+            weight: 25
+            duration: "10m"
+            pauseBeforeNext: false
+          - name: "50%"
+            weight: 50
+            duration: "15m"
+            pauseBeforeNext: true
+          - name: "100%"
+            weight: 100
+            duration: "5m"
+            pauseBeforeNext: false
+        trafficShiftMode: "automatic"
+        analysisInterval: "2m"
+        successThreshold: 0.99
+        metricsQuery: "rate(http_requests_total{status=~\"2..\"}[5m])"
+
+      blueGreen:
+        autoPromote: false
+        promotionDelay: "5m"
+        keepOldVersion: false
+        testTrafficWeight: 10
+
+    # Application-specific update configs
+    applications:
+      - appId: "/production/web-frontend"
+        strategy: "canary"
+        canary:
+          stages:
+            - name: "5%"
+              weight: 5
+              duration: "10m"
+            - name: "10%"
+              weight: 10
+              duration: "10m"
+            - name: "25%"
+              weight: 25
+              duration: "15m"
+            - name: "50%"
+              weight: 50
+              duration: "20m"
+            - name: "100%"
+              weight: 100
+              duration: "5m"
+          successThreshold: 0.995
+
+      - appId: "/production/api-backend"
+        strategy: "rolling"
+        rolling:
+          batchSize: 5
+          minHealthyPercent: 0.95
+          pauseTime: "1m"
+          autoRollback: true
+
+      - appId: "/production/database-migration"
+        strategy: "blue-green"
+        blueGreen:
+          autoPromote: false
+          promotionDelay: "30m"
+          keepOldVersion: true
+
+      - appId: "/batch/worker"
+        strategy: "recreate"
+        healthCheckDelay: "2m"
+---
+# Argo Rollouts Integration for Marathon Apps
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: marathon-app-example
+  namespace: orchestrator
+spec:
+  replicas: 10
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels:
+      app: marathon-app
+  template:
+    metadata:
+      labels:
+        app: marathon-app
+        version: v2
+    spec:
+      containers:
+      - name: app
+        image: myapp:v2
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            cpu: 500m
+            memory: 512Mi
+          limits:
+            cpu: 1000m
+            memory: 1Gi
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 5
+
+  # Canary strategy
+  strategy:
+    canary:
+      maxSurge: "25%"
+      maxUnavailable: 0
+      steps:
+      - setWeight: 10
+      - pause: {duration: 5m}
+      - analysis:
+          templates:
+          - templateName: success-rate
+          - templateName: latency-p95
+      - setWeight: 25
+      - pause: {duration: 10m}
+      - analysis:
+          templates:
+          - templateName: success-rate
+          - templateName: latency-p95
+      - setWeight: 50
+      - pause: {duration: 15m}
+      - analysis:
+          templates:
+          - templateName: success-rate
+          - templateName: latency-p95
+      - setWeight: 75
+      - pause: {duration: 10m}
+      - setWeight: 100
+
+      # Traffic routing (for use with Istio/Linkerd)
+      trafficRouting:
+        istio:
+          virtualService:
+            name: marathon-app
+            routes:
+            - primary
+
+      # Automated analysis
+      analysis:
+        startingStep: 1
+        successfulRunHistoryLimit: 3
+        unsuccessfulRunHistoryLimit: 3
+---
+# AnalysisTemplate for success rate
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: success-rate
+  namespace: orchestrator
+spec:
+  metrics:
+  - name: success-rate
+    interval: 1m
+    successCondition: result >= 0.99
+    failureLimit: 3
+    provider:
+      prometheus:
+        address: http://prometheus:9090
+        query: |
+          sum(rate(http_requests_total{app="marathon-app",status=~"2.."}[5m]))
+          /
+          sum(rate(http_requests_total{app="marathon-app"}[5m]))
+---
+# AnalysisTemplate for latency
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: latency-p95
+  namespace: orchestrator
+spec:
+  metrics:
+  - name: latency-p95
+    interval: 1m
+    successCondition: result < 1000
+    failureLimit: 3
+    provider:
+      prometheus:
+        address: http://prometheus:9090
+        query: |
+          histogram_quantile(0.95,
+            sum(rate(http_request_duration_seconds_bucket{app="marathon-app"}[5m])) by (le)
+          ) * 1000
+---
+# PrometheusRule for rolling update alerts
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: marathon-rolling-updates-alerts
+  namespace: orchestrator
+spec:
+  groups:
+  - name: marathon_rolling_updates
+    interval: 30s
+    rules:
+    - alert: MarathonUpdateStuck
+      expr: |
+        (time() - marathon_update_start_time) > 3600
+        and marathon_update_status == 1
+      for: 5m
+      labels:
+        severity: warning
+        component: marathon
+      annotations:
+        summary: "Marathon update for {{ $labels.app_id }} is stuck"
+        description: "Update has been running for over 1 hour"
+
+    - alert: MarathonUpdateFailed
+      expr: |
+        marathon_update_status == 2
+      labels:
+        severity: critical
+        component: marathon
+      annotations:
+        summary: "Marathon update failed for {{ $labels.app_id }}"
+        description: "Update failed: {{ $labels.error_message }}"
+
+    - alert: MarathonCanaryAnalysisFailed
+      expr: |
+        marathon_canary_analysis_success_rate < 0.99
+      for: 5m
+      labels:
+        severity: critical
+        component: marathon
+      annotations:
+        summary: "Canary analysis failing for {{ $labels.app_id }}"
+        description: "Success rate: {{ $value | humanizePercentage }}"
+
+    - alert: MarathonRollbackInProgress
+      expr: |
+        marathon_update_status == 3
+      labels:
+        severity: warning
+        component: marathon
+      annotations:
+        summary: "Rollback in progress for {{ $labels.app_id }}"
+        description: "Application is being rolled back to previous version"
+
+    - alert: MarathonBlueGreenPendingPromotion
+      expr: |
+        marathon_bluegreen_pending_promotion == 1
+      for: 30m
+      labels:
+        severity: info
+        component: marathon
+      annotations:
+        summary: "Blue-green deployment pending promotion for {{ $labels.app_id }}"
+        description: "Waiting for manual promotion for over 30 minutes"
+---
+# ServiceMonitor for rolling update metrics
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: marathon-rolling-updates
+  namespace: orchestrator
+spec:
+  selector:
+    matchLabels:
+      app: marathon
+  endpoints:
+  - port: http
+    interval: 15s
+    path: /metrics/updates
+---
+# CronJob to cleanup old rollout history
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: rollout-history-cleanup
+  namespace: orchestrator
+spec:
+  schedule: "0 2 * * *"  # Daily at 2 AM
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: marathon
+          containers:
+          - name: cleanup
+            image: busybox:1.36
+            command:
+            - sh
+            - -c
+            - |
+              echo "Cleaning up old rollout history..."
+              # In production, this would:
+              # 1. Query rollout history older than 7 days
+              # 2. Archive to S3/GCS
+              # 3. Delete from Marathon
+              echo "Cleanup completed"
+          restartPolicy: OnFailure
+---
+# Grafana Dashboard for Rolling Updates
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: marathon-rolling-updates-dashboard
+  namespace: orchestrator
+  labels:
+    grafana_dashboard: "1"
+data:
+  marathon-rolling-updates.json: |
+    {
+      "dashboard": {
+        "title": "Marathon Rolling Updates",
+        "panels": [
+          {
+            "title": "Active Updates",
+            "targets": [
+              {
+                "expr": "marathon_active_updates"
+              }
+            ]
+          },
+          {
+            "title": "Update Progress",
+            "targets": [
+              {
+                "expr": "marathon_update_progress"
+              }
+            ]
+          },
+          {
+            "title": "Update Duration",
+            "targets": [
+              {
+                "expr": "marathon_update_duration_seconds"
+              }
+            ]
+          },
+          {
+            "title": "Canary Stages",
+            "targets": [
+              {
+                "expr": "marathon_canary_stage"
+              }
+            ]
+          },
+          {
+            "title": "Success Rate During Update",
+            "targets": [
+              {
+                "expr": "rate(http_requests_total{status=~\"2..\"}[5m]) / rate(http_requests_total[5m])"
+              }
+            ]
+          },
+          {
+            "title": "Update Failures",
+            "targets": [
+              {
+                "expr": "increase(marathon_update_failures_total[1h])"
+              }
+            ]
+          },
+          {
+            "title": "Rollback Events",
+            "targets": [
+              {
+                "expr": "increase(marathon_rollback_events_total[1h])"
+              }
+            ]
+          }
+        ]
+      }
+    }

@@ -56,14 +56,14 @@ type MesosAgent struct {
 
 // MigrationPhase represents a migration phase
 type MigrationPhase struct {
-	Number        int
-	Name          string
-	Description   string
-	Status        string
-	StartTime     *time.Time
-	EndTime       *time.Time
-	Validation    *ValidationResult
-	RollbackSteps []string
+	Number        int    `json:"number"`
+	Name          string `json:"name"`
+	Description   string `json:"description"`
+	Status        string `json:"status"`
+	StartTime     *time.Time `json:"start_time"`
+	EndTime       *time.Time `json:"end_time"`
+	Validation    *ValidationResult `json:"validation"`
+	RollbackSteps []string `json:"rollback_steps"`
 }
 
 // SyncStatus represents synchronization status
@@ -90,11 +90,11 @@ type SyncConflict struct {
 
 // ValidationResult represents validation results
 type ValidationResult struct {
-	Passed    bool
-	Checks    []*ValidationCheck
-	Errors    []string
-	Warnings  []string
-	Timestamp time.Time
+	Passed    bool      `json:"passed"`
+	Checks    []*ValidationCheck `json:"checks"`
+	Errors    []string  `json:"errors"`
+	Warnings  []string  `json:"warnings"`
+	Timestamp time.Time `json:"timestamp"`
 }
 
 // ValidationCheck represents a validation check
@@ -491,7 +491,12 @@ func (m *MigrationManager) handleStartPhase(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"status": "success",
+		"phase":  phaseNumber,
+	})
 }
 
 func (m *MigrationManager) handleValidatePhase(w http.ResponseWriter, r *http.Request) {
@@ -529,7 +534,12 @@ func (m *MigrationManager) handleRollbackPhase(w http.ResponseWriter, r *http.Re
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"status": "success",
+		"phase":  phaseNumber,
+	})
 }
 
 func (m *MigrationManager) handleSyncStatus(w http.ResponseWriter, r *http.Request) {
@@ -546,7 +556,12 @@ func (m *MigrationManager) handleStartSync(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"status": "success",
+		"sync":   "started",
+	})
 }
 
 func (m *MigrationManager) handleStopSync(w http.ResponseWriter, r *http.Request) {
@@ -555,7 +570,12 @@ func (m *MigrationManager) handleStopSync(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"status": "success",
+		"sync":   "stopped",
+	})
 }
 
 func (m *MigrationManager) handleListConflicts(w http.ResponseWriter, r *http.Request) {

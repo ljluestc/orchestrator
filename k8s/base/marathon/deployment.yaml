@@ -1,0 +1,139 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: marathon
+  namespace: orchestrator
+  labels:
+    app: marathon
+    component: orchestration
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: marathon
+  template:
+    metadata:
+      labels:
+        app: marathon
+        component: orchestration
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: marathon
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - marathon
+              topologyKey: kubernetes.io/hostname
+      containers:
+      - name: marathon
+        image: mesosphere/marathon:v1.11.31
+        command:
+        - /marathon/bin/start
+        args:
+        - --master
+        - zk://zookeeper-0.zookeeper:2181,zookeeper-1.zookeeper:2181,zookeeper-2.zookeeper:2181/mesos
+        - --zk
+        - zk://zookeeper-0.zookeeper:2181,zookeeper-1.zookeeper:2181,zookeeper-2.zookeeper:2181/marathon
+        - --hostname
+        - $(POD_NAME).marathon.orchestrator.svc.cluster.local
+        - --http_port
+        - "8080"
+        - --event_subscriber
+        - http_callback
+        - --task_launch_timeout
+        - "300000"
+        - --task_launch_confirm_timeout
+        - "300000"
+        - --max_tasks_per_offer
+        - "100"
+        - --decline_offer_duration
+        - "300000"
+        - --revive_offers_repetitions
+        - "3"
+        - --min_revive_offers_interval
+        - "5000"
+        - --mesos_role
+        - "*"
+        - --mesos_authentication_principal
+        - marathon
+        - --enable_features
+        - vips,task_killing,external_volumes,secrets,gpu_resources
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: MARATHON_LOGGING_LEVEL
+          value: "INFO"
+        - name: JAVA_OPTS
+          value: "-Xms512m -Xmx2048m"
+        ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+        volumeMounts:
+        - name: marathon-data
+          mountPath: /var/lib/marathon
+        resources:
+          requests:
+            cpu: 1000m
+            memory: 2Gi
+          limits:
+            cpu: 2000m
+            memory: 4Gi
+        livenessProbe:
+          httpGet:
+            path: /ping
+            port: 8080
+          initialDelaySeconds: 120
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ping
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+      volumes:
+      - name: marathon-data
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: marathon
+  namespace: orchestrator
+  labels:
+    app: marathon
+    component: orchestration
+spec:
+  type: LoadBalancer
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+    protocol: TCP
+  selector:
+    app: marathon
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: marathon
+  namespace: orchestrator
+  labels:
+    app: marathon
+    component: orchestration

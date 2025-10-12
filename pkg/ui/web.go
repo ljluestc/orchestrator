@@ -43,6 +43,9 @@ func (w *WebUI) Start() error {
 
 // Stop stops the web UI
 func (w *WebUI) Stop() error {
+	if w.server == nil {
+		return nil // Nothing to stop
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	return w.server.Shutdown(ctx)

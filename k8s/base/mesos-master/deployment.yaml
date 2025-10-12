@@ -1,0 +1,117 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mesos-master
+  namespace: orchestrator
+  labels:
+    app: mesos-master
+    component: orchestration
+spec:
+  serviceName: mesos-master
+  replicas: 3
+  selector:
+    matchLabels:
+      app: mesos-master
+  template:
+    metadata:
+      labels:
+        app: mesos-master
+        component: orchestration
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "5050"
+        prometheus.io/path: "/metrics/snapshot"
+    spec:
+      serviceAccountName: mesos-master
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - mesos-master
+            topologyKey: kubernetes.io/hostname
+      containers:
+      - name: mesos-master
+        image: mesosphere/mesos:1.11.0
+        command:
+        - mesos-master
+        args:
+        - --zk=zk://zookeeper-0.zookeeper:2181,zookeeper-1.zookeeper:2181,zookeeper-2.zookeeper:2181/mesos
+        - --quorum=2
+        - --ip=0.0.0.0
+        - --hostname=$(POD_NAME).mesos-master.orchestrator.svc.cluster.local
+        - --cluster=k8s-mesos-cluster
+        - --work_dir=/var/lib/mesos
+        - --log_dir=/var/log/mesos
+        - --registry=replicated_log
+        - --allocation_interval=1secs
+        - --offer_timeout=10secs
+        - --max_tasks_per_offer=100
+        - --authenticate_frameworks=false
+        - --authenticate_http_frameworks=false
+        - --http_authenticators=basic
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: MESOS_PORT
+          value: "5050"
+        - name: MESOS_LOGGING_LEVEL
+          value: "INFO"
+        ports:
+        - name: http
+          containerPort: 5050
+          protocol: TCP
+        volumeMounts:
+        - name: mesos-work
+          mountPath: /var/lib/mesos
+        - name: mesos-log
+          mountPath: /var/log/mesos
+        resources:
+          requests:
+            cpu: 1000m
+            memory: 2Gi
+          limits:
+            cpu: 2000m
+            memory: 4Gi
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5050
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5050
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+  volumeClaimTemplates:
+  - metadata:
+      name: mesos-work
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: standard
+      resources:
+        requests:
+          storage: 10Gi
+  - metadata:
+      name: mesos-log
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: standard
+      resources:
+        requests:
+          storage: 5Gi

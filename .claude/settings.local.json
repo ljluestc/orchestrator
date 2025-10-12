@@ -3,7 +3,9 @@
     "allow": [
       "Bash(mkdir:*)",
       "Bash(go test:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(export:*)",
+      "Bash(go version)"
     ],
     "deny": [],
     "ask": []

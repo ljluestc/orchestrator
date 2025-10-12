@@ -1,0 +1,39 @@
+FROM golang:1.21-alpine AS builder
+
+WORKDIR /build
+
+# Install dependencies
+RUN apk add --no-cache git ca-certificates
+
+# Copy go modules
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Copy source code
+COPY . .
+
+# Build probe binary
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
+    -ldflags="-w -s" \
+    -o /probe \
+    ./cmd/probe
+
+FROM alpine:latest
+
+RUN apk --no-cache add ca-certificates conntrack-tools
+
+WORKDIR /
+
+# Copy binary from builder
+COPY --from=builder /probe /probe
+
+# Set user
+RUN addgroup -g 1000 probe && \
+    adduser -D -u 1000 -G probe probe
+
+# Note: probe needs to run as root for privileged operations
+# USER probe
+
+EXPOSE 8090
+
+ENTRYPOINT ["/probe"]

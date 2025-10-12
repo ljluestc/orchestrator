@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ljluestc/orchestrator/pkg/probe"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -272,4 +273,146 @@ func TestStorage_Performance(t *testing.T) {
 
 	// Should complete within reasonable time
 	assert.Less(t, duration, 1*time.Second)
+}
+
+func TestStorage_StoreWithContext(t *testing.T) {
+	storage := NewStorage()
+	ctx := context.Background()
+
+	// Test successful store with context
+	err := storage.StoreWithContext(ctx, "key1", "value1")
+	assert.NoError(t, err)
+
+	// Verify data was stored
+	value, err := storage.Get("key1")
+	assert.NoError(t, err)
+	assert.Equal(t, "value1", value)
+
+	// Test with cancelled context
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel() // Cancel immediately
+
+	err = storage.StoreWithContext(ctx, "key2", "value2")
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "context canceled")
+}
+
+func TestStorage_GetWithContext(t *testing.T) {
+	storage := NewStorage()
+	ctx := context.Background()
+
+	// Store some data first
+	err := storage.Store("key1", "value1")
+	require.NoError(t, err)
+
+	// Test successful get with context
+	value, err := storage.GetWithContext(ctx, "key1")
+	assert.NoError(t, err)
+	assert.Equal(t, "value1", value)
+
+	// Test with cancelled context
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel() // Cancel immediately
+
+	_, err = storage.GetWithContext(ctx, "key1")
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "context canceled")
+}
+
+func TestTimeSeriesData_AddPoint(t *testing.T) {
+	ts := &TimeSeriesData{
+		AgentID: "agent1",
+		Points:  make([]TimeSeriesPoint, 0),
+	}
+
+	// Test adding a point
+	report := &probe.ReportData{
+		AgentID:  "agent1",
+		Hostname: "test-host",
+		Timestamp: time.Now(),
+	}
+
+	ts.AddPoint(report)
+
+	// Verify point was added
+	points := ts.GetRecentPoints(1 * time.Hour)
+	assert.Len(t, points, 1)
+	assert.Equal(t, report, points[0].Report)
+}
+
+func TestTimeSeriesData_GetRecentPoints(t *testing.T) {
+	ts := &TimeSeriesData{
+		AgentID: "agent1",
+		Points:  make([]TimeSeriesPoint, 0),
+	}
+
+	// Add multiple points with past timestamps
+	now := time.Now()
+	for i := 0; i < 5; i++ {
+		report := &probe.ReportData{
+			AgentID:  "agent1",
+			Hostname: "test-host",
+			Timestamp: now.Add(time.Duration(-i) * time.Minute), // Past timestamps
+		}
+		ts.AddPoint(report)
+	}
+
+	// Test getting recent points (should get all 5 since they're all within 10 minutes)
+	points := ts.GetRecentPoints(10 * time.Minute)
+	assert.Len(t, points, 5)
+
+	// Test getting limited recent points (should get 3 most recent)
+	points = ts.GetRecentPoints(3 * time.Minute)
+	assert.Len(t, points, 3)
+}
+
+func TestTimeSeriesData_GetLatestReport(t *testing.T) {
+	ts := &TimeSeriesData{
+		AgentID: "agent1",
+		Points:  make([]TimeSeriesPoint, 0),
+	}
+
+	// Test with no points
+	report := ts.GetLatestReport()
+	assert.Nil(t, report)
+
+	// Add points
+	for i := 0; i < 3; i++ {
+		report := &probe.ReportData{
+			AgentID:  "agent1",
+			Hostname: "test-host",
+			Timestamp: time.Now().Add(time.Duration(i) * time.Minute),
+		}
+		ts.AddPoint(report)
+	}
+
+	// Test getting latest report
+	report = ts.GetLatestReport()
+	assert.NotNil(t, report)
+	assert.Equal(t, "agent1", report.AgentID)
+}
+
+func TestTimeSeriesStore_GetTimeSeriesData(t *testing.T) {
+	store := NewTimeSeriesStore(1 * time.Hour)
+
+	// Test getting non-existent data (should return nil)
+	data := store.GetTimeSeriesData("agent1")
+	assert.Nil(t, data)
+
+	// Add a report to create the data
+	report := &probe.ReportData{
+		AgentID:  "agent1",
+		Hostname: "test-host",
+		Timestamp: time.Now(),
+	}
+	store.AddReport(report)
+
+	// Test getting existing data
+	data = store.GetTimeSeriesData("agent1")
+	assert.NotNil(t, data)
+	assert.Equal(t, "agent1", data.AgentID)
+
+	// Test getting existing data again
+	data2 := store.GetTimeSeriesData("agent1")
+	assert.Equal(t, data, data2) // Should return same instance
 }

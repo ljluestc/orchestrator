@@ -1,0 +1,177 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: mesos-agent
+  namespace: orchestrator
+  labels:
+    app: mesos-agent
+    component: orchestration
+spec:
+  selector:
+    matchLabels:
+      app: mesos-agent
+  template:
+    metadata:
+      labels:
+        app: mesos-agent
+        component: orchestration
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "5051"
+        prometheus.io/path: "/metrics/snapshot"
+    spec:
+      serviceAccountName: mesos-agent
+      hostNetwork: true
+      hostPID: true
+      containers:
+      - name: mesos-agent
+        image: mesosphere/mesos:1.11.0
+        command:
+        - mesos-agent
+        args:
+        - --master=zk://zookeeper-0.zookeeper:2181,zookeeper-1.zookeeper:2181,zookeeper-2.zookeeper:2181/mesos
+        - --ip=$(NODE_IP)
+        - --hostname=$(NODE_NAME)
+        - --containerizers=docker,mesos
+        - --work_dir=/var/lib/mesos
+        - --log_dir=/var/log/mesos
+        - --image_providers=docker
+        - --isolation=cgroups/cpu,cgroups/mem,docker/runtime,filesystem/linux,namespaces/pid
+        - --executor_registration_timeout=5mins
+        - --docker_pull_timeout=10mins
+        - --oversubscribed_resources_interval=30secs
+        - --resources=cpus:4;mem:8192;disk:50000;ports:[31000-32000]
+        env:
+        - name: NODE_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: MESOS_PORT
+          value: "5051"
+        - name: MESOS_LOGGING_LEVEL
+          value: "INFO"
+        ports:
+        - name: http
+          containerPort: 5051
+          protocol: TCP
+        volumeMounts:
+        - name: docker-socket
+          mountPath: /var/run/docker.sock
+        - name: mesos-work
+          mountPath: /var/lib/mesos
+        - name: mesos-log
+          mountPath: /var/log/mesos
+        - name: cgroup
+          mountPath: /sys/fs/cgroup
+          readOnly: true
+        - name: proc
+          mountPath: /proc
+          readOnly: true
+        - name: docker-config
+          mountPath: /etc/docker/daemon.json
+          subPath: daemon.json
+        - name: registry-credentials
+          mountPath: /root/.docker/config.json
+          subPath: .dockerconfigjson
+          readOnly: true
+        resources:
+          requests:
+            cpu: 500m
+            memory: 1Gi
+          limits:
+            cpu: 1000m
+            memory: 2Gi
+        securityContext:
+          privileged: true
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5051
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5051
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+      volumes:
+      - name: docker-socket
+        hostPath:
+          path: /var/run/docker.sock
+          type: Socket
+      - name: mesos-work
+        hostPath:
+          path: /var/lib/mesos
+          type: DirectoryOrCreate
+      - name: mesos-log
+        hostPath:
+          path: /var/log/mesos
+          type: DirectoryOrCreate
+      - name: cgroup
+        hostPath:
+          path: /sys/fs/cgroup
+          type: Directory
+      - name: proc
+        hostPath:
+          path: /proc
+          type: Directory
+      - name: docker-config
+        configMap:
+          name: mesos-agent-docker-config
+      - name: registry-credentials
+        secret:
+          secretName: registry-credentials
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        effect: NoSchedule
+      - key: node-role.kubernetes.io/control-plane
+        effect: NoSchedule
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: mesos-agent
+  namespace: orchestrator
+  labels:
+    app: mesos-agent
+    component: orchestration
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: mesos-agent
+  labels:
+    app: mesos-agent
+    component: orchestration
+rules:
+- apiGroups: [""]
+  resources: ["pods", "nodes"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["pods/exec"]
+  verbs: ["create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: mesos-agent
+  labels:
+    app: mesos-agent
+    component: orchestration
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: mesos-agent
+subjects:
+- kind: ServiceAccount
+  name: mesos-agent
+  namespace: orchestrator

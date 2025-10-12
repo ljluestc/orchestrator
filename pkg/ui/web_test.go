@@ -1,307 +1,517 @@
 package ui
 
 import (
+	"bytes"
+	"context"
+	"net/http"
+	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestNewWebUI(t *testing.T) {
-	// Test creating a new Web UI
-	webUI := NewWebUI("web-ui-1", 9090, "http://localhost:8082")
-	assert.NotNil(t, webUI)
-	assert.Equal(t, "web-ui-1", webUI.ID)
-	assert.Equal(t, 9090, webUI.Port)
-	assert.Equal(t, "http://localhost:8082", webUI.TopologyURL)
+	tests := []struct {
+		name        string
+		id          string
+		port        int
+		topologyURL string
+	}{
+		{
+			name:        "Valid WebUI",
+			id:          "webui-1",
+			port:        8080,
+			topologyURL: "http://localhost:8080",
+		},
+		{
+			name:        "Different port",
+			id:          "webui-2",
+			port:        9090,
+			topologyURL: "http://localhost:9090",
+		},
+		{
+			name:        "Empty ID",
+			id:          "",
+			port:        8080,
+			topologyURL: "http://localhost:8080",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			webUI := NewWebUI(tt.id, tt.port, tt.topologyURL)
+
+			assert.Equal(t, tt.id, webUI.ID)
+			assert.Equal(t, tt.port, webUI.Port)
+			assert.Equal(t, tt.topologyURL, webUI.TopologyURL)
+			assert.Nil(t, webUI.server)
+		})
+	}
 }
 
 func TestWebUI_Start(t *testing.T) {
-	// Test starting Web UI
-	webUI := NewWebUI("web-ui-1", 9090, "http://localhost:8082")
-	
-	err := webUI.Start()
-	assert.NoError(t, err)
-	
-	// Test stopping Web UI
-	err = webUI.Stop()
-	assert.NoError(t, err)
+	tests := []struct {
+		name        string
+		id          string
+		port        int
+		topologyURL string
+		expectError bool
+	}{
+		{
+			name:        "Valid start",
+			id:          "webui-1",
+			port:        0, // Use port 0 for testing
+			topologyURL: "http://localhost:8080",
+			expectError: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			webUI := NewWebUI(tt.id, tt.port, tt.topologyURL)
+
+			// Start server in a goroutine
+			errChan := make(chan error, 1)
+			go func() {
+				errChan <- webUI.Start()
+			}()
+
+			// Give server time to start
+			time.Sleep(100 * time.Millisecond)
+
+			// Stop the server
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+
+			err := webUI.server.Shutdown(ctx)
+			if err != nil {
+				t.Logf("Server shutdown error: %v", err)
+			}
+
+			// Check for start error
+			select {
+			case err := <-errChan:
+				if tt.expectError {
+					assert.Error(t, err)
+				} else {
+					// Server should have started successfully, but may get "Server closed" when shut down
+					if err != nil && err.Error() != "http: Server closed" {
+						assert.NoError(t, err)
+					}
+				}
+			case <-time.After(1 * time.Second):
+				t.Fatal("Server start timeout")
+			}
+		})
+	}
 }
 
 func TestWebUI_Stop(t *testing.T) {
-	// Test stopping Web UI
-	webUI := NewWebUI("web-ui-1", 9090, "http://localhost:8082")
-	
-	err := webUI.Stop()
-	assert.NoError(t, err)
+	tests := []struct {
+		name        string
+		id          string
+		port        int
+		topologyURL string
+		expectError bool
+	}{
+		{
+			name:        "Stop without start",
+			id:          "webui-1",
+			port:        8080,
+			topologyURL: "http://localhost:8080",
+			expectError: false, // Should not error when stopping without starting
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			webUI := NewWebUI(tt.id, tt.port, tt.topologyURL)
+
+			err := webUI.Stop()
+			if tt.expectError {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
 }
 
-func TestWebUI_HandleRoot(t *testing.T) {
-	// Test handling root request
-	webUI := NewWebUI("web-ui-1", 9090, "http://localhost:8082")
-	
-	// Test root handler
-	err := webUI.HandleRoot()
+func TestWebUI_StartStop(t *testing.T) {
+	webUI := NewWebUI("test-webui", 0, "http://localhost:8080")
+
+	// Start server
+	errChan := make(chan error, 1)
+	go func() {
+		errChan <- webUI.Start()
+	}()
+
+	// Give server time to start
+	time.Sleep(100 * time.Millisecond)
+
+	// Stop server
+	err := webUI.Stop()
 	assert.NoError(t, err)
+
+	// Check for start error
+	select {
+	case err := <-errChan:
+		// Server should have started successfully, but may get "Server closed" when shut down
+		if err != nil && err.Error() != "http: Server closed" {
+			assert.NoError(t, err)
+		}
+	case <-time.After(1 * time.Second):
+		t.Fatal("Server start timeout")
+	}
+}
+
+func TestWebUI_SetupRoutes(t *testing.T) {
+	webUI := NewWebUI("test-webui", 8080, "http://localhost:8080")
+	router := webUI.setupRoutes()
+
+	assert.NotNil(t, router)
+
+	// Test that routes are properly configured
+	testCases := []struct {
+		method string
+		path   string
+	}{
+		{"GET", "/"},
+		{"GET", "/dashboard"},
+		{"GET", "/topology"},
+		{"GET", "/topology/containers"},
+		{"GET", "/api/topology"},
+		{"GET", "/api/topology/nodes"},
+		{"GET", "/api/topology/edges"},
+		{"GET", "/api/topology/search"},
+		{"POST", "/api/topology/filter"},
+		{"GET", "/api/views"},
+		{"GET", "/api/metrics"},
+		{"POST", "/api/containers/test-id/start"},
+		{"POST", "/api/containers/test-id/stop"},
+		{"POST", "/api/containers/test-id/restart"},
+		{"POST", "/api/containers/test-id/pause"},
+		{"POST", "/api/containers/test-id/unpause"},
+		{"GET", "/api/containers/test-id/logs"},
+		{"GET", "/ws"},
+		{"GET", "/health"},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.method+" "+tc.path, func(t *testing.T) {
+			req := httptest.NewRequest(tc.method, tc.path, nil)
+			rr := httptest.NewRecorder()
+
+			router.ServeHTTP(rr, req)
+
+			// Should not return 404 (route not found)
+			assert.NotEqual(t, http.StatusNotFound, rr.Code, "Route %s %s should be found", tc.method, tc.path)
+		})
+	}
+}
+
+func TestWebUI_HandleDashboard(t *testing.T) {
+	webUI := NewWebUI("test-webui", 8080, "http://localhost:8080")
+
+	req := httptest.NewRequest("GET", "/", nil)
+	rr := httptest.NewRecorder()
+
+	webUI.handleDashboard(rr, req)
+
+	assert.Equal(t, http.StatusOK, rr.Code)
+	assert.Equal(t, "text/html", rr.Header().Get("Content-Type"))
+	assert.Contains(t, rr.Body.String(), "Mesos-Docker Orchestration Platform")
+	assert.Contains(t, rr.Body.String(), "TopologyVisualizer")
 }
 
 func TestWebUI_HandleTopology(t *testing.T) {
-	// Test handling topology request
-	webUI := NewWebUI("web-ui-1", 9090, "http://localhost:8082")
-	
-	// Test topology handler
-	err := webUI.HandleTopology()
-	assert.NoError(t, err)
+	webUI := NewWebUI("test-webui", 8080, "http://localhost:8080")
+
+	req := httptest.NewRequest("GET", "/topology", nil)
+	rr := httptest.NewRecorder()
+
+	webUI.handleTopology(rr, req)
+
+	assert.Equal(t, http.StatusOK, rr.Code)
+	assert.Equal(t, "text/html", rr.Header().Get("Content-Type"))
+	assert.Contains(t, rr.Body.String(), "Mesos-Docker Orchestration Platform")
 }
 
-func TestWebUI_HandleMetrics(t *testing.T) {
-	// Test handling metrics request
-	webUI := NewWebUI("web-ui-1", 9090, "http://localhost:8082")
-	
-	// Test metrics handler
-	err := webUI.HandleMetrics()
-	assert.NoError(t, err)
+func TestWebUI_HandleTopologyView(t *testing.T) {
+	webUI := NewWebUI("test-webui", 8080, "http://localhost:8080")
+
+	req := httptest.NewRequest("GET", "/topology/containers", nil)
+	rr := httptest.NewRecorder()
+
+	webUI.handleTopologyView(rr, req)
+
+	assert.Equal(t, http.StatusOK, rr.Code)
+	assert.Equal(t, "text/html", rr.Header().Get("Content-Type"))
+	assert.Contains(t, rr.Body.String(), "Mesos-Docker Orchestration Platform")
 }
 
-func TestWebUI_HandleControl(t *testing.T) {
-	// Test handling control request
-	webUI := NewWebUI("web-ui-1", 9090, "http://localhost:8082")
-	
-	// Test control handler
-	err := webUI.HandleControl()
-	assert.NoError(t, err)
+func TestWebUI_HandleAPIProxy(t *testing.T) {
+	webUI := NewWebUI("test-webui", 8080, "http://localhost:8080")
+
+	testCases := []struct {
+		method string
+		path   string
+	}{
+		{"GET", "/api/topology"},
+		{"GET", "/api/topology/nodes"},
+		{"GET", "/api/topology/edges"},
+		{"GET", "/api/topology/search"},
+		{"POST", "/api/topology/filter"},
+		{"GET", "/api/views"},
+		{"GET", "/api/metrics"},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.method+" "+tc.path, func(t *testing.T) {
+			req := httptest.NewRequest(tc.method, tc.path, nil)
+			rr := httptest.NewRecorder()
+
+			webUI.handleAPIProxy(rr, req)
+
+			assert.Equal(t, http.StatusOK, rr.Code)
+			assert.Equal(t, "application/json", rr.Header().Get("Content-Type"))
+
+			// Should return mock data
+			body := rr.Body.String()
+			assert.Contains(t, body, "nodes")
+			assert.Contains(t, body, "edges")
+			assert.Contains(t, body, "metrics")
+		})
+	}
 }
 
-func TestWebUI_HandleLogs(t *testing.T) {
-	// Test handling logs request
-	webUI := NewWebUI("web-ui-1", 9090, "http://localhost:8082")
-	
-	// Test logs handler
-	err := webUI.HandleLogs()
-	assert.NoError(t, err)
+func TestWebUI_HandleWebSocketProxy(t *testing.T) {
+	webUI := NewWebUI("test-webui", 8080, "http://localhost:8080")
+
+	req := httptest.NewRequest("GET", "/ws", nil)
+	rr := httptest.NewRecorder()
+
+	webUI.handleWebSocketProxy(rr, req)
+
+	assert.Equal(t, http.StatusNotImplemented, rr.Code)
+	assert.Contains(t, rr.Body.String(), "WebSocket proxy not implemented")
 }
 
-func TestWebUI_HandleTerminal(t *testing.T) {
-	// Test handling terminal request
-	webUI := NewWebUI("web-ui-1", 9090, "http://localhost:8082")
-	
-	// Test terminal handler
-	err := webUI.HandleTerminal()
-	assert.NoError(t, err)
-}
+func TestWebUI_HandleHealth(t *testing.T) {
+	webUI := NewWebUI("test-webui", 8080, "http://localhost:8080")
 
-func TestWebUI_HandleSearch(t *testing.T) {
-	// Test handling search request
-	webUI := NewWebUI("web-ui-1", 9090, "http://localhost:8082")
-	
-	// Test search handler
-	err := webUI.HandleSearch()
-	assert.NoError(t, err)
-}
+	req := httptest.NewRequest("GET", "/health", nil)
+	rr := httptest.NewRecorder()
 
-func TestWebUI_HandleFilter(t *testing.T) {
-	// Test handling filter request
-	webUI := NewWebUI("web-ui-1", 9090, "http://localhost:8082")
-	
-	// Test filter handler
-	err := webUI.HandleFilter()
-	assert.NoError(t, err)
-}
+	webUI.handleHealth(rr, req)
 
-func TestWebUI_HandleViews(t *testing.T) {
-	// Test handling views request
-	webUI := NewWebUI("web-ui-1", 9090, "http://localhost:8082")
-	
-	// Test views handler
-	err := webUI.HandleViews()
-	assert.NoError(t, err)
-}
-
-func TestWebUI_HandleWebSocket(t *testing.T) {
-	// Test handling WebSocket request
-	webUI := NewWebUI("web-ui-1", 9090, "http://localhost:8082")
-	
-	// Test WebSocket handler
-	err := webUI.HandleWebSocket()
-	assert.NoError(t, err)
-}
-
-func TestWebUI_ErrorHandling(t *testing.T) {
-	// Test error handling
-	webUI := NewWebUI("web-ui-1", 9090, "http://localhost:8082")
-	
-	// Test invalid operations
-	err := webUI.Stop()
-	assert.NoError(t, err) // Should not error on stop
-	
-	// Test starting after stop
-	err = webUI.Start()
-	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, rr.Code)
+	assert.Equal(t, "application/json", rr.Header().Get("Content-Type"))
+	assert.Contains(t, rr.Body.String(), "healthy")
 }
 
 func TestWebUI_ConcurrentAccess(t *testing.T) {
-	// Test concurrent access
-	webUI := NewWebUI("web-ui-1", 9090, "http://localhost:8082")
-	
-	// Test concurrent operations
-	done := make(chan bool, 3)
-	
-	go func() {
-		defer func() { done <- true }()
-		err := webUI.HandleRoot()
-		assert.NoError(t, err)
-	}()
-	
-	go func() {
-		defer func() { done <- true }()
-		err := webUI.HandleTopology()
-		assert.NoError(t, err)
-	}()
-	
-	go func() {
-		defer func() { done <- true }()
-		err := webUI.HandleMetrics()
-		assert.NoError(t, err)
-	}()
-	
+	webUI := NewWebUI("test-webui", 8080, "http://localhost:8080")
+
+	const numGoroutines = 10
+	const numRequests = 100
+
+	done := make(chan bool, numGoroutines)
+
+	for i := 0; i < numGoroutines; i++ {
+		go func() {
+			for j := 0; j < numRequests; j++ {
+				req := httptest.NewRequest("GET", "/health", nil)
+				rr := httptest.NewRecorder()
+				webUI.handleHealth(rr, req)
+			}
+			done <- true
+		}()
+	}
+
 	// Wait for all goroutines to complete
-	for i := 0; i < 3; i++ {
+	for i := 0; i < numGoroutines; i++ {
 		<-done
 	}
 }
 
-func TestWebUI_Performance(t *testing.T) {
-	// Test performance
-	webUI := NewWebUI("web-ui-1", 9090, "http://localhost:8082")
-	
-	// Test multiple operations
-	err := webUI.HandleRoot()
-	assert.NoError(t, err)
-	
-	err = webUI.HandleTopology()
-	assert.NoError(t, err)
-	
-	err = webUI.HandleMetrics()
-	assert.NoError(t, err)
-	
-	err = webUI.HandleControl()
-	assert.NoError(t, err)
-	
-	err = webUI.HandleLogs()
-	assert.NoError(t, err)
+func TestWebUI_ErrorHandling(t *testing.T) {
+	webUI := NewWebUI("test-webui", 8080, "http://localhost:8080")
+
+	t.Run("Invalid method", func(t *testing.T) {
+		req := httptest.NewRequest("POST", "/health", nil)
+		rr := httptest.NewRecorder()
+
+		webUI.handleHealth(rr, req)
+
+		// Should still work for POST to health endpoint
+		assert.Equal(t, http.StatusOK, rr.Code)
+	})
+
+	t.Run("Large request", func(t *testing.T) {
+		// Create a large request body
+		largeBody := make([]byte, 1024*1024) // 1MB
+		req := httptest.NewRequest("POST", "/api/topology/filter", bytes.NewReader(largeBody))
+		rr := httptest.NewRecorder()
+
+		webUI.handleAPIProxy(rr, req)
+
+		assert.Equal(t, http.StatusOK, rr.Code)
+	})
 }
 
-func TestWebUI_Configuration(t *testing.T) {
-	// Test configuration
-	webUI := NewWebUI("web-ui-1", 9090, "http://localhost:8082")
-	
-	// Test ID
-	assert.Equal(t, "web-ui-1", webUI.ID)
-	
-	// Test port
-	assert.Equal(t, 9090, webUI.Port)
-	
-	// Test topology URL
-	assert.Equal(t, "http://localhost:8082", webUI.TopologyURL)
+func TestWebUI_StaticAssets(t *testing.T) {
+	webUI := NewWebUI("test-webui", 8080, "http://localhost:8080")
+	router := webUI.setupRoutes()
+
+	req := httptest.NewRequest("GET", "/static/test.css", nil)
+	rr := httptest.NewRecorder()
+
+	router.ServeHTTP(rr, req)
+
+	// Static assets should return 404 if static directory doesn't exist
+	assert.Equal(t, http.StatusNotFound, rr.Code)
 }
 
-func TestWebUI_ServerManagement(t *testing.T) {
-	// Test server management
-	webUI := NewWebUI("web-ui-1", 9090, "http://localhost:8082")
-	
-	// Test starting server
-	err := webUI.Start()
-	assert.NoError(t, err)
-	
-	// Test stopping server
-	err = webUI.Stop()
-	assert.NoError(t, err)
-}
+func TestWebUI_ContainerControlEndpoints(t *testing.T) {
+	webUI := NewWebUI("test-webui", 8080, "http://localhost:8080")
 
-func TestWebUI_HandlerRegistration(t *testing.T) {
-	// Test handler registration
-	webUI := NewWebUI("web-ui-1", 9090, "http://localhost:8082")
-	
-	// Test all handlers
-	handlers := []func() error{
-		webUI.HandleRoot,
-		webUI.HandleTopology,
-		webUI.HandleMetrics,
-		webUI.HandleControl,
-		webUI.HandleLogs,
-		webUI.HandleTerminal,
-		webUI.HandleSearch,
-		webUI.HandleFilter,
-		webUI.HandleViews,
-		webUI.HandleWebSocket,
+	testCases := []struct {
+		method string
+		path   string
+	}{
+		{"POST", "/api/containers/test-id/start"},
+		{"POST", "/api/containers/test-id/stop"},
+		{"POST", "/api/containers/test-id/restart"},
+		{"POST", "/api/containers/test-id/pause"},
+		{"POST", "/api/containers/test-id/unpause"},
+		{"GET", "/api/containers/test-id/logs"},
 	}
-	
-	for _, handler := range handlers {
-		err := handler()
-		assert.NoError(t, err)
+
+	for _, tc := range testCases {
+		t.Run(tc.method+" "+tc.path, func(t *testing.T) {
+			req := httptest.NewRequest(tc.method, tc.path, nil)
+			rr := httptest.NewRecorder()
+
+			webUI.handleAPIProxy(rr, req)
+
+			assert.Equal(t, http.StatusOK, rr.Code)
+			assert.Equal(t, "application/json", rr.Header().Get("Content-Type"))
+		})
 	}
 }
 
-func TestWebUI_ResourceManagement(t *testing.T) {
-	// Test resource management
-	webUI := NewWebUI("web-ui-1", 9090, "http://localhost:8082")
-	
-	// Test resource allocation
-	err := webUI.HandleRoot()
-	assert.NoError(t, err)
-	
-	// Test resource cleanup
-	err = webUI.Stop()
-	assert.NoError(t, err)
+func TestWebUI_HTMLContent(t *testing.T) {
+	webUI := NewWebUI("test-webui", 8080, "http://localhost:8080")
+
+	req := httptest.NewRequest("GET", "/", nil)
+	rr := httptest.NewRecorder()
+
+	webUI.handleDashboard(rr, req)
+
+	body := rr.Body.String()
+
+	// Check for essential HTML elements
+	assert.Contains(t, body, "<!DOCTYPE html>")
+	assert.Contains(t, body, "<html")
+	assert.Contains(t, body, "<head>")
+	assert.Contains(t, body, "<body>")
+	assert.Contains(t, body, "</html>")
+
+	// Check for JavaScript libraries
+	assert.Contains(t, body, "d3js.org")
+	assert.Contains(t, body, "cytoscape")
+	assert.Contains(t, body, "TopologyVisualizer")
+
+	// Check for CSS classes
+	assert.Contains(t, body, "header")
+	assert.Contains(t, body, "nav")
+	assert.Contains(t, body, "main")
+	assert.Contains(t, body, "sidebar")
+	assert.Contains(t, body, "content")
+	assert.Contains(t, body, "graph-container")
 }
 
-func TestWebUI_DataConsistency(t *testing.T) {
-	// Test data consistency
-	webUI := NewWebUI("web-ui-1", 9090, "http://localhost:8082")
-	
-	// Test data handling
-	err := webUI.HandleTopology()
-	assert.NoError(t, err)
-	
-	err = webUI.HandleMetrics()
-	assert.NoError(t, err)
-	
-	err = webUI.HandleControl()
-	assert.NoError(t, err)
+func TestWebUI_WebSocketIntegration(t *testing.T) {
+	webUI := NewWebUI("test-webui", 8080, "http://localhost:8080")
+
+	req := httptest.NewRequest("GET", "/", nil)
+	rr := httptest.NewRecorder()
+
+	webUI.handleDashboard(rr, req)
+
+	body := rr.Body.String()
+
+	// Check for WebSocket connection code
+	assert.Contains(t, body, "WebSocket")
+	assert.Contains(t, body, "window.location.protocol")
+	assert.Contains(t, body, "window.location.host")
+	assert.Contains(t, body, "/ws")
 }
 
-func TestWebUI_Security(t *testing.T) {
-	// Test security
-	webUI := NewWebUI("web-ui-1", 9090, "http://localhost:8082")
-	
-	// Test secure operations
-	err := webUI.HandleRoot()
-	assert.NoError(t, err)
-	
-	err = webUI.HandleControl()
-	assert.NoError(t, err)
-	
-	err = webUI.HandleTerminal()
-	assert.NoError(t, err)
+func TestWebUI_ViewSelector(t *testing.T) {
+	webUI := NewWebUI("test-webui", 8080, "http://localhost:8080")
+
+	req := httptest.NewRequest("GET", "/", nil)
+	rr := httptest.NewRecorder()
+
+	webUI.handleDashboard(rr, req)
+
+	body := rr.Body.String()
+
+	// Check for view selector buttons
+	assert.Contains(t, body, "data-view=\"processes\"")
+	assert.Contains(t, body, "data-view=\"containers\"")
+	assert.Contains(t, body, "data-view=\"hosts\"")
+	assert.Contains(t, body, "data-view=\"pods\"")
+	assert.Contains(t, body, "data-view=\"services\"")
 }
 
-func TestWebUI_Integration(t *testing.T) {
-	// Test integration
-	webUI := NewWebUI("web-ui-1", 9090, "http://localhost:8082")
-	
-	// Test full integration
-	err := webUI.Start()
-	assert.NoError(t, err)
-	
-	// Test all handlers
-	err = webUI.HandleRoot()
-	assert.NoError(t, err)
-	
-	err = webUI.HandleTopology()
-	assert.NoError(t, err)
-	
-	err = webUI.HandleMetrics()
-	assert.NoError(t, err)
-	
-	err = webUI.Stop()
-	assert.NoError(t, err)
+func TestWebUI_SearchAndFilter(t *testing.T) {
+	webUI := NewWebUI("test-webui", 8080, "http://localhost:8080")
+
+	req := httptest.NewRequest("GET", "/", nil)
+	rr := httptest.NewRecorder()
+
+	webUI.handleDashboard(rr, req)
+
+	body := rr.Body.String()
+
+	// Check for search functionality
+	assert.Contains(t, body, "searchInput")
+	assert.Contains(t, body, "mainSearchInput")
+	assert.Contains(t, body, "filterHealthy")
+	assert.Contains(t, body, "filterWarning")
+	assert.Contains(t, body, "filterCritical")
+}
+
+func BenchmarkWebUI_HandleDashboard(b *testing.B) {
+	webUI := NewWebUI("test-webui", 8080, "http://localhost:8080")
+
+	for i := 0; i < b.N; i++ {
+		req := httptest.NewRequest("GET", "/", nil)
+		rr := httptest.NewRecorder()
+		webUI.handleDashboard(rr, req)
+	}
+}
+
+func BenchmarkWebUI_HandleAPIProxy(b *testing.B) {
+	webUI := NewWebUI("test-webui", 8080, "http://localhost:8080")
+
+	for i := 0; i < b.N; i++ {
+		req := httptest.NewRequest("GET", "/api/topology", nil)
+		rr := httptest.NewRecorder()
+		webUI.handleAPIProxy(rr, req)
+	}
+}
+
+func BenchmarkWebUI_HandleHealth(b *testing.B) {
+	webUI := NewWebUI("test-webui", 8080, "http://localhost:8080")
+
+	for i := 0; i < b.N; i++ {
+		req := httptest.NewRequest("GET", "/health", nil)
+		rr := httptest.NewRecorder()
+		webUI.handleHealth(rr, req)
+	}
 }

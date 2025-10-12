@@ -1,0 +1,153 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: monitoring-probe
+  namespace: orchestrator
+  labels:
+    app: monitoring-probe
+    component: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: monitoring-probe
+  template:
+    metadata:
+      labels:
+        app: monitoring-probe
+        component: monitoring
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8090"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: monitoring-probe
+      hostNetwork: true
+      hostPID: true
+      containers:
+      - name: probe
+        image: orchestrator-probe:latest
+        imagePullPolicy: IfNotPresent
+        command:
+        - /probe
+        args:
+        - --probe-id=$(NODE_NAME)
+        - --hostname=$(NODE_NAME)
+        - --app-url=http://monitoring-app:8080
+        - --collect-interval=15s
+        env:
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: NODE_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
+        ports:
+        - name: metrics
+          containerPort: 8090
+          protocol: TCP
+        volumeMounts:
+        - name: docker-socket
+          mountPath: /var/run/docker.sock
+          readOnly: true
+        - name: proc
+          mountPath: /host/proc
+          readOnly: true
+        - name: sys
+          mountPath: /host/sys
+          readOnly: true
+        - name: cgroup
+          mountPath: /sys/fs/cgroup
+          readOnly: true
+        resources:
+          requests:
+            cpu: 100m
+            memory: 64Mi
+          limits:
+            cpu: 200m
+            memory: 128Mi
+        securityContext:
+          privileged: true
+          capabilities:
+            add:
+            - NET_ADMIN
+            - SYS_ADMIN
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8090
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8090
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+      volumes:
+      - name: docker-socket
+        hostPath:
+          path: /var/run/docker.sock
+          type: Socket
+      - name: proc
+        hostPath:
+          path: /proc
+          type: Directory
+      - name: sys
+        hostPath:
+          path: /sys
+          type: Directory
+      - name: cgroup
+        hostPath:
+          path: /sys/fs/cgroup
+          type: Directory
+      tolerations:
+      - effect: NoSchedule
+        operator: Exists
+      - effect: NoExecute
+        operator: Exists
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: monitoring-probe
+  namespace: orchestrator
+  labels:
+    app: monitoring-probe
+    component: monitoring
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: monitoring-probe
+  labels:
+    app: monitoring-probe
+    component: monitoring
+rules:
+- apiGroups: [""]
+  resources: ["pods", "nodes", "services", "endpoints"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["apps"]
+  resources: ["deployments", "daemonsets", "statefulsets", "replicasets"]
+  verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: monitoring-probe
+  labels:
+    app: monitoring-probe
+    component: monitoring
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: monitoring-probe
+subjects:
+- kind: ServiceAccount
+  name: monitoring-probe
+  namespace: orchestrator

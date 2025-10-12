@@ -1,0 +1,269 @@
+---
+# Resource Quotas for Multi-Tenancy
+# Enforces hard limits on resource consumption per namespace/tenant
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: tenant-alpha
+  labels:
+    tenant: alpha
+    tier: production
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: tenant-alpha-quota
+  namespace: tenant-alpha
+spec:
+  hard:
+    # Compute resources
+    requests.cpu: "50"
+    requests.memory: "100Gi"
+    requests.nvidia.com/gpu: "4"
+    limits.cpu: "80"
+    limits.memory: "150Gi"
+    limits.nvidia.com/gpu: "4"
+
+    # Storage
+    requests.storage: "500Gi"
+    persistentvolumeclaims: "20"
+
+    # Object count limits
+    pods: "100"
+    services: "20"
+    services.loadbalancers: "5"
+    services.nodeports: "10"
+    configmaps: "50"
+    secrets: "50"
+    replicationcontrollers: "20"
+
+  # Scope selectors for more granular control
+  scopeSelector:
+    matchExpressions:
+    - operator: In
+      scopeName: PriorityClass
+      values:
+      - high
+      - medium
+      - low
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: tenant-alpha-limits
+  namespace: tenant-alpha
+spec:
+  limits:
+  # Default container resource limits
+  - type: Container
+    default:
+      cpu: "1"
+      memory: "2Gi"
+    defaultRequest:
+      cpu: "500m"
+      memory: "1Gi"
+    max:
+      cpu: "8"
+      memory: "16Gi"
+    min:
+      cpu: "100m"
+      memory: "128Mi"
+    maxLimitRequestRatio:
+      cpu: "2"
+      memory: "2"
+
+  # Pod-level limits
+  - type: Pod
+    max:
+      cpu: "16"
+      memory: "32Gi"
+    min:
+      cpu: "100m"
+      memory: "128Mi"
+
+  # PVC limits
+  - type: PersistentVolumeClaim
+    max:
+      storage: "50Gi"
+    min:
+      storage: "1Gi"
+---
+# Tenant Beta - Smaller quota for development
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: tenant-beta
+  labels:
+    tenant: beta
+    tier: development
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: tenant-beta-quota
+  namespace: tenant-beta
+spec:
+  hard:
+    requests.cpu: "20"
+    requests.memory: "40Gi"
+    requests.nvidia.com/gpu: "1"
+    limits.cpu: "30"
+    limits.memory: "60Gi"
+    limits.nvidia.com/gpu: "1"
+    requests.storage: "200Gi"
+    persistentvolumeclaims: "10"
+    pods: "50"
+    services: "10"
+    configmaps: "30"
+    secrets: "30"
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: tenant-beta-limits
+  namespace: tenant-beta
+spec:
+  limits:
+  - type: Container
+    default:
+      cpu: "500m"
+      memory: "1Gi"
+    defaultRequest:
+      cpu: "250m"
+      memory: "512Mi"
+    max:
+      cpu: "4"
+      memory: "8Gi"
+    min:
+      cpu: "100m"
+      memory: "128Mi"
+  - type: Pod
+    max:
+      cpu: "8"
+      memory: "16Gi"
+---
+# Tenant Gamma - Enterprise tier with high quotas
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: tenant-gamma
+  labels:
+    tenant: gamma
+    tier: enterprise
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: tenant-gamma-quota
+  namespace: tenant-gamma
+spec:
+  hard:
+    requests.cpu: "200"
+    requests.memory: "400Gi"
+    requests.nvidia.com/gpu: "16"
+    limits.cpu: "300"
+    limits.memory: "600Gi"
+    limits.nvidia.com/gpu: "16"
+    requests.storage: "2Ti"
+    persistentvolumeclaims: "50"
+    pods: "500"
+    services: "50"
+    services.loadbalancers: "20"
+    configmaps: "100"
+    secrets: "100"
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: tenant-gamma-limits
+  namespace: tenant-gamma
+spec:
+  limits:
+  - type: Container
+    default:
+      cpu: "2"
+      memory: "4Gi"
+    defaultRequest:
+      cpu: "1"
+      memory: "2Gi"
+    max:
+      cpu: "32"
+      memory: "64Gi"
+    min:
+      cpu: "100m"
+      memory: "128Mi"
+  - type: Pod
+    max:
+      cpu: "64"
+      memory: "128Gi"
+---
+# NetworkPolicy for tenant isolation
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: tenant-alpha-isolation
+  namespace: tenant-alpha
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Allow from same namespace
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          tenant: alpha
+  # Allow from monitoring
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: orchestrator
+    ports:
+    - protocol: TCP
+      port: 9090
+  egress:
+  # Allow to same namespace
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          tenant: alpha
+  # Allow DNS
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: kube-system
+    ports:
+    - protocol: UDP
+      port: 53
+  # Allow external
+  - to:
+    - namespaceSelector: {}
+    ports:
+    - protocol: TCP
+      port: 443
+---
+# PriorityClass for multi-tenancy
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: tenant-high-priority
+value: 1000000
+globalDefault: false
+description: "High priority for enterprise tenants"
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: tenant-medium-priority
+value: 500000
+globalDefault: false
+description: "Medium priority for standard tenants"
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: tenant-low-priority
+value: 100000
+globalDefault: true
+description: "Low priority for development tenants"

@@ -1,0 +1,355 @@
+---
+# cgroups Isolation Configuration for Mesos Agent
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mesos-agent-cgroups-config
+  namespace: orchestrator
+data:
+  cgroups-isolation.json: |
+    {
+      "cgroups_version": "auto",
+      "cgroups_root": "/sys/fs/cgroup",
+      "cgroups_hierarchy": "mesos",
+      "cgroups_enable_cfs": true,
+      "isolation": {
+        "cpu": {
+          "enabled": true,
+          "shares_enabled": true,
+          "cfs_quota_enabled": true,
+          "cfs_period_us": 100000,
+          "stat_collection_interval": "1s"
+        },
+        "memory": {
+          "enabled": true,
+          "enforce_limit": true,
+          "soft_limit_enabled": true,
+          "swap_enabled": false,
+          "oom_killer_enabled": true,
+          "memory_pressure_enabled": true,
+          "stat_collection_interval": "1s"
+        },
+        "cpuset": {
+          "enabled": true,
+          "exclusive_cpus": false,
+          "mem_exclusive": false
+        },
+        "blkio": {
+          "enabled": true,
+          "weight_enabled": true,
+          "throttle_enabled": true,
+          "stat_collection_interval": "5s"
+        },
+        "pids": {
+          "enabled": true,
+          "max_enabled": true,
+          "default_max": 32768
+        },
+        "devices": {
+          "enabled": true,
+          "whitelist_enabled": true
+        },
+        "net_cls": {
+          "enabled": false
+        },
+        "net_prio": {
+          "enabled": false
+        },
+        "perf_event": {
+          "enabled": true,
+          "events": [
+            "cycles",
+            "instructions",
+            "cache-references",
+            "cache-misses",
+            "bus-cycles"
+          ],
+          "sample_interval": "60s",
+          "sample_duration": "10s"
+        }
+      },
+      "resource_limits": {
+        "default_cpu_shares": 1024,
+        "min_cpu_shares": 2,
+        "max_cpu_shares": 262144,
+        "default_memory_limit_mb": 2048,
+        "min_memory_limit_mb": 32,
+        "revocable_cpu_low_priority": 1
+      },
+      "oom_handling": {
+        "enable_oom_killer": true,
+        "oom_score_adj": 0,
+        "oom_kill_policy": "container",
+        "notify_on_oom": true
+      },
+      "monitoring": {
+        "enable_stats_collection": true,
+        "stats_collection_interval": "1s",
+        "metrics_export": {
+          "prometheus_enabled": true,
+          "prometheus_port": 9101
+        },
+        "violations": {
+          "memory_threshold_percent": 90,
+          "cpu_throttle_threshold_percent": 80,
+          "alert_on_violation": true
+        }
+      }
+    }
+
+  resource-profiles.yaml: |
+    # Predefined resource profiles for different workload types
+    profiles:
+      # High-performance workload
+      - name: high-performance
+        cpu:
+          shares: 4096
+          quota: 400000  # 4 cores
+          period: 100000
+        memory:
+          limit: 16GB
+          swap: 0
+        blkio:
+          weight: 1000
+        pids:
+          max: 10000
+
+      # Standard workload
+      - name: standard
+        cpu:
+          shares: 1024
+          quota: 200000  # 2 cores
+          period: 100000
+        memory:
+          limit: 4GB
+          swap: 0
+        blkio:
+          weight: 500
+        pids:
+          max: 5000
+
+      # Best-effort workload
+      - name: best-effort
+        cpu:
+          shares: 256
+          quota: 50000  # 0.5 cores
+          period: 100000
+        memory:
+          limit: 1GB
+          swap: 0
+        blkio:
+          weight: 100
+        pids:
+          max: 1000
+
+      # GPU workload
+      - name: gpu-enabled
+        cpu:
+          shares: 2048
+          quota: 400000
+          period: 100000
+        memory:
+          limit: 32GB
+          swap: 0
+        devices:
+          - /dev/nvidia0
+          - /dev/nvidiactl
+          - /dev/nvidia-uvm
+        blkio:
+          weight: 800
+        pids:
+          max: 5000
+
+  cgroups-v1-mount.sh: |
+    #!/bin/bash
+    # Mount cgroups v1 hierarchies if not already mounted
+    CGROUP_ROOT=/sys/fs/cgroup
+
+    mount_cgroup() {
+        local subsystem=$1
+        local mount_point=$CGROUP_ROOT/$subsystem
+
+        if [ ! -d "$mount_point" ]; then
+            mkdir -p "$mount_point"
+        fi
+
+        if ! mountpoint -q "$mount_point"; then
+            mount -t cgroup -o "$subsystem" cgroup "$mount_point"
+            echo "Mounted $subsystem at $mount_point"
+        fi
+    }
+
+    # Mount all required cgroup subsystems
+    mount_cgroup cpu
+    mount_cgroup cpuacct
+    mount_cgroup cpuset
+    mount_cgroup memory
+    mount_cgroup devices
+    mount_cgroup freezer
+    mount_cgroup blkio
+    mount_cgroup pids
+    mount_cgroup net_cls
+    mount_cgroup net_prio
+    mount_cgroup perf_event
+
+    # Create mesos hierarchy
+    for subsystem in cpu cpuacct cpuset memory devices freezer blkio pids; do
+        mkdir -p "$CGROUP_ROOT/$subsystem/mesos"
+    done
+
+    echo "cgroups v1 initialization complete"
+
+  cgroups-v2-setup.sh: |
+    #!/bin/bash
+    # Setup cgroups v2 unified hierarchy
+    CGROUP_ROOT=/sys/fs/cgroup
+
+    # Enable controllers at root
+    if [ -f "$CGROUP_ROOT/cgroup.controllers" ]; then
+        # cgroups v2 detected
+        CONTROLLERS=$(cat "$CGROUP_ROOT/cgroup.controllers")
+        echo "+$CONTROLLERS" > "$CGROUP_ROOT/cgroup.subtree_control" 2>/dev/null || true
+
+        # Create mesos slice
+        mkdir -p "$CGROUP_ROOT/mesos.slice"
+
+        # Enable controllers for mesos slice
+        if [ -f "$CGROUP_ROOT/mesos.slice/cgroup.subtree_control" ]; then
+            echo "+cpu +memory +io +pids" > "$CGROUP_ROOT/mesos.slice/cgroup.subtree_control"
+        fi
+
+        echo "cgroups v2 initialization complete"
+    else
+        echo "cgroups v2 not detected"
+        exit 1
+    fi
+---
+# DaemonSet to initialize cgroups on each node
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: cgroups-initializer
+  namespace: orchestrator
+spec:
+  selector:
+    matchLabels:
+      app: cgroups-initializer
+  template:
+    metadata:
+      labels:
+        app: cgroups-initializer
+    spec:
+      hostPID: true
+      hostNetwork: true
+      initContainers:
+      - name: init-cgroups
+        image: busybox:1.36
+        command:
+        - sh
+        - -c
+        - |
+          # Detect cgroups version
+          if [ -f /sys/fs/cgroup/cgroup.controllers ]; then
+            echo "Detected cgroups v2"
+            sh /scripts/cgroups-v2-setup.sh
+          elif [ -d /sys/fs/cgroup/cpu ]; then
+            echo "Detected cgroups v1"
+            sh /scripts/cgroups-v1-mount.sh
+          else
+            echo "ERROR: No cgroups detected"
+            exit 1
+          fi
+        volumeMounts:
+        - name: cgroup
+          mountPath: /sys/fs/cgroup
+        - name: scripts
+          mountPath: /scripts
+        securityContext:
+          privileged: true
+      containers:
+      - name: pause
+        image: gcr.io/google_containers/pause:3.1
+        resources:
+          requests:
+            cpu: 10m
+            memory: 10Mi
+          limits:
+            cpu: 10m
+            memory: 10Mi
+      volumes:
+      - name: cgroup
+        hostPath:
+          path: /sys/fs/cgroup
+          type: Directory
+      - name: scripts
+        configMap:
+          name: mesos-agent-cgroups-config
+          defaultMode: 0755
+      tolerations:
+      - effect: NoSchedule
+        operator: Exists
+---
+# ServiceMonitor for cgroups metrics
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: mesos-agent-cgroups
+  namespace: orchestrator
+spec:
+  selector:
+    matchLabels:
+      app: mesos-agent
+  endpoints:
+  - port: cgroups-metrics
+    interval: 30s
+    path: /metrics/cgroups
+---
+# PrometheusRule for cgroups alerts
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: cgroups-alerts
+  namespace: orchestrator
+spec:
+  groups:
+  - name: cgroups_resource_limits
+    interval: 30s
+    rules:
+    - alert: ContainerMemoryHigh
+      expr: |
+        (container_memory_usage_bytes / container_spec_memory_limit_bytes) > 0.9
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Container {{ $labels.container }} memory usage is high"
+        description: "Container {{ $labels.container }} is using {{ $value | humanizePercentage }} of its memory limit"
+
+    - alert: ContainerCPUThrottled
+      expr: |
+        rate(container_cpu_cfs_throttled_seconds_total[5m]) > 0.8
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Container {{ $labels.container }} is heavily CPU throttled"
+        description: "Container {{ $labels.container }} CPU throttling rate: {{ $value | humanizePercentage }}"
+
+    - alert: ContainerOOMKilled
+      expr: |
+        increase(container_oom_events_total[5m]) > 0
+      labels:
+        severity: critical
+      annotations:
+        summary: "Container {{ $labels.container }} was OOM killed"
+        description: "Container {{ $labels.container }} experienced OOM kill"
+
+    - alert: TooManyPids
+      expr: |
+        (container_pids_current / container_pids_limit) > 0.9
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Container {{ $labels.container }} approaching PID limit"
+        description: "Container {{ $labels.container }} using {{ $value | humanizePercentage }} of PID limit"

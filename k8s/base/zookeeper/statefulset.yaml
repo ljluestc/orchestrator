@@ -1,0 +1,154 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: zookeeper
+  namespace: orchestrator
+  labels:
+    app: zookeeper
+    component: coordination
+spec:
+  serviceName: zookeeper
+  replicas: 3
+  selector:
+    matchLabels:
+      app: zookeeper
+  template:
+    metadata:
+      labels:
+        app: zookeeper
+        component: coordination
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "7070"
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - zookeeper
+            topologyKey: kubernetes.io/hostname
+      containers:
+      - name: zookeeper
+        image: zookeeper:3.8.0
+        env:
+        - name: ZOO_MY_ID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.labels['statefulset.kubernetes.io/pod-name']
+        - name: ZOO_SERVERS
+          value: "server.1=zookeeper-0.zookeeper:2888:3888;2181 server.2=zookeeper-1.zookeeper:2888:3888;2181 server.3=zookeeper-2.zookeeper:2888:3888;2181"
+        - name: ZOO_TICK_TIME
+          value: "2000"
+        - name: ZOO_INIT_LIMIT
+          value: "10"
+        - name: ZOO_SYNC_LIMIT
+          value: "5"
+        - name: ZOO_MAX_CLIENT_CNXNS
+          value: "60"
+        - name: ZOO_AUTOPURGE_PURGEINTERVAL
+          value: "1"
+        - name: ZOO_AUTOPURGE_SNAPRETAINCOUNT
+          value: "10"
+        - name: ZOO_4LW_COMMANDS_WHITELIST
+          value: "mntr, conf, ruok, stat"
+        ports:
+        - name: client
+          containerPort: 2181
+          protocol: TCP
+        - name: follower
+          containerPort: 2888
+          protocol: TCP
+        - name: election
+          containerPort: 3888
+          protocol: TCP
+        - name: metrics
+          containerPort: 7070
+          protocol: TCP
+        volumeMounts:
+        - name: zk-data
+          mountPath: /data
+        - name: zk-datalog
+          mountPath: /datalog
+        - name: zk-config
+          mountPath: /conf
+        resources:
+          requests:
+            cpu: 500m
+            memory: 1Gi
+          limits:
+            cpu: 1000m
+            memory: 2Gi
+        livenessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - echo ruok | nc localhost 2181 | grep imok
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - echo ruok | nc localhost 2181 | grep imok
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+      volumes:
+      - name: zk-config
+        configMap:
+          name: zookeeper-config
+  volumeClaimTemplates:
+  - metadata:
+      name: zk-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: standard
+      resources:
+        requests:
+          storage: 10Gi
+  - metadata:
+      name: zk-datalog
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: standard
+      resources:
+        requests:
+          storage: 5Gi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: zookeeper-config
+  namespace: orchestrator
+  labels:
+    app: zookeeper
+    component: coordination
+data:
+  zoo.cfg: |
+    tickTime=2000
+    initLimit=10
+    syncLimit=5
+    dataDir=/data
+    dataLogDir=/datalog
+    clientPort=2181
+    maxClientCnxns=60
+    autopurge.purgeInterval=1
+    autopurge.snapRetainCount=10
+    4lw.commands.whitelist=mntr, conf, ruok, stat
+    sessionTimeout=60000
+  myid.sh: |
+    #!/bin/bash
+    # Extract pod ordinal from hostname
+    [[ `hostname` =~ -([0-9]+)$ ]] || exit 1
+    ordinal=${BASH_REMATCH[1]}
+    # ZooKeeper IDs start at 1
+    echo $((ordinal + 1)) > /data/myid

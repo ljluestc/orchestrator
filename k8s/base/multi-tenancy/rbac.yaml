@@ -1,0 +1,260 @@
+---
+# RBAC for Multi-Tenancy
+# Ensures tenants can only access their own resources
+
+# Tenant Admin Role - Full access within namespace
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: tenant-admin
+  namespace: tenant-alpha
+rules:
+- apiGroups: ["", "apps", "batch", "extensions"]
+  resources:
+  - pods
+  - pods/log
+  - pods/exec
+  - services
+  - endpoints
+  - deployments
+  - replicasets
+  - statefulsets
+  - daemonsets
+  - jobs
+  - cronjobs
+  - configmaps
+  - secrets
+  - persistentvolumeclaims
+  verbs: ["*"]
+- apiGroups: ["networking.k8s.io"]
+  resources:
+  - ingresses
+  - networkpolicies
+  verbs: ["*"]
+- apiGroups: ["autoscaling"]
+  resources:
+  - horizontalpodautoscalers
+  verbs: ["*"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: tenant-alpha-admins
+  namespace: tenant-alpha
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: tenant-admin
+subjects:
+- kind: Group
+  name: tenant-alpha-admins
+  apiGroup: rbac.authorization.k8s.io
+- kind: ServiceAccount
+  name: tenant-alpha-admin
+  namespace: tenant-alpha
+---
+# Tenant Developer Role - Limited access
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: tenant-developer
+  namespace: tenant-alpha
+rules:
+- apiGroups: [""]
+  resources:
+  - pods
+  - pods/log
+  - services
+  - configmaps
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["apps"]
+  resources:
+  - deployments
+  - replicasets
+  - statefulsets
+  verbs: ["get", "list", "watch", "update", "patch"]
+- apiGroups: ["batch"]
+  resources:
+  - jobs
+  - cronjobs
+  verbs: ["get", "list", "watch", "create", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: tenant-alpha-developers
+  namespace: tenant-alpha
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: tenant-developer
+subjects:
+- kind: Group
+  name: tenant-alpha-developers
+  apiGroup: rbac.authorization.k8s.io
+---
+# Tenant Viewer Role - Read-only access
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: tenant-viewer
+  namespace: tenant-alpha
+rules:
+- apiGroups: ["", "apps", "batch"]
+  resources:
+  - pods
+  - pods/log
+  - services
+  - deployments
+  - replicasets
+  - statefulsets
+  - jobs
+  - cronjobs
+  - configmaps
+  verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: tenant-alpha-viewers
+  namespace: tenant-alpha
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: tenant-viewer
+subjects:
+- kind: Group
+  name: tenant-alpha-viewers
+  apiGroup: rbac.authorization.k8s.io
+---
+# Service Accounts for Tenants
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: tenant-alpha-admin
+  namespace: tenant-alpha
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: tenant-alpha-app
+  namespace: tenant-alpha
+---
+# ClusterRole for multi-tenant operators
+# Allows viewing ResourceQuotas and LimitRanges across namespaces
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: quota-viewer
+rules:
+- apiGroups: [""]
+  resources:
+  - resourcequotas
+  - limitranges
+  - namespaces
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources:
+  - resourcequotas/status
+  verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: orchestrator-quota-viewer
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: quota-viewer
+subjects:
+- kind: ServiceAccount
+  name: orchestrator-controller
+  namespace: orchestrator
+---
+# ClusterRole for DRF scheduler
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: drf-scheduler
+rules:
+- apiGroups: [""]
+  resources:
+  - nodes
+  - pods
+  - resourcequotas
+  - limitranges
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources:
+  - pods/binding
+  - bindings
+  verbs: ["create"]
+- apiGroups: [""]
+  resources:
+  - events
+  verbs: ["create", "patch", "update"]
+- apiGroups: ["scheduling.k8s.io"]
+  resources:
+  - priorityclasses
+  verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: drf-scheduler
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: drf-scheduler
+subjects:
+- kind: ServiceAccount
+  name: drf-scheduler
+  namespace: orchestrator
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: drf-scheduler
+  namespace: orchestrator
+---
+# Admission Controller for quota enforcement
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: quota-enforcer
+  namespace: orchestrator
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: quota-enforcer
+rules:
+- apiGroups: [""]
+  resources:
+  - pods
+  - resourcequotas
+  - limitranges
+  - namespaces
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources:
+  - events
+  verbs: ["create", "patch"]
+- apiGroups: ["admissionregistration.k8s.io"]
+  resources:
+  - validatingwebhookconfigurations
+  - mutatingwebhookconfigurations
+  verbs: ["get", "list", "watch", "update", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: quota-enforcer
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: quota-enforcer
+subjects:
+- kind: ServiceAccount
+  name: quota-enforcer
+  namespace: orchestrator

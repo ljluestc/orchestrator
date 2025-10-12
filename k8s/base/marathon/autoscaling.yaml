@@ -1,0 +1,392 @@
+---
+# HorizontalPodAutoscaler for Marathon framework
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: marathon-hpa
+  namespace: orchestrator
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: marathon
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+  # CPU-based scaling
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  # Memory-based scaling
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  # Custom metric: Marathon task queue depth
+  - type: Pods
+    pods:
+      metric:
+        name: marathon_task_queue_depth
+      target:
+        type: AverageValue
+        averageValue: "100"
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300  # 5 minutes
+      policies:
+      - type: Percent
+        value: 50
+        periodSeconds: 60
+      - type: Pods
+        value: 1
+        periodSeconds: 60
+      selectPolicy: Min
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 30
+      - type: Pods
+        value: 2
+        periodSeconds: 30
+      selectPolicy: Max
+---
+# Marathon Auto-Scaling Configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: marathon-autoscaling-config
+  namespace: orchestrator
+data:
+  autoscaling.yaml: |
+    # Global autoscaling configuration
+    global:
+      enabled: true
+      checkInterval: "30s"
+      metricsBackend: "prometheus"
+      prometheusURL: "http://prometheus:9090"
+
+    # Default autoscaling policies
+    defaults:
+      minInstances: 1
+      maxInstances: 100
+      targetCPUPercent: 70
+      targetMemPercent: 80
+      scaleUpPolicy:
+        threshold: 0.7
+        consecutivePeriods: 2
+        cooldown: "3m"
+        stepSize: 0
+        stepPercentage: 0.5  # 50% increase
+      scaleDownPolicy:
+        threshold: 0.3
+        consecutivePeriods: 3
+        cooldown: "5m"
+        stepSize: 0
+        stepPercentage: 0.25  # 25% decrease
+
+    # Application-specific autoscaling configs
+    applications:
+      - appId: "/production/web-frontend"
+        enabled: true
+        minInstances: 5
+        maxInstances: 50
+        targetCPUPercent: 60
+        targetMemPercent: 75
+        scaleUpPolicy:
+          cooldown: "2m"
+          stepPercentage: 0.5
+        scaleDownPolicy:
+          cooldown: "10m"
+          stepPercentage: 0.2
+
+      - appId: "/production/api-backend"
+        enabled: true
+        minInstances: 10
+        maxInstances: 100
+        targetCPUPercent: 70
+        customMetrics:
+          - name: "http_requests_per_second"
+            target: 1000
+            scaleUpThreshold: 1200
+            scaleDownThreshold: 500
+
+      - appId: "/production/worker-queue"
+        enabled: true
+        minInstances: 3
+        maxInstances: 50
+        customMetrics:
+          - name: "queue_depth"
+            target: 100
+            scaleUpThreshold: 200
+            scaleDownThreshold: 50
+
+  autohealing.yaml: |
+    # Global auto-healing configuration
+    global:
+      enabled: true
+      checkInterval: "15s"
+
+    # Default healing policies
+    defaults:
+      enabled: true
+      healthCheckTimeout: "30s"
+      maxConsecutiveFailures: 3
+      restartPolicy: "on-failure"
+      replacementStrategy: "rolling"
+      maxRestartAttempts: 10
+      backoffPolicy:
+        initialDelay: "10s"
+        maxDelay: "5m"
+        multiplier: 2.0
+
+    # Application-specific healing configs
+    applications:
+      - appId: "/production/web-frontend"
+        enabled: true
+        maxConsecutiveFailures: 2
+        restartPolicy: "always"
+        replacementStrategy: "rolling"
+        healthCheckTimeout: "20s"
+
+      - appId: "/production/critical-service"
+        enabled: true
+        maxConsecutiveFailures: 1
+        restartPolicy: "always"
+        replacementStrategy: "immediate"
+        maxRestartAttempts: 20
+
+      - appId: "/batch/data-processor"
+        enabled: true
+        restartPolicy: "on-failure"
+        replacementStrategy: "batch"
+        backoffPolicy:
+          initialDelay: "30s"
+          maxDelay: "30m"
+          multiplier: 3.0
+---
+# ServiceMonitor for Marathon autoscaling metrics
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: marathon-autoscaling
+  namespace: orchestrator
+spec:
+  selector:
+    matchLabels:
+      app: marathon
+  endpoints:
+  - port: http
+    interval: 30s
+    path: /metrics
+  - port: http
+    interval: 15s
+    path: /v2/apps
+    metricRelabelings:
+    - sourceLabels: [__name__]
+      regex: 'marathon_app_.*'
+      action: keep
+---
+# PrometheusRule for autoscaling alerts
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: marathon-autoscaling-alerts
+  namespace: orchestrator
+spec:
+  groups:
+  - name: marathon_autoscaling
+    interval: 30s
+    rules:
+    - alert: MarathonAppHighCPU
+      expr: |
+        avg(marathon_app_cpu_usage_percent) by (app_id) > 80
+      for: 5m
+      labels:
+        severity: warning
+        component: marathon
+      annotations:
+        summary: "Marathon app {{ $labels.app_id }} CPU usage high"
+        description: "CPU usage is {{ $value | humanizePercentage }}"
+
+    - alert: MarathonAppHighMemory
+      expr: |
+        avg(marathon_app_memory_usage_percent) by (app_id) > 85
+      for: 5m
+      labels:
+        severity: warning
+        component: marathon
+      annotations:
+        summary: "Marathon app {{ $labels.app_id }} memory usage high"
+        description: "Memory usage is {{ $value | humanizePercentage }}"
+
+    - alert: MarathonAppUnhealthy
+      expr: |
+        (marathon_app_tasks_unhealthy / marathon_app_tasks_running) > 0.2
+      for: 3m
+      labels:
+        severity: critical
+        component: marathon
+      annotations:
+        summary: "Marathon app {{ $labels.app_id }} has unhealthy tasks"
+        description: "{{ $value | humanizePercentage }} of tasks are unhealthy"
+
+    - alert: MarathonAppScalingDisabled
+      expr: |
+        marathon_autoscaler_enabled == 0
+      labels:
+        severity: info
+        component: marathon
+      annotations:
+        summary: "Autoscaling disabled for {{ $labels.app_id }}"
+        description: "Application autoscaling is currently disabled"
+
+    - alert: MarathonAppAtMaxScale
+      expr: |
+        marathon_app_instances >= marathon_app_max_instances
+      for: 10m
+      labels:
+        severity: warning
+        component: marathon
+      annotations:
+        summary: "Marathon app {{ $labels.app_id }} at maximum scale"
+        description: "App has reached max instances ({{ $value }})"
+
+  - name: marathon_autohealing
+    interval: 30s
+    rules:
+    - alert: MarathonTaskRestartLoop
+      expr: |
+        rate(marathon_task_restarts_total[5m]) > 0.5
+      for: 5m
+      labels:
+        severity: warning
+        component: marathon
+      annotations:
+        summary: "Marathon task {{ $labels.task_id }} in restart loop"
+        description: "Task restarting frequently ({{ $value }} restarts/sec)"
+
+    - alert: MarathonHealingFailed
+      expr: |
+        increase(marathon_healing_failures_total[10m]) > 3
+      labels:
+        severity: critical
+        component: marathon
+      annotations:
+        summary: "Marathon healing failures for {{ $labels.app_id }}"
+        description: "{{ $value }} healing attempts failed"
+
+    - alert: MarathonTasksStuckUnhealthy
+      expr: |
+        marathon_unhealthy_task_duration_seconds > 600
+      labels:
+        severity: critical
+        component: marathon
+      annotations:
+        summary: "Marathon task {{ $labels.task_id }} stuck unhealthy"
+        description: "Task unhealthy for {{ $value | humanizeDuration }}"
+---
+# Grafana Dashboard ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: marathon-autoscaling-dashboard
+  namespace: orchestrator
+  labels:
+    grafana_dashboard: "1"
+data:
+  marathon-autoscaling.json: |
+    {
+      "dashboard": {
+        "title": "Marathon Autoscaling & Auto-Healing",
+        "panels": [
+          {
+            "title": "Application Instance Count",
+            "targets": [
+              {
+                "expr": "marathon_app_instances"
+              }
+            ]
+          },
+          {
+            "title": "CPU Utilization",
+            "targets": [
+              {
+                "expr": "marathon_app_cpu_usage_percent"
+              }
+            ]
+          },
+          {
+            "title": "Memory Utilization",
+            "targets": [
+              {
+                "expr": "marathon_app_memory_usage_percent"
+              }
+            ]
+          },
+          {
+            "title": "Scaling Events",
+            "targets": [
+              {
+                "expr": "rate(marathon_scaling_events_total[5m])"
+              }
+            ]
+          },
+          {
+            "title": "Healthy vs Unhealthy Tasks",
+            "targets": [
+              {
+                "expr": "marathon_app_tasks_healthy",
+                "legendFormat": "Healthy"
+              },
+              {
+                "expr": "marathon_app_tasks_unhealthy",
+                "legendFormat": "Unhealthy"
+              }
+            ]
+          },
+          {
+            "title": "Healing Events",
+            "targets": [
+              {
+                "expr": "rate(marathon_healing_events_total[5m])"
+              }
+            ]
+          }
+        ]
+      }
+    }
+---
+# CronJob for autoscaling report generation
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: marathon-autoscaling-report
+  namespace: orchestrator
+spec:
+  schedule: "0 * * * *"  # Hourly
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: marathon
+          containers:
+          - name: report-generator
+            image: busybox:1.36
+            command:
+            - sh
+            - -c
+            - |
+              echo "=== Marathon Autoscaling Report ==="
+              date
+              echo ""
+              echo "Generating autoscaling report..."
+              # In production, this would query Marathon API and generate report
+              echo "Report generated successfully"
+          restartPolicy: OnFailure

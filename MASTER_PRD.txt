@@ -1,0 +1,2136 @@
+================================================================================
+                        MASTER PRODUCT REQUIREMENTS DOCUMENT
+           UNIFIED MESOS ORCHESTRATION, MIGRATION & MONITORING PLATFORM
+================================================================================
+
+VERSION: 2.0
+DATE: 2025-10-12
+STATUS: 100% Complete - 64 Tasks Identified - Ready for Implementation
+DEPLOYMENT: ArgoCD GitOps with Argo Rollouts Canary Strategy
+
+================================================================================
+SECTION 1: EXECUTIVE SUMMARY
+================================================================================
+
+This comprehensive PRD defines a unified datacenter-scale distributed resource
+management platform combining three major components:
+
+1. APACHE MESOS ORCHESTRATION PLATFORM
+   - Datacenter-scale resource management (5,000+ nodes)
+   - Docker containerization with <5s startup
+   - Marathon service orchestration
+   - Multi-framework support (50+ concurrent frameworks)
+   - High availability (99.95% uptime)
+   - Resource efficiency (70%+ utilization vs. 20-30% in siloed environments)
+
+2. ZERO-DOWNTIME ZOOKEEPER MIGRATION SYSTEM
+   - Live migration capabilities for Zookeeper clusters
+   - Bidirectional synchronization (<50ms lag)
+   - Phase-based orchestration (6 phases)
+   - Zero task failures during migration
+   - 100% data consistency
+   - Rollback capability at any phase
+
+3. WEAVE SCOPE-LIKE MONITORING PLATFORM
+   - Real-time topology visualization
+   - Automatic discovery (hosts, containers, processes, networks)
+   - Container monitoring and management
+   - Interactive graph visualization (<2s rendering for 1000 nodes)
+   - Support for 10,000+ containers
+   - Probe overhead <5% CPU, <100MB RAM
+
+================================================================================
+SECTION 2: PLATFORM GOALS & SUCCESS CRITERIA
+================================================================================
+
+PRIMARY GOALS:
+--------------
+1. Resource Democratization: Enable any framework to use any resource
+2. Zero-Downtime Operations: Infrastructure changes without interruption
+3. Containerization at Scale: 10,000+ Docker containers with <5s startup
+4. Complete Observability: Real-time visibility into all infrastructure
+5. High Availability: 99.95% availability for critical services
+
+ORCHESTRATION SUCCESS METRICS:
+-------------------------------
+- Cluster utilization > 70%
+- Support 5,000+ nodes per cluster
+- Container startup < 5 seconds
+- Framework resource offers < 100ms latency
+- Task launch rate > 1,000 tasks/second
+- Master availability 99.95%
+
+MIGRATION SUCCESS METRICS:
+---------------------------
+- Zero task failures during migration
+- Coordination latency < 100ms
+- 100% data consistency between clusters
+- Cutover time < 5 minutes
+- Sync lag < 50ms for 10,000+ znodes
+
+MONITORING SUCCESS METRICS:
+----------------------------
+- UI rendering < 2 seconds for 1,000 nodes (P95)
+- Real-time updates < 1 second latency
+- Probe overhead < 5% CPU, < 100MB memory
+- Support 10,000+ containers per deployment
+- 99.9% probe uptime
+
+================================================================================
+SECTION 3: USER PERSONAS
+================================================================================
+
+PLATFORM ENGINEER
+-----------------
+- Deploys and maintains Mesos cluster infrastructure
+- Executes migration procedures
+- Monitors cluster health
+- Configures resource allocation policies
+
+APPLICATION DEVELOPER
+---------------------
+- Deploys containerized applications via Marathon
+- Manages service scaling and updates
+- Uses monitoring UI for troubleshooting
+
+DATA ENGINEER
+-------------
+- Runs Hadoop, Spark jobs on shared cluster
+- Monitors job completion and resource usage
+
+DEVOPS/SRE
+----------
+- Operates service discovery and load balancing
+- Manages CI/CD pipelines
+- Validates service continuity during migrations
+- Uses monitoring for debugging
+
+INFRASTRUCTURE OPERATIONS LEAD
+------------------------------
+- Plans migration windows
+- Reviews rollback procedures
+- Manages compliance and security
+
+================================================================================
+SECTION 4: CORE MESOS ORCHESTRATION PLATFORM (23 TASKS)
+================================================================================
+
+4.1 MESOS CLUSTER MANAGEMENT
+----------------------------
+
+TASK 1: Mesos Master Cluster Setup with HA
+-------------------------------------------
+PRIORITY: Critical
+DEPENDENCIES: None
+DESCRIPTION: Deploy 3-5 Mesos masters in HA mode with Zookeeper-based leader
+            election using MultiPaxos algorithm
+DETAILS:
+  - Deploy Mesos master containers (mesosphere/mesos:1.11.0)
+  - Configure Zookeeper quorum (3-5 nodes)
+  - Implement MultiPaxos leader election
+  - Set up master failover <10s
+  - Configure resource offer mechanism
+  - Deploy using ArgoCD with Helm chart
+  - Add Prometheus metrics export
+TEST STRATEGY:
+  - Leader election tests
+  - Failover simulation (<10s requirement)
+  - Resource offer latency (<100ms requirement)
+
+TASK 2: Zookeeper Cluster Deployment for Coordination
+------------------------------------------------------
+PRIORITY: Critical
+DEPENDENCIES: None
+DESCRIPTION: Deploy highly available Zookeeper ensemble (3-5 nodes) for Mesos
+            coordination
+DETAILS:
+  - Deploy Zookeeper StatefulSet in K8s
+  - Configure quorum (minimum 3 nodes)
+  - Set up persistent volumes for data
+  - Configure authentication (Kerberos)
+  - Implement monitoring and alerting
+  - Performance tuning (sessionTimeout=60000, tickTime=2000)
+  - Deploy via ArgoCD
+TEST STRATEGY:
+  - Quorum resilience tests
+  - Leader election validation
+  - Session timeout validation
+  - Performance benchmarks
+
+TASK 3: Mesos Agent Deployment and Resource Abstraction
+--------------------------------------------------------
+PRIORITY: Critical
+DEPENDENCIES: Task 1, Task 2
+DESCRIPTION: Deploy Mesos agents across cluster nodes with resource abstraction
+            and cgroups isolation
+DETAILS:
+  - Deploy Mesos agent DaemonSet
+  - Implement resource aggregation (CPU, memory, disk, GPU, ports)
+  - Configure Linux cgroups isolation (v1 and v2)
+  - Support fractional resources (0.5 CPU, 512MB)
+  - Custom resource types (network bandwidth)
+  - Agent registration and heartbeats
+  - Deploy with ArgoCD Rollout for canary updates
+TEST STRATEGY:
+  - Resource allocation accuracy
+  - cgroups isolation validation
+  - Agent heartbeat reliability
+  - Registration tests
+
+4.2 MULTI-TENANCY & RESOURCE MANAGEMENT
+----------------------------------------
+
+TASK 4: Multi-Tenancy and Resource Quotas Implementation
+---------------------------------------------------------
+PRIORITY: High
+DEPENDENCIES: Task 1, Task 3
+DESCRIPTION: Implement multi-tenancy with DRF algorithm and resource quotas
+DETAILS:
+  - Implement Weighted DRF (Dominant Resource Fairness)
+  - Resource quotas per framework
+  - Role-based resource access
+  - Principal authentication (SASL)
+  - Framework isolation
+  - Quota enforcement engine
+  - Metrics and reporting
+TEST STRATEGY:
+  - DRF fairness validation
+  - Quota enforcement tests
+  - Multi-tenant isolation tests
+
+4.3 DOCKER CONTAINER SUPPORT
+-----------------------------
+
+TASK 5: Docker Containerizer Integration
+-----------------------------------------
+PRIORITY: Critical
+DEPENDENCIES: Task 3
+DESCRIPTION: Integrate Docker containerizer with Mesos for container orchestration
+DETAILS:
+  - Configure Mesos containerizer with Docker runtime
+  - Composite containerizer (docker,mesos)
+  - Private registry authentication
+  - Image caching for <5s startup
+  - Support for Docker API calls
+  - Volume mounts (local, NFS, Ceph, HDFS)
+  - Network modes (bridge, host, overlay, CNI)
+TEST STRATEGY:
+  - Container startup time (<5s requirement)
+  - Image pull performance
+  - Volume mount validation
+  - Network modes testing
+
+TASK 6: Container Resource Isolation with cgroups
+--------------------------------------------------
+PRIORITY: High
+DEPENDENCIES: Task 5
+DESCRIPTION: Implement comprehensive resource isolation using Linux cgroups
+DETAILS:
+  - CPU limits via shares, quotas, pinning
+  - Memory limits with OOM handling
+  - Disk quotas for container storage
+  - Network bandwidth shaping
+  - cgroups v1 and v2 support
+  - Resource enforcement monitoring
+  - Metrics collection per container
+TEST STRATEGY:
+  - Resource limit enforcement
+  - OOM behavior validation
+  - Bandwidth shaping tests
+  - Quota accuracy
+
+4.4 MARATHON FRAMEWORK
+----------------------
+
+TASK 7: Marathon Framework Integration
+---------------------------------------
+PRIORITY: Critical
+DEPENDENCIES: Task 1, Task 2
+DESCRIPTION: Deploy and configure Marathon for long-running service management
+DETAILS:
+  - Deploy Marathon (mesosphere/marathon:1.11.0)
+  - Configure Marathon API
+  - Application deployment templates
+  - Health check configuration (TCP, HTTP, command)
+  - Service discovery integration
+  - HA configuration (3 instances)
+  - Deploy via ArgoCD with canary strategy
+TEST STRATEGY:
+  - Application deployment
+  - Scaling operations
+  - Health checks
+  - Failover testing
+
+TASK 8: Marathon Scaling and Auto-Healing
+------------------------------------------
+PRIORITY: High
+DEPENDENCIES: Task 7
+DESCRIPTION: Implement horizontal scaling and automatic task relaunching
+DETAILS:
+  - Horizontal scaling API implementation
+  - Automatic task relaunching on failure
+  - Configurable restart backoff
+  - Launch rate limiting
+  - Scale-up/scale-down policies
+  - Health-based autoscaling
+  - API endpoints for scaling operations
+TEST STRATEGY:
+  - Scaling performance (1000 tasks/sec requirement)
+  - Auto-healing validation
+  - Backoff behavior
+  - Rate limiting
+
+TASK 9: Marathon Rolling Updates with Blue-Green and Canary
+------------------------------------------------------------
+PRIORITY: Critical
+DEPENDENCIES: Task 7, Task 8
+DESCRIPTION: Implement zero-downtime deployment strategies
+DETAILS:
+  - Replace strategy implementation
+  - Blue-Green deployment support
+  - Canary deployment with traffic shifting (10%→25%→50%→75%→100%)
+  - Health check validation during updates
+  - Automatic rollback on failure
+  - Upgrade strategies: minimumHealthCapacity=0.8, maximumOverCapacity=0.2
+  - Integration with Argo Rollouts
+TEST STRATEGY:
+  - Zero-downtime validation
+  - Rollback speed
+  - Health check accuracy
+  - Canary traffic routing
+
+TASK 10: Service Discovery with Mesos-DNS and Consul
+-----------------------------------------------------
+PRIORITY: High
+DEPENDENCIES: Task 7
+DESCRIPTION: Implement service discovery using Mesos-DNS and Consul
+DETAILS:
+  - Deploy Mesos-DNS (app.marathon.mesos)
+  - Consul service catalog integration
+  - Environment variable injection for service endpoints
+  - Config file generation
+  - DNS-based service discovery
+  - Health-based service routing
+  - Integration with load balancers
+TEST STRATEGY:
+  - DNS resolution tests
+  - Service registration accuracy
+  - Failover handling
+  - Health check integration
+
+4.5 MULTI-FRAMEWORK SUPPORT
+----------------------------
+
+TASK 11: Multi-Framework Support (Kubernetes, Hadoop, Spark, Chronos)
+----------------------------------------------------------------------
+PRIORITY: Medium
+DEPENDENCIES: Task 1, Task 3, Task 4
+DESCRIPTION: Enable support for multiple frameworks beyond Marathon
+DETAILS:
+  - Kubernetes on Mesos integration
+  - Hadoop YARN on Mesos
+  - Spark cluster manager (coarse/fine-grained)
+  - Chronos distributed cron
+  - Storm stream processing
+  - Framework registration API
+  - Resource allocation fairness across frameworks
+  - Deploy frameworks via ArgoCD
+TEST STRATEGY:
+  - Concurrent framework operation (50+ frameworks requirement)
+  - Resource fairness validation
+  - Framework failover
+
+TASK 12: Task Management and Lifecycle
+---------------------------------------
+PRIORITY: High
+DEPENDENCIES: Task 7
+DESCRIPTION: Implement comprehensive task lifecycle management
+DETAILS:
+  - Task states: staging, running, finished, failed
+  - Kill tasks (graceful/forceful)
+  - Gang scheduling for task groups
+  - Health checking and status updates
+  - Task metadata and labeling
+  - Task history and audit logging
+  - Task resource tracking
+TEST STRATEGY:
+  - Task lifecycle state transitions
+  - Graceful shutdown validation
+  - Gang scheduling correctness
+
+4.6 HIGH AVAILABILITY & STATE PERSISTENCE
+------------------------------------------
+
+TASK 13: High Availability for Mesos Masters
+---------------------------------------------
+PRIORITY: Critical
+DEPENDENCIES: Task 1, Task 2
+DESCRIPTION: Implement HA configuration with automatic failover <10s
+DETAILS:
+  - Quorum-based leader election
+  - Automatic failover mechanism
+  - Replicated log for consistency
+  - Framework/agent re-registration on failover
+  - State persistence to replicated log
+  - Zero data loss recovery
+  - Monitor and alert on failover events
+TEST STRATEGY:
+  - Failover latency (<10s requirement)
+  - State consistency validation
+  - Zero data loss verification
+
+TASK 14: State Persistence and Checkpointing
+---------------------------------------------
+PRIORITY: Critical
+DEPENDENCIES: Task 13
+DESCRIPTION: Implement state persistence with checkpointing for recovery
+DETAILS:
+  - Task state to replicated log
+  - Checkpoint framework info
+  - Cluster state snapshots
+  - Zero data loss recovery mechanism
+  - Agent recovery with checkpoint restore
+  - Network partition handling
+  - Backup and restore procedures
+TEST STRATEGY:
+  - Recovery validation
+  - Checkpoint integrity
+  - Network partition resilience
+  - Backup/restore testing
+
+TASK 15: Agent Recovery and Graceful Draining
+----------------------------------------------
+PRIORITY: High
+DEPENDENCIES: Task 14
+DESCRIPTION: Implement agent recovery and graceful draining for maintenance
+DETAILS:
+  - Checkpoint task/executor state
+  - Recover running tasks on restart
+  - Graceful draining for maintenance
+  - Task migration to other agents
+  - Drain timeout configuration
+  - Re-registration after recovery
+  - Monitoring drain progress
+TEST STRATEGY:
+  - Task recovery accuracy
+  - Graceful drain validation
+  - Zero task loss during maintenance
+
+4.7 OBSERVABILITY & LOGGING
+----------------------------
+
+TASK 16: Mesos Observability and Metrics
+-----------------------------------------
+PRIORITY: High
+DEPENDENCIES: Task 1, Task 3
+DESCRIPTION: Implement comprehensive metrics collection and export
+DETAILS:
+  - Master metrics: offers, frameworks, agents, tasks
+  - Agent metrics: resource usage, containers, executors
+  - Framework metrics: launch latency, allocation efficiency
+  - Prometheus format export
+  - Metrics aggregation
+  - Dashboard integration (Grafana)
+  - Alerting rules
+TEST STRATEGY:
+  - Metrics accuracy
+  - Export performance
+  - Dashboard functionality
+  - Alert validation
+
+TASK 17: Centralized Logging with ELK Stack
+--------------------------------------------
+PRIORITY: Medium
+DEPENDENCIES: Task 1, Task 3
+DESCRIPTION: Implement centralized logging for Mesos cluster
+DETAILS:
+  - Deploy ELK stack (Elasticsearch, Logstash, Kibana)
+  - Task stdout/stderr capture
+  - Structured JSON logs
+  - Log rotation and compression
+  - Log aggregation via Fluentd
+  - Log retention policies
+  - Search and analysis interface
+TEST STRATEGY:
+  - Log collection completeness
+  - Search performance
+  - Retention policy enforcement
+
+TASK 18: Mesos Web UI and Dashboard
+------------------------------------
+PRIORITY: Medium
+DEPENDENCIES: Task 16
+DESCRIPTION: Deploy and configure Mesos Web UI for cluster management
+DETAILS:
+  - Cluster state dashboard
+  - Agent details and resource allocation view
+  - Framework list with task status
+  - Task browsing with logs
+  - Metrics visualization
+  - Real-time updates
+  - User authentication and authorization
+TEST STRATEGY:
+  - UI responsiveness
+  - Real-time update latency
+  - Authentication validation
+
+4.8 NETWORKING
+--------------
+
+TASK 19: Container Networking with CNI and Overlay Networks
+------------------------------------------------------------
+PRIORITY: High
+DEPENDENCIES: Task 5
+DESCRIPTION: Implement advanced container networking capabilities
+DETAILS:
+  - Host mode (no isolation)
+  - Bridge mode (port mapping)
+  - Overlay networks (Weave, Calico, Flannel)
+  - CNI plugin support
+  - Network policy enforcement
+  - Service mesh preparation
+  - Network performance monitoring
+TEST STRATEGY:
+  - Network mode validation
+  - Overlay network connectivity
+  - CNI plugin compatibility
+  - Performance benchmarks
+
+TASK 20: HAProxy Load Balancing Integration
+--------------------------------------------
+PRIORITY: High
+DEPENDENCIES: Task 7, Task 10
+DESCRIPTION: Deploy and configure HAProxy for load balancing
+DETAILS:
+  - HAProxy auto-configuration based on Marathon apps
+  - Load balancing algorithms: round-robin, least-connections, IP hash
+  - Health-based backend selection
+  - SSL/TLS termination
+  - Stats dashboard
+  - Dynamic reconfiguration
+  - Deploy via ArgoCD
+TEST STRATEGY:
+  - Load distribution accuracy
+  - Health check integration
+  - SSL termination
+  - Failover handling
+
+4.9 SECURITY
+------------
+
+TASK 21: Mesos Security: Authentication and Authorization
+----------------------------------------------------------
+PRIORITY: Critical
+DEPENDENCIES: Task 1, Task 2
+DESCRIPTION: Implement comprehensive security with SASL, SSL/TLS, and ACLs
+DETAILS:
+  - Framework auth via SASL
+  - HTTP auth (Basic, Bearer token)
+  - Zookeeper auth (Kerberos)
+  - SSL/TLS everywhere
+  - ACLs for framework registration
+  - Resource quota enforcement
+  - Task launch permissions
+  - Admin operation authorization
+TEST STRATEGY:
+  - Authentication validation
+  - Authorization enforcement
+  - SSL/TLS verification
+  - ACL correctness
+
+TASK 22: Secrets Management with Vault
+---------------------------------------
+PRIORITY: High
+DEPENDENCIES: Task 21
+DESCRIPTION: Integrate HashiCorp Vault for secrets management
+DETAILS:
+  - Vault integration for Mesos
+  - Encrypted secrets at rest
+  - Zero-downtime rotation
+  - Dynamic secret generation
+  - Secret injection into containers
+  - Audit logging
+  - Secret access policies
+TEST STRATEGY:
+  - Secret injection validation
+  - Rotation testing
+  - Access policy enforcement
+  - Audit completeness
+
+TASK 23: Container Security Hardening
+--------------------------------------
+PRIORITY: High
+DEPENDENCIES: Task 5
+DESCRIPTION: Implement container security best practices
+DETAILS:
+  - Non-root containers enforcement
+  - AppArmor/SELinux profiles
+  - Seccomp filters
+  - Image vulnerability scanning
+  - Prevent privileged containers
+  - Security policy enforcement
+  - Regular security audits
+TEST STRATEGY:
+  - Security policy enforcement
+  - Vulnerability scan accuracy
+  - Privilege escalation prevention
+
+================================================================================
+SECTION 5: ZOOKEEPER MIGRATION SYSTEM (11 TASKS)
+================================================================================
+
+5.1 BIDIRECTIONAL SYNCHRONIZATION
+----------------------------------
+
+TASK 24: Zookeeper Sync Engine for Bidirectional Replication
+-------------------------------------------------------------
+PRIORITY: Critical
+DEPENDENCIES: Task 2
+DESCRIPTION: Build sync engine for real-time bidirectional Zookeeper replication
+DETAILS:
+  - Continuous sync between Cluster-A and Cluster-B
+  - Propagate creates, updates, deletes <50ms
+  - Handle nested path hierarchies
+  - Preserve metadata (version, timestamps, ACLs)
+  - Initial snapshot bootstrap
+  - Incremental catch-up
+  - Checksum validation
+TEST STRATEGY:
+  - Replication latency (<50ms requirement)
+  - Data consistency (100%)
+  - Metadata preservation
+  - Large dataset handling
+
+TASK 25: Conflict Resolution for Zookeeper Sync
+------------------------------------------------
+PRIORITY: High
+DEPENDENCIES: Task 24
+DESCRIPTION: Implement conflict resolution strategies for concurrent modifications
+DETAILS:
+  - Detect concurrent modifications
+  - Last-Write-Wins strategy
+  - Manual conflict resolution
+  - Source-Wins strategy
+  - Audit logging for conflicts
+  - Alert on high conflict rates
+  - Conflict resolution dashboard
+TEST STRATEGY:
+  - Conflict detection accuracy
+  - Resolution strategy validation
+  - Audit completeness
+
+TASK 26: Zookeeper Sync Health Monitoring
+------------------------------------------
+PRIORITY: High
+DEPENDENCIES: Task 24
+DESCRIPTION: Implement comprehensive monitoring for sync engine
+DETAILS:
+  - Track replication lag
+  - Alert on sync failures
+  - Dashboard for sync status
+  - Metrics export (Prometheus)
+  - Sync throughput monitoring
+  - Error rate tracking
+  - Performance metrics
+TEST STRATEGY:
+  - Monitoring accuracy
+  - Alert responsiveness
+  - Dashboard functionality
+  - Metrics correctness
+
+5.2 MIGRATION ORCHESTRATION (6 PHASES)
+---------------------------------------
+
+TASK 27: Migration Phase 1 - Deploy Zookeeper Cluster-B
+--------------------------------------------------------
+PRIORITY: Critical
+DEPENDENCIES: Task 24, Task 25, Task 26
+DESCRIPTION: Deploy and sync target Zookeeper cluster
+DETAILS:
+  - Deploy ZK ensemble on Cluster-B
+  - Start sync engine (A → B)
+  - Wait for initial snapshot transfer
+  - Validate 100% data consistency
+SUCCESS CRITERIA:
+  - Cluster-B quorum healthy
+  - Sync lag <100ms
+  - Zero missing znodes
+TEST STRATEGY:
+  - Data consistency validation (100%)
+  - Sync lag measurement
+  - Quorum health verification
+
+TASK 28: Migration Phase 2 - Deploy Mesos Master Cluster-B
+-----------------------------------------------------------
+PRIORITY: Critical
+DEPENDENCIES: Task 27
+DESCRIPTION: Deploy Mesos masters on target cluster
+DETAILS:
+  - Configure masters pointing to Cluster-B
+  - Set matching ZK path prefix
+  - Start Mesos masters
+  - Verify masters join existing cluster
+SUCCESS CRITERIA:
+  - Unified master set visible
+  - Leader election stable
+  - Framework connections maintained
+TEST STRATEGY:
+  - Master registration validation
+  - Leader election stability
+  - Framework connectivity
+
+TASK 29: Migration Phase 3 - Tear Down Mesos Master Cluster-A
+--------------------------------------------------------------
+PRIORITY: Critical
+DEPENDENCIES: Task 28
+DESCRIPTION: Gracefully remove source Mesos masters
+DETAILS:
+  - Gracefully stop Cluster-A masters
+  - Force leader election if needed
+  - Verify Cluster-B leader elected
+SUCCESS CRITERIA:
+  - Single master cluster on Cluster-B
+  - Zero task interruptions
+  - All frameworks connected
+TEST STRATEGY:
+  - Zero task interruption validation
+  - Leader election verification
+  - Framework connectivity
+
+TASK 30: Migration Phase 4 - Deploy Mesos Agent Cluster-B
+----------------------------------------------------------
+PRIORITY: Critical
+DEPENDENCIES: Task 29
+DESCRIPTION: Deploy Mesos agents on target cluster
+DETAILS:
+  - Configure agents pointing to Cluster-B
+  - Start agents and verify registration
+  - Confirm resource offers flowing
+SUCCESS CRITERIA:
+  - Agents registered and healthy
+  - Resource offers accepted
+  - No agent flapping
+TEST STRATEGY:
+  - Agent registration validation
+  - Resource offer flow
+  - Stability testing
+
+TASK 31: Migration Phase 5 - Drain Agent Cluster-A
+---------------------------------------------------
+PRIORITY: Critical
+DEPENDENCIES: Task 30
+DESCRIPTION: Gracefully drain source agents
+DETAILS:
+  - Mark Cluster-A agents for maintenance
+  - Trigger task draining
+  - Wait for task migration to Cluster-B
+  - Decommission drained agents
+SUCCESS CRITERIA:
+  - All tasks on Cluster-B
+  - Zero failed tasks
+  - Agent Cluster-A empty
+TEST STRATEGY:
+  - Task migration validation
+  - Zero task failure
+  - Drain completion verification
+
+TASK 32: Migration Phase 6 - Remove Zookeeper Cluster-A
+--------------------------------------------------------
+PRIORITY: Critical
+DEPENDENCIES: Task 31
+DESCRIPTION: Remove source Zookeeper cluster
+DETAILS:
+  - Stop sync engine
+  - Verify zero active sessions on Cluster-A
+  - Shut down Cluster-A
+  - Archive data for rollback window (72 hours)
+SUCCESS CRITERIA:
+  - Cluster-B fully independent
+  - Migration complete
+  - All services healthy
+TEST STRATEGY:
+  - Service health validation
+  - Data archival verification
+  - Independent operation confirmation
+
+5.3 VALIDATION & SAFETY
+------------------------
+
+TASK 33: Migration Validation and Safety Checks
+------------------------------------------------
+PRIORITY: Critical
+DEPENDENCIES: Task 27-32
+DESCRIPTION: Implement comprehensive pre/in-flight/post migration validation
+DETAILS:
+PRE-MIGRATION:
+  - Cluster-A health verification
+  - Network connectivity testing
+  - Mesos cluster state validation
+  - Resource availability check
+IN-FLIGHT VALIDATION:
+  - Task count and health monitoring
+  - Leader election consistency
+  - Framework connectivity tracking
+  - Resource offer validation
+POST-MIGRATION:
+  - Task migration confirmation
+  - Orphaned znodes check
+  - Performance metrics baseline
+  - Migration report generation
+TEST STRATEGY:
+  - Validation completeness
+  - Accuracy of checks
+  - Performance impact
+  - Report generation
+
+TASK 34: Migration Rollback Capability
+---------------------------------------
+PRIORITY: Critical
+DEPENDENCIES: Task 33
+DESCRIPTION: Implement rollback capability at any migration phase
+DETAILS:
+  - Rollback logic for each phase (1-6)
+  - Restore original routing
+  - Validate cluster state post-rollback
+  - 72-hour rollback retention window
+  - Data archival and restoration
+  - Automated rollback procedures
+  - Rollback testing
+TEST STRATEGY:
+  - Rollback from each phase
+  - State restoration validation
+  - Data integrity verification
+
+5.4 MIGRATION API
+-----------------
+
+TASK 35: Migration CLI and REST API
+------------------------------------
+PRIORITY: High
+DEPENDENCIES: Task 27-32
+DESCRIPTION: Build CLI and REST API for migration management
+DETAILS:
+CLI COMMANDS:
+  - zk-migrate start --source-zk --target-zk --config
+  - zk-migrate status --migration-id
+  - zk-migrate advance --migration-id --phase --confirm
+  - zk-migrate rollback --migration-id --to-phase
+  - zk-migrate validate --migration-id --phase
+REST API ENDPOINTS:
+  - POST   /api/v1/migrations              # Create migration plan
+  - GET    /api/v1/migrations/{id}         # Get status
+  - POST   /api/v1/migrations/{id}/start   # Begin execution
+  - POST   /api/v1/migrations/{id}/advance # Move to next phase
+  - POST   /api/v1/migrations/{id}/rollback # Revert
+  - GET    /api/v1/migrations/{id}/health  # Health check
+  - GET    /api/v1/sync/status             # Sync metrics
+ADDITIONAL FEATURES:
+  - Configuration YAML format
+  - Interactive mode
+  - Dry-run capability
+  - Progress reporting
+TEST STRATEGY:
+  - API functionality
+  - CLI usability
+  - Configuration validation
+  - Error handling
+
+================================================================================
+SECTION 6: CONTAINER MONITORING & VISUALIZATION (19 TASKS)
+================================================================================
+
+6.1 MONITORING PROBE AGENT
+---------------------------
+
+TASK 36: Monitoring Probe Agent Implementation
+-----------------------------------------------
+PRIORITY: Critical
+DEPENDENCIES: None
+DESCRIPTION: Build lightweight monitoring probe agent for each node
+DETAILS:
+  - Collect from /proc, Docker API, K8s API, conntrack
+  - Generate local reports
+  - Send to app via HTTP/gRPC
+  - Minimal resource overhead (<5% CPU, <100MB memory)
+  - Host, container, process discovery
+  - Network topology collection
+  - Deploy as DaemonSet via ArgoCD
+TEST STRATEGY:
+  - Resource overhead validation (<5% CPU, <100MB RAM requirement)
+  - Data accuracy
+  - Report generation performance
+  - K8s integration
+
+6.2 AUTOMATIC TOPOLOGY DISCOVERY
+---------------------------------
+
+TASK 37: Host Discovery and Metadata Collection
+------------------------------------------------
+PRIORITY: High
+DEPENDENCIES: Task 36
+DESCRIPTION: Implement automatic host discovery with metadata collection
+DETAILS:
+  - Detect all hosts automatically
+  - Collect metadata (hostname, IPs, OS, kernel)
+  - Track resource capacity
+  - Monitor host-level metrics
+  - System information gathering
+  - Hardware detection
+  - Integration with probe agent
+TEST STRATEGY:
+  - Discovery completeness
+  - Metadata accuracy
+  - Performance impact
+
+TASK 38: Container Discovery and Lifecycle Tracking
+----------------------------------------------------
+PRIORITY: High
+DEPENDENCIES: Task 36
+DESCRIPTION: Implement container discovery and lifecycle state tracking
+DETAILS:
+  - Discover running containers via Docker API
+  - Extract metadata (image, labels, env vars)
+  - Track lifecycle states (created, running, paused, stopped)
+  - Monitor resource usage
+  - Container events tracking
+  - Real-time updates
+  - Integration with probe
+TEST STRATEGY:
+  - Discovery accuracy
+  - Lifecycle tracking
+  - Metadata completeness
+  - Real-time update latency
+
+TASK 39: Process Discovery and Relationship Mapping
+----------------------------------------------------
+PRIORITY: Medium
+DEPENDENCIES: Task 36
+DESCRIPTION: Implement process discovery with parent-child relationship tracking
+DETAILS:
+  - Detect processes in containers and hosts
+  - Collect PID, command, user info
+  - Track parent-child relationships
+  - Monitor resource consumption
+  - Process tree visualization
+  - Integration with /proc filesystem
+  - Efficient polling
+TEST STRATEGY:
+  - Process detection accuracy
+  - Relationship mapping correctness
+  - Resource overhead
+
+TASK 40: Network Topology Discovery with conntrack
+---------------------------------------------------
+PRIORITY: High
+DEPENDENCIES: Task 36, Task 38
+DESCRIPTION: Implement network connection mapping and traffic flow visualization
+DETAILS:
+  - Map connections between containers via conntrack
+  - Visualize service communication
+  - Track TCP/UDP connections
+  - Display traffic flows
+  - Connection strength based on byte volumes
+  - Protocol analysis (HTTP, gRPC, TCP, UDP)
+  - Service-to-service mapping
+TEST STRATEGY:
+  - Connection accuracy
+  - Traffic flow visualization
+  - Protocol detection
+  - Performance with high-connection environments
+
+TASK 41: Kubernetes Resource Discovery Integration
+---------------------------------------------------
+PRIORITY: High
+DEPENDENCIES: Task 36
+DESCRIPTION: Extend probe to discover Kubernetes resources
+DETAILS:
+  - Discover pods, services, deployments, namespaces via K8s API
+  - Map K8s resources to containers
+  - Support labels and annotations
+  - Multi-orchestrator support
+  - Container-to-pod mapping
+  - Service endpoint tracking
+  - Real-time K8s events
+TEST STRATEGY:
+  - K8s resource discovery accuracy
+  - Pod-container mapping
+  - Label/annotation handling
+  - Multi-cluster support
+
+6.3 MONITORING BACKEND
+----------------------
+
+TASK 42: Monitoring App Backend with Report Aggregation
+--------------------------------------------------------
+PRIORITY: Critical
+DEPENDENCIES: Task 36
+DESCRIPTION: Build central app backend for report aggregation and API
+DETAILS:
+  - Receive and merge probe reports
+  - Process into topology views (Processes, Containers, Hosts, Pods, Services)
+  - Time-series metrics storage
+  - REST API for UI
+  - WebSocket for real-time updates (<1s latency requirement)
+  - Control plane for container actions
+  - Deploy via ArgoCD with canary rollouts
+TEST STRATEGY:
+  - Report aggregation performance
+  - API responsiveness
+  - WebSocket latency (<1s requirement)
+  - Multi-probe handling
+
+6.4 VISUALIZATION & NAVIGATION
+-------------------------------
+
+TASK 43: Multiple Topology Views Implementation
+------------------------------------------------
+PRIORITY: High
+DEPENDENCIES: Task 42
+DESCRIPTION: Implement multiple topology view modes
+DETAILS:
+  - Processes View: All processes and relationships
+  - Containers View: Container-level topology
+  - Hosts View: Infrastructure visualization
+  - Pods View: Kubernetes pod topology
+  - Services View: Service mesh visualization
+  - Drill-up/drill-down navigation
+  - View switching without data reload
+TEST STRATEGY:
+  - View accuracy
+  - Switching performance
+  - Navigation correctness
+  - Data consistency across views
+
+TASK 44: Interactive Graph Visualization with D3.js/Cytoscape.js
+-----------------------------------------------------------------
+PRIORITY: Critical
+DEPENDENCIES: Task 42, Task 43
+DESCRIPTION: Build interactive force-directed graph visualization
+DETAILS:
+  - Real-time force-directed layout
+  - Node sizing by metrics
+  - Color coding for status (healthy, degraded, failed)
+  - Animated connection flows
+  - Zoom, pan, navigation controls
+  - Performance optimization for large graphs (10,000+ nodes)
+  - Graph clustering for complex topologies
+TEST STRATEGY:
+  - Rendering performance (<2s for 1000 nodes requirement)
+  - Animation smoothness
+  - Interaction responsiveness
+  - Large graph handling
+
+TASK 45: Context Panel with Node Details and Metrics
+-----------------------------------------------------
+PRIORITY: High
+DEPENDENCIES: Task 44
+DESCRIPTION: Build context panel showing detailed node information
+DETAILS:
+  - Detailed node information display
+  - Metadata, tags, labels
+  - Real-time metrics with sparklines
+  - Network metrics
+  - Connected nodes list
+  - Historical data
+  - Export capabilities
+TEST STRATEGY:
+  - Data accuracy
+  - Real-time updates
+  - Sparkline rendering
+  - Panel responsiveness
+
+6.5 METRICS & MONITORING
+-------------------------
+
+TASK 46: Time-Series Metrics Storage with 15-second Resolution
+---------------------------------------------------------------
+PRIORITY: High
+DEPENDENCIES: Task 42
+DESCRIPTION: Implement efficient time-series metrics storage
+DETAILS:
+  - CPU usage (container, process, host)
+  - Memory usage and limits
+  - Network I/O (ingress/egress)
+  - Disk I/O and storage
+  - 15-second resolution sparklines
+  - Ring buffer implementation
+  - Retention policies (default 1 hour)
+  - Optional Prometheus TSDB integration
+TEST STRATEGY:
+  - Storage efficiency
+  - Query performance
+  - Retention enforcement
+  - Sparkline accuracy
+
+TASK 47: Metrics Visualization with Sparklines
+-----------------------------------------------
+PRIORITY: Medium
+DEPENDENCIES: Task 46
+DESCRIPTION: Implement time-series sparkline charts
+DETAILS:
+  - Time-series sparkline charts
+  - Current value with historical trend
+  - Percentage-based utilization
+  - Connection counts
+  - Custom metrics from plugins
+  - Real-time updates
+  - Export to PNG/CSV
+TEST STRATEGY:
+  - Visualization accuracy
+  - Real-time update performance
+  - Export functionality
+
+6.6 CONTAINER CONTROL
+----------------------
+
+TASK 48: Container Lifecycle Management from UI
+------------------------------------------------
+PRIORITY: High
+DEPENDENCIES: Task 42
+DESCRIPTION: Implement container control operations from web UI
+DETAILS:
+  - Start/stop containers
+  - Pause/unpause containers
+  - Restart containers
+  - Delete/remove containers
+  - Execute from UI with confirmation
+  - Bulk operations support
+  - RBAC integration
+  - Audit logging
+TEST STRATEGY:
+  - Operation correctness
+  - Permission enforcement
+  - Bulk operations
+  - Audit completeness
+
+TASK 49: Container Inspection and Real-time Logs
+-------------------------------------------------
+PRIORITY: High
+DEPENDENCIES: Task 48
+DESCRIPTION: Implement container inspection with real-time log streaming
+DETAILS:
+  - Real-time logs via WebSocket
+  - Attach to terminal (exec shell) with xterm.js
+  - Inspect configuration
+  - View environment variables
+  - Access filesystem
+  - Log search and filtering
+  - Export logs
+TEST STRATEGY:
+  - Log streaming latency
+  - Terminal responsiveness
+  - Search performance
+  - Security validation
+
+TASK 50: Terminal Access with xterm.js
+---------------------------------------
+PRIORITY: Medium
+DEPENDENCIES: Task 49
+DESCRIPTION: Implement interactive terminal access for containers
+DETAILS:
+  - Terminal component using xterm.js
+  - WebSocket proxy for container exec
+  - Multiple terminal tabs support
+  - Session management and cleanup
+  - TTY encryption
+  - Session timeout
+  - Command history
+TEST STRATEGY:
+  - Terminal functionality
+  - Session security
+  - Multi-tab support
+  - Timeout enforcement
+
+TASK 51: Search and Filtering System
+-------------------------------------
+PRIORITY: Medium
+DEPENDENCIES: Task 42, Task 43
+DESCRIPTION: Implement full-text search and advanced filtering
+DETAILS:
+  - Full-text search index for node metadata
+  - Filter API: /api/v1/search
+  - Filter types: labels, tags, metadata, resource type, metrics thresholds, namespace
+  - Real-time filtering
+  - Search autocomplete
+  - Filter sidebar
+  - Save/load filter configurations
+TEST STRATEGY:
+  - Search accuracy
+  - Filter performance
+  - Autocomplete responsiveness
+  - Configuration persistence
+
+6.7 WEB UI
+----------
+
+TASK 52: React-based Web UI Development
+----------------------------------------
+PRIORITY: Critical
+DEPENDENCIES: Task 44, Task 45
+DESCRIPTION: Build modern React frontend for monitoring platform
+DETAILS:
+  - Setup with Vite
+  - Components: TopologyGraph, NodeDetailsPanel, ViewSelector, SearchBar, FilterPanel
+  - Cytoscape.js integration
+  - WebSocket real-time updates
+  - Responsive design with styled-components
+  - State management with Zustand
+  - Deploy via ArgoCD
+TEST STRATEGY:
+  - Component testing
+  - E2E tests with Playwright
+  - Visual regression tests
+  - Performance tests
+
+6.8 PLUGIN SYSTEM
+-----------------
+
+TASK 53: Plugin Architecture and SDK
+-------------------------------------
+PRIORITY: Low
+DEPENDENCIES: Task 42, Task 52
+DESCRIPTION: Develop extensible plugin system
+DETAILS:
+  - HTTP-based plugin API
+  - Plugin registration and discovery
+  - Plugin types: metrics, control, reporter
+  - Go SDK with client library
+  - Plugin manifest format (YAML)
+  - Hot-reload capability
+  - Example plugins
+  - Plugin UI integration
+  - Security: sandboxing and validation
+TEST STRATEGY:
+  - Plugin lifecycle
+  - SDK functionality
+  - Hot-reload
+  - Security boundaries
+  - Example plugins
+
+6.9 DEPLOYMENT
+--------------
+
+TASK 54: Kubernetes Deployment with Helm Chart
+-----------------------------------------------
+PRIORITY: High
+DEPENDENCIES: Task 36, Task 42, Task 52
+DESCRIPTION: Create Helm chart for Kubernetes deployment
+DETAILS:
+  - DaemonSet for probes
+  - Deployment for app
+  - Service/Ingress for UI
+  - Helm chart with configurable values
+  - Multi-environment support (dev, staging, prod)
+  - Resource limits and requests
+  - RBAC configuration
+  - ArgoCD integration
+TEST STRATEGY:
+  - Deployment validation across K8s versions
+  - Helm chart functionality
+  - Value overrides
+
+TASK 55: Docker Compose for Local Development
+----------------------------------------------
+PRIORITY: Medium
+DEPENDENCIES: Task 36, Task 42, Task 52
+DESCRIPTION: Create Docker Compose setup for local development
+DETAILS:
+  - Container images for all components
+  - Docker Compose configuration
+  - Volume mounts for persistence
+  - Network configuration
+  - Development environment setup
+  - Hot-reload support
+  - Documentation
+TEST STRATEGY:
+  - Compose functionality
+  - Volume persistence
+  - Network connectivity
+  - Development workflow
+
+================================================================================
+SECTION 7: ARGOCD GITOPS INTEGRATION (3 TASKS)
+================================================================================
+
+TASK 56: ArgoCD Applications for Full Platform
+-----------------------------------------------
+PRIORITY: Critical
+DEPENDENCIES: Task 1, Task 7, Task 42, Task 54
+DESCRIPTION: Create ArgoCD Applications for complete platform deployment
+DETAILS:
+  - Application for Mesos cluster
+  - Application for Marathon
+  - Application for monitoring platform
+  - Application for migration system
+  - ApplicationSet for multi-environment
+  - Sync policies and health checks
+  - Notifications configuration
+  - Progressive delivery with Argo Rollouts
+TEST STRATEGY:
+  - Application sync
+  - Health checks
+  - Multi-environment deployment
+  - Rollout validation
+
+TASK 57: Argo Rollouts for All Services
+----------------------------------------
+PRIORITY: High
+DEPENDENCIES: Task 56
+DESCRIPTION: Implement Argo Rollouts with canary strategy
+DETAILS:
+  - Rollout for orchestrator app
+  - Rollout for monitoring app
+  - Rollout for Marathon
+  - Analysis templates for each service
+  - Canary steps: 10%→25%→50%→75%→100%
+  - Automated analysis and rollback
+  - Traffic routing configuration
+TEST STRATEGY:
+  - Canary deployment validation
+  - Analysis accuracy
+  - Automatic rollback
+  - Traffic routing
+
+TASK 58: Prometheus and Grafana Integration
+--------------------------------------------
+PRIORITY: High
+DEPENDENCIES: Task 16, Task 42
+DESCRIPTION: Deploy Prometheus and Grafana for monitoring
+DETAILS:
+  - Prometheus deployment for metrics collection
+  - ServiceMonitors for all components
+  - Grafana deployment with dashboards
+  - Pre-built dashboards for Mesos, Marathon, monitoring platform
+  - Alerting rules
+  - Alert manager configuration
+  - Deploy via ArgoCD
+TEST STRATEGY:
+  - Metrics collection completeness
+  - Dashboard accuracy
+  - Alerting functionality
+
+================================================================================
+SECTION 8: INFRASTRUCTURE & PRODUCTION READINESS (8 TASKS)
+================================================================================
+
+TASK 59: Performance Testing and Optimization
+----------------------------------------------
+PRIORITY: High
+DEPENDENCIES: Task 1, 3, 7, 24, 42, 52
+DESCRIPTION: Conduct comprehensive performance testing and optimization
+DETAILS:
+  - 10,000 node cluster simulation
+  - 100,000 concurrent tasks
+  - Large cluster migrations (10TB+, 5000 agents)
+  - UI rendering with 10,000 containers
+  - Sync throughput (10,000+ znodes/sec)
+  - Load testing with k6
+  - Performance benchmarks and reports
+TEST STRATEGY:
+  - All performance targets met per PRD success criteria
+
+TASK 60: Chaos Testing Implementation
+--------------------------------------
+PRIORITY: Medium
+DEPENDENCIES: Task 13, 14, 15
+DESCRIPTION: Implement chaos testing for resilience validation
+DETAILS:
+  - Random agent kills with Chaos Mesh
+  - Network partitions
+  - Zookeeper node failures
+  - Master crashes during operations
+  - Probe disconnections
+  - Automated chaos scenarios
+  - Recovery validation
+TEST STRATEGY:
+  - System resilience
+  - Automatic recovery
+  - Zero data loss
+  - Service availability
+
+TASK 61: Security Compliance and Auditing
+------------------------------------------
+PRIORITY: High
+DEPENDENCIES: Task 21, 22, 23
+DESCRIPTION: Implement security compliance requirements
+DETAILS:
+  - SOC 2 compliance preparation
+  - GDPR compliance for user data
+  - Audit logging (1 year retention)
+  - Security vulnerability disclosure process
+  - Regular security audits
+  - Penetration testing
+  - Compliance documentation
+TEST STRATEGY:
+  - Compliance validation
+  - Audit log completeness
+  - Vulnerability remediation process
+
+TASK 62: Comprehensive Documentation
+-------------------------------------
+PRIORITY: Medium
+DEPENDENCIES: All implementation tasks
+DESCRIPTION: Create comprehensive documentation for all platform components
+DETAILS:
+  - Architecture documentation
+  - Installation guides (Mesos, Marathon, monitoring)
+  - Configuration reference
+  - API documentation (REST, CLI)
+  - User guides
+  - Troubleshooting guides
+  - Migration playbooks
+  - Security best practices
+  - Architecture diagrams
+TEST STRATEGY:
+  - Documentation accuracy
+  - Completeness
+  - User testing
+
+TASK 63: CI/CD Pipeline with GitOps
+------------------------------------
+PRIORITY: High
+DEPENDENCIES: Task 56, 57
+DESCRIPTION: Implement CI/CD pipeline using GitOps with ArgoCD
+DETAILS:
+  - GitHub Actions for CI
+  - Container image building
+  - Image scanning and security checks
+  - ArgoCD for CD
+  - Automated testing in pipeline
+  - Multi-environment promotion (dev→staging→prod)
+  - Rollback automation
+TEST STRATEGY:
+  - Pipeline execution
+  - Automated testing
+  - Deployment validation
+  - Rollback scenarios
+
+TASK 64: Production Readiness Validation
+-----------------------------------------
+PRIORITY: Critical
+DEPENDENCIES: All tasks
+DESCRIPTION: Validate production readiness against all success criteria
+DETAILS:
+  - Orchestration metrics validation
+  - Migration metrics validation
+  - Monitoring metrics validation
+  - 99.95% availability testing
+  - Capacity planning
+  - Disaster recovery testing
+  - Production deployment checklist
+TEST STRATEGY:
+  - All PRD success criteria met
+  - Stress testing
+  - DR validation
+
+================================================================================
+SECTION 9: TECHNICAL ARCHITECTURE
+================================================================================
+
+SYSTEM COMPONENTS DIAGRAM
+--------------------------
+
+┌────────────────────────────────────────────────────────────────┐
+│                     Frameworks Layer                            │
+│  ┌──────────┐ ┌──────────┐ ┌───────┐ ┌──────────┐            │
+│  │Marathon  │ │Kubernetes│ │ Spark │ │ Chronos  │            │
+│  │(Services)│ │  (Pods)  │ │(Jobs) │ │  (Cron)  │            │
+│  └────┬─────┘ └────┬─────┘ └───┬───┘ └────┬─────┘            │
+└───────┼────────────┼───────────┼──────────┼──────────────────┘
+        │            │           │          │
+        │      Scheduler API (Resource Offers)
+        │            │           │          │
+┌───────▼────────────▼───────────▼──────────▼─────────────────┐
+│              Mesos Master Cluster (HA)                        │
+│  ┌─────────┐  ┌─────────┐  ┌─────────┐                      │
+│  │Master 1 │  │Master 2 │  │Master 3 │                      │
+│  │(Leader) │  │(Standby)│  │(Standby)│                      │
+│  └────┬────┘  └────┬────┘  └────┬────┘                      │
+│       └───────────┬┴─────────────┘                           │
+│          ┌────────▼────────┐                                 │
+│          │   Zookeeper     │ (Leader Election + Migration)   │
+│          │   Cluster A/B   │                                 │
+│          └────────┬────────┘                                 │
+│                   │                                           │
+│          ┌────────▼────────┐                                 │
+│          │  Sync Engine    │ (Bidirectional Replication)     │
+│          └─────────────────┘                                 │
+└─────────────────┬─────────────────────────────────────────────┘
+                  │
+        Executor API (Task Launch)
+                  │
+┌─────────────────▼──────────────────────────────────────────────┐
+│              Mesos Agent Cluster                                │
+│  ┌─────────┐  ┌─────────┐  ┌─────────┐                        │
+│  │ Agent 1 │  │ Agent 2 │  │ Agent N │                        │
+│  │┌───────┐│  │┌───────┐│  │┌───────┐│                        │
+│  ││Docker ││  ││Docker ││  ││Docker ││                        │
+│  ││Contain││  ││Contain││  ││Contain││                        │
+│  │└───┬───┘│  │└───┬───┘│  │└───┬───┘│                        │
+│  └────┼────┘  └────┼────┘  └────┼────┘                        │
+└───────┼────────────┼────────────┼──────────────────────────────┘
+        │            │            │
+        │     ┌──────▼────────────▼──────┐
+        │     │  Monitoring Probes        │
+        │     │  (per host/container)     │
+        │     └──────┬────────────────────┘
+        │            │
+        │     ┌──────▼────────────────────┐
+        │     │  Monitoring App (Backend) │
+        │     │  - Report Aggregation     │
+        │     │  - Topology Processing    │
+        │     │  - Metrics Storage        │
+        │     └──────┬────────────────────┘
+        │            │
+        │     ┌──────▼────────────────────┐
+        │     │  Monitoring UI (Frontend) │
+        │     │  - Graph Visualization    │
+        │     │  - Container Control      │
+        │     └───────────────────────────┘
+        │
+┌───────▼──────────────────────────────────────────────────────┐
+│              Observability Stack                              │
+│  ┌────────────┐  ┌──────────┐  ┌─────────────┐             │
+│  │ Prometheus │  │ Grafana  │  │  ELK Stack  │             │
+│  └────────────┘  └──────────┘  └─────────────┘             │
+└───────────────────────────────────────────────────────────────┘
+
+TECHNOLOGY STACK
+----------------
+
+BACKEND:
+- Go (Mesos agents, monitoring probes, sync engine)
+- C++ (Mesos core)
+- Scala (Marathon)
+- gRPC for probe communication
+- HTTP/WebSocket for UI
+
+FRONTEND:
+- React or Vue.js
+- D3.js or Cytoscape.js for graphs
+- xterm.js for terminal
+
+STORAGE:
+- Zookeeper (coordination)
+- etcd (orchestrator state)
+- Prometheus TSDB (metrics)
+- Replicated log (Mesos state)
+
+MONITORING:
+- Prometheus + Grafana
+- ELK stack (Elasticsearch, Logstash, Kibana)
+- Fluentd for log aggregation
+
+NETWORKING:
+- libnetwork, CNI plugins
+- HAProxy (load balancing)
+- Mesos-DNS, Consul (service discovery)
+
+CONTAINER RUNTIME:
+- Docker, containerd
+- Mesos containerizer
+- Linux cgroups
+
+================================================================================
+SECTION 10: DATA COLLECTION SPECIFICATIONS
+================================================================================
+
+HOST INFORMATION
+----------------
+- Hostname
+- IP addresses (all interfaces)
+- OS and kernel version
+- CPU architecture and core count
+- Total memory
+- Disk capacity
+- Load average
+- Uptime
+
+CONTAINER INFORMATION
+---------------------
+- Container ID and name
+- Image name and tag
+- Image ID
+- Status (running, paused, exited)
+- Created timestamp
+- Labels and annotations
+- Environment variables
+- Port mappings
+- Volume mounts
+- Network mode
+- Resource limits (CPU, memory)
+- Current resource usage
+
+PROCESS INFORMATION
+-------------------
+- PID
+- Parent PID
+- Command line
+- User/UID
+- CPU usage
+- Memory usage (RSS, VSZ)
+- Open file descriptors
+- Network connections
+
+NETWORK CONNECTIONS
+-------------------
+- Source IP:Port
+- Destination IP:Port
+- Protocol (TCP/UDP)
+- Connection state
+- Process ID
+- Byte counts (sent/received)
+
+KUBERNETES RESOURCES
+--------------------
+- Pods (name, namespace, labels, phase)
+- Services (name, type, cluster IP, endpoints)
+- Deployments (name, replicas, strategy)
+- Namespaces
+- Nodes (K8s node metadata)
+
+================================================================================
+SECTION 11: API SPECIFICATIONS
+================================================================================
+
+MESOS MASTER API
+----------------
+
+Framework Registration:
+POST /api/v1/scheduler HTTP/1.1
+Content-Type: application/json
+
+{
+  "type": "SUBSCRIBE",
+  "subscribe": {
+    "framework_info": {
+      "name": "MyFramework",
+      "principal": "my-framework"
+    }
+  }
+}
+
+Accept Resource Offer:
+POST /api/v1/scheduler HTTP/1.1
+
+{
+  "type": "ACCEPT",
+  "accept": {
+    "offer_ids": ["offer-001"],
+    "operations": [{
+      "type": "LAUNCH",
+      "launch": {"task_infos": [{...}]}
+    }]
+  }
+}
+
+MARATHON API
+------------
+
+Deploy Application:
+curl -X POST http://marathon.mesos:8080/v2/apps \
+  -H "Content-Type: application/json" \
+  -d '{...}'
+
+Scale Application:
+curl -X PUT http://marathon.mesos:8080/v2/apps/webapp \
+  -d '{"instances": 10}'
+
+MIGRATION API
+-------------
+
+Start Migration:
+POST /api/v1/migrations
+{
+  "source_zk": "zk-a:2181",
+  "target_zk": "zk-b:2181",
+  "config": {...}
+}
+
+MONITORING API
+--------------
+
+Get Topology:
+GET /api/topology?view=containers
+
+Container Control:
+POST /api/containers/{id}/stop
+POST /api/containers/{id}/restart
+POST /api/containers/{id}/exec
+
+================================================================================
+SECTION 12: DEPLOYMENT MODELS
+================================================================================
+
+KUBERNETES DEPLOYMENT
+---------------------
+- DaemonSet for probes (one per node)
+- Deployment for app component
+- Service/Ingress for UI access
+- ConfigMap for configuration
+- Secrets for credentials
+- Helm chart for easy installation
+
+DOCKER STANDALONE
+-----------------
+- Container images for probe and app
+- Docker Compose for local deployment
+- Volume mounts for persistence
+
+ARGOCD GITOPS
+-------------
+- Application for each component
+- ApplicationSet for multi-environment
+- Argo Rollouts for canary deployments
+- Progressive delivery: 10%→25%→50%→75%→100%
+- Automated analysis and rollback
+
+================================================================================
+SECTION 13: INSTALLATION INSTRUCTIONS
+================================================================================
+
+MESOS MASTER INSTALLATION
+--------------------------
+# Ubuntu/Debian
+sudo apt-key adv --keyserver keyserver.ubuntu.com --recv E56151BF
+DISTRO=$(lsb_release -is | tr '[:upper:]' '[:lower:]')
+CODENAME=$(lsb_release -cs)
+echo "deb http://repos.mesosphere.com/${DISTRO} ${CODENAME} main" | \
+  sudo tee /etc/apt/sources.list.d/mesosphere.list
+
+sudo apt-get update
+sudo apt-get install -y mesos marathon zookeeper
+
+# Configuration
+echo "zk://zk1:2181,zk2:2181,zk3:2181/mesos" > /etc/mesos/zk
+echo "2" > /etc/mesos-master/quorum
+echo "/var/lib/mesos" > /etc/mesos-master/work_dir
+
+# Start services
+sudo systemctl restart zookeeper
+sudo systemctl restart mesos-master
+sudo systemctl restart marathon
+
+MESOS AGENT INSTALLATION
+-------------------------
+# Configuration
+echo "zk://zk1:2181,zk2:2181,zk3:2181/mesos" > /etc/mesos/zk
+echo "docker,mesos" > /etc/mesos-slave/containerizers
+echo "/var/lib/mesos" > /etc/mesos-slave/work_dir
+echo "cpus:16;mem:65536;disk:1000000;ports:[31000-32000]" > /etc/mesos-slave/resources
+
+# Install Docker
+curl -fsSL https://get.docker.com | sh
+
+# Start agent
+sudo systemctl restart mesos-slave
+
+ARGOCD DEPLOYMENT
+-----------------
+# Install ArgoCD
+kubectl create namespace argocd
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
+# Install Argo Rollouts
+kubectl create namespace argo-rollouts
+kubectl apply -n argo-rollouts -f https://github.com/argoproj/argo-rollouts/releases/latest/download/install.yaml
+
+# Deploy master application (deploys all components)
+kubectl apply -f k8s/argocd/master-application.yaml
+
+# Watch deployment with canary rollouts
+kubectl argo rollouts get rollout orchestrator -n orchestrator --watch
+
+================================================================================
+SECTION 14: SECURITY & COMPLIANCE
+================================================================================
+
+AUTHENTICATION
+--------------
+- Framework auth via SASL
+- HTTP auth (Basic, Bearer token)
+- Zookeeper auth (Kerberos)
+- SSL/TLS for all communications
+
+AUTHORIZATION
+-------------
+- ACLs for framework registration
+- Resource quota enforcement
+- RBAC for monitoring UI
+- Task launch permissions
+
+SECRETS MANAGEMENT
+------------------
+- Vault integration
+- Encrypted secrets at rest
+- Zero-downtime rotation
+- Secure WebSocket for exec
+
+COMPLIANCE
+----------
+- SOC 2 compliance
+- GDPR for user data
+- Audit logging (1 year retention)
+- Security vulnerability disclosure
+- Regular security audits
+
+CONTAINER SECURITY
+------------------
+- Non-root containers
+- AppArmor/SELinux profiles
+- Seccomp filters
+- Image vulnerability scanning
+- Prevent privileged containers
+
+================================================================================
+SECTION 15: TESTING STRATEGY
+================================================================================
+
+UNIT TESTS
+----------
+- Resource allocation algorithms
+- Sync engine conflict resolution
+- Phase state transitions
+- Topology graph generation
+
+INTEGRATION TESTS
+-----------------
+- Framework registration and failover
+- Multi-cluster Zookeeper sync
+- Mesos master failover during migration
+- Container lifecycle management
+- Probe-to-app communication
+
+PERFORMANCE TESTS
+-----------------
+- 10,000 node cluster simulation
+- 100,000 concurrent tasks
+- Large cluster migrations (10TB+, 5000 agents)
+- UI rendering with 10,000 containers
+- Sync throughput (10,000+ znodes/sec)
+
+CHAOS TESTS
+-----------
+- Random agent kills
+- Network partitions
+- Zookeeper node failures
+- Master crashes during operations
+- Probe disconnections
+
+UPGRADE TESTS
+-------------
+- Rolling upgrade Mesos N to N+1
+- Backward compatibility validation
+- State migration testing
+
+================================================================================
+SECTION 16: TIMELINE & MILESTONES (9 MONTHS)
+================================================================================
+
+MONTH 1-2: PHASE 1 - CORE INFRASTRUCTURE
+-----------------------------------------
+Tasks: 1-6
+- Mesos Master/Agent deployment
+- Zookeeper cluster
+- Docker containerizer
+- Resource abstraction
+DELIVERABLE: Working Mesos cluster with basic container support
+
+MONTH 3: PHASE 2 - MARATHON FRAMEWORK
+--------------------------------------
+Tasks: 7-12
+- Marathon deployment
+- Scaling and auto-healing
+- Rolling updates
+- Multi-framework support
+DELIVERABLE: Marathon service orchestration with autoscaling
+
+MONTH 4: PHASE 3 - HA & SECURITY
+---------------------------------
+Tasks: 13-23
+- High availability
+- State persistence
+- Security implementation
+- Networking and load balancing
+DELIVERABLE: Production-ready Mesos with HA and security
+
+MONTH 5: PHASE 4-5 - MIGRATION SYSTEM
+--------------------------------------
+Tasks: 24-35
+- Zookeeper sync engine
+- 6-phase migration orchestration
+- Validation and rollback
+DELIVERABLE: Zero-downtime migration capability
+
+MONTH 6: PHASE 6-7 - MONITORING PLATFORM
+-----------------------------------------
+Tasks: 36-55
+- Monitoring probes
+- Backend and frontend
+- Metrics and visualization
+- Container control
+DELIVERABLE: Full Weave Scope-like monitoring platform
+
+MONTH 7: PHASE 8 - GITOPS INTEGRATION
+--------------------------------------
+Tasks: 56-58
+- ArgoCD applications
+- Argo Rollouts
+- Prometheus and Grafana
+DELIVERABLE: Complete GitOps deployment pipeline
+
+MONTH 8: PHASE 9 - TESTING & VALIDATION
+----------------------------------------
+Tasks: 59-61
+- Performance testing
+- Chaos testing
+- Security compliance
+DELIVERABLE: Validated production-ready platform
+
+MONTH 9: GA RELEASE
+-------------------
+Tasks: 62-64
+- Comprehensive documentation
+- CI/CD pipeline
+- Production readiness validation
+DELIVERABLE: General availability release
+
+================================================================================
+SECTION 17: RISKS & MITIGATIONS
+================================================================================
+
+| RISK | IMPACT | MITIGATION |
+|------|--------|------------|
+| Performance degradation at scale | High | Implement efficient graph compression, sampling, pagination |
+| Security vulnerabilities in exec | High | Secure WebSocket tunnels, audit logging, RBAC enforcement |
+| Probe resource overhead | Medium | Optimize collection intervals, implement sampling |
+| Complex Kubernetes environments | Medium | Extensive testing, support for CRDs and operators |
+| Plugin ecosystem adoption | Low | Provide comprehensive SDK, example plugins, documentation |
+
+================================================================================
+SECTION 18: DEPENDENCIES
+================================================================================
+
+- Docker Engine API
+- Kubernetes API (for K8s deployments)
+- Linux kernel features (conntrack, /proc)
+- Modern web browsers with WebSocket support
+- TLS certificates (for secure deployments)
+
+================================================================================
+SECTION 19: OUT OF SCOPE (V1)
+================================================================================
+
+- Application Performance Monitoring (APM) with distributed tracing
+- Log aggregation and analysis
+- Cost optimization recommendations
+- Automated remediation/auto-healing
+- Change management and deployment tracking
+- Service mesh integration (Istio, Linkerd) - future enhancement
+
+================================================================================
+SECTION 20: GLOSSARY
+================================================================================
+
+MESOS TERMS:
+- Framework: Application running on Mesos (Marathon, Spark)
+- Executor: Process that runs tasks on behalf of framework
+- Offer: Available resources advertised by master
+- Task: Unit of work executed by executor
+- Agent: Mesos worker node (formerly "slave")
+- DRF: Dominant Resource Fairness allocation algorithm
+
+MIGRATION TERMS:
+- Cluster-A: Source Zookeeper cluster
+- Cluster-B: Target Zookeeper cluster
+- Sync Engine: Bidirectional replication component
+- Phase: Discrete migration step with validation
+- Rollback: Revert to previous cluster state
+
+MONITORING TERMS:
+- Probe: Lightweight agent collecting topology data
+- Topology: Graph of infrastructure relationships
+- Sparkline: 15-second resolution time-series chart
+- Node: Entity in topology graph (container, host, process)
+
+================================================================================
+SECTION 21: REFERENCE ARCHITECTURES
+================================================================================
+
+SMALL DEPLOYMENT (100 NODES):
+- 3 Mesos masters (m5.large)
+- 3 Zookeeper nodes (t3.medium)
+- 1 Marathon instance
+- 94 Mesos agents (mixed types)
+- HAProxy for load balancing
+- Prometheus + Grafana
+
+MEDIUM DEPLOYMENT (1,000 NODES):
+- 5 Mesos masters (m5.xlarge)
+- 5 Zookeeper nodes (m5.large)
+- 3 Marathon instances (load balanced)
+- 987 Mesos agents (mixed types)
+- HAProxy cluster
+- Prometheus + Grafana + ELK
+
+LARGE DEPLOYMENT (5,000+ NODES):
+- 5 Mesos masters (m5.2xlarge)
+- 5 Zookeeper nodes (r5.xlarge)
+- 5 Marathon instances (load balanced)
+- 4,985 Mesos agents (mixed types)
+- HAProxy cluster with multiple tiers
+- Prometheus federation + Grafana + ELK
+- Monitoring app cluster (3+ instances)
+
+================================================================================
+SECTION 22: MONITORING METRICS REFERENCE
+================================================================================
+
+CRITICAL METRICS:
+- mesos_master_uptime_secs
+- mesos_master_elected
+- mesos_master_tasks_running
+- mesos_master_tasks_failed
+- mesos_agent_registered
+- marathon_app_instances
+- zk_sync_lag_ms
+- scope_probe_cpu_percent
+- scope_ui_render_time_ms
+
+ALERTS:
+- Master leader not elected > 30s
+- Agent registration drop > 10%
+- Task failure rate > 5%
+- Sync lag > 500ms
+- Probe offline > 5 minutes
+
+================================================================================
+SECTION 23: PERFORMANCE TUNING
+================================================================================
+
+MESOS MASTER:
+# Increase offer timeout
+--offer_timeout=10secs
+
+# Adjust allocation interval
+--allocation_interval=1secs
+
+# Max tasks per offer
+--max_tasks_per_offer=100
+
+MESOS AGENT:
+# Increase executor registration timeout
+--executor_registration_timeout=5mins
+
+# Docker image pull timeout
+--docker_pull_timeout=10mins
+
+# Resource estimation
+--oversubscribed_resources_interval=30secs
+
+ZOOKEEPER:
+# Increase session timeout
+sessionTimeout=60000
+
+# Optimize tick time
+tickTime=2000
+
+# Tune snapshots
+autopurge.snapRetainCount=10
+autopurge.purgeInterval=1
+
+================================================================================
+SECTION 24: TROUBLESHOOTING GUIDE
+================================================================================
+
+COMMON ISSUES:
+
+1. TASK LAUNCH FAILURES
+   - Check resource availability
+   - Verify Docker image exists
+   - Check network connectivity
+   - Review agent logs
+
+2. MASTER FAILOVER ISSUES
+   - Verify Zookeeper quorum
+   - Check network partitions
+   - Review replicated log
+   - Validate master configuration
+
+3. SYNC LAG HIGH
+   - Check network latency
+   - Review Zookeeper performance
+   - Increase sync threads
+   - Optimize conflict resolution
+
+4. MONITORING UI SLOW
+   - Reduce polling frequency
+   - Enable graph clustering
+   - Increase app instances
+   - Optimize database queries
+
+================================================================================
+SECTION 25: MIGRATION CHECKLIST
+================================================================================
+
+PRE-MIGRATION:
+- [ ] Cluster-A health verified
+- [ ] Cluster-B provisioned
+- [ ] Network connectivity tested
+- [ ] Backup taken
+- [ ] Rollback plan reviewed
+- [ ] Stakeholders notified
+
+DURING MIGRATION:
+- [ ] Phase 1: ZK Cluster-B deployed
+- [ ] Phase 2: Mesos Master Cluster-B deployed
+- [ ] Phase 3: Mesos Master Cluster-A removed
+- [ ] Phase 4: Mesos Agent Cluster-B deployed
+- [ ] Phase 5: Agent Cluster-A drained
+- [ ] Phase 6: ZK Cluster-A removed
+
+POST-MIGRATION:
+- [ ] All tasks running on Cluster-B
+- [ ] Performance metrics baseline
+- [ ] Migration report generated
+- [ ] Cluster-A archived
+- [ ] Documentation updated
+
+================================================================================
+SECTION 26: CONCLUSION
+================================================================================
+
+This comprehensive platform combines industry-leading orchestration (Apache
+Mesos), zero-downtime migration capabilities, and real-time monitoring into a
+unified solution. It enables organizations to achieve datacenter-scale
+efficiency while maintaining operational excellence and complete observability.
+
+KEY DIFFERENTIATORS:
+- Unified platform reducing operational complexity
+- Zero-downtime migrations for critical infrastructure
+- 70%+ resource utilization vs. 20-30% in siloed systems
+- Complete visibility from infrastructure to application
+- Production-ready with HA, security, and compliance
+
+NEXT STEPS:
+1. Approve PRD and secure funding
+2. Assemble engineering team
+3. Begin Phase 1 development
+4. Establish beta customer partnerships
+5. Execute 9-month development timeline
+
+================================================================================
+END OF MASTER PRD
+================================================================================
+
+TASK SUMMARY: 64 Total Tasks
+- Component 1: Mesos Orchestration (23 tasks)
+- Component 2: Zookeeper Migration (11 tasks)
+- Component 3: Container Monitoring (19 tasks)
+- Component 4: ArgoCD GitOps (3 tasks)
+- Component 5: Infrastructure & Production (8 tasks)
+
+DEPLOYMENT STRATEGY: ArgoCD GitOps with Argo Rollouts Canary
+STATUS: Ready for Implementation
+VERSION: 2.0
+DATE: 2025-10-12

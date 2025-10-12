@@ -1,0 +1,207 @@
+---
+# Tenant Configuration
+# Defines tenant quotas, weights, and policies for DRF scheduler
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tenant-config
+  namespace: orchestrator
+data:
+  tenants.yaml: |
+    # Cluster-wide configuration
+    cluster:
+      totalCPU: 1000          # cores
+      totalMemory: 2000       # GB
+      totalGPU: 32            # count
+      totalDisk: 50000        # GB
+
+    # DRF Scheduler configuration
+    scheduler:
+      algorithm: "weighted-drf"
+      allocationInterval: "1s"
+      offerTimeout: "60s"
+      fairnessThreshold: 0.05  # 5% tolerance
+
+    # Quota enforcement configuration
+    enforcement:
+      mode: "adaptive"  # hard | soft | adaptive
+      preemptionPolicy: "low-priority"  # never | low-priority | oldest
+      gracePeriod: "5m"
+      warningThreshold: 0.9  # Warn at 90% quota usage
+
+    # Tenant definitions
+    tenants:
+      - id: "alpha"
+        name: "Alpha Corp"
+        tier: "enterprise"
+        weight: 3.0  # 3x priority in DRF
+        quota:
+          cpu: 300
+          memory: 600
+          gpu: 12
+          disk: 10000
+        limits:
+          maxPodsPerNode: 50
+          maxServicesPerNamespace: 50
+        features:
+          - gpu-access
+          - premium-storage
+          - dedicated-nodes
+        billing:
+          model: "committed"
+          rate: 5000  # USD/month
+
+      - id: "beta"
+        name: "Beta Startup"
+        tier: "standard"
+        weight: 1.0
+        quota:
+          cpu: 100
+          memory: 200
+          gpu: 4
+          disk: 3000
+        limits:
+          maxPodsPerNode: 30
+          maxServicesPerNamespace: 20
+        features:
+          - gpu-access
+          - standard-storage
+        billing:
+          model: "on-demand"
+          rate: 1500  # USD/month
+
+      - id: "gamma"
+        name: "Gamma Research"
+        tier: "enterprise"
+        weight: 5.0  # Highest priority
+        quota:
+          cpu: 500
+          memory: 1000
+          gpu: 16
+          disk: 20000
+        limits:
+          maxPodsPerNode: 100
+          maxServicesPerNamespace: 100
+        features:
+          - gpu-access
+          - premium-storage
+          - dedicated-nodes
+          - high-bandwidth
+        billing:
+          model: "committed"
+          rate: 10000  # USD/month
+
+      - id: "delta"
+        name: "Delta Developers"
+        tier: "development"
+        weight: 0.5  # Lower priority
+        quota:
+          cpu: 50
+          memory: 100
+          gpu: 2
+          disk: 1000
+        limits:
+          maxPodsPerNode: 20
+          maxServicesPerNamespace: 10
+        features:
+          - standard-storage
+        billing:
+          model: "on-demand"
+          rate: 500  # USD/month
+
+    # Node affinity rules for tenant isolation
+    nodeAffinity:
+      alpha:
+        nodeSelector:
+          tenant: alpha
+          tier: enterprise
+        tolerations:
+          - key: "tenant"
+            operator: "Equal"
+            value: "alpha"
+            effect: "NoSchedule"
+
+      gamma:
+        nodeSelector:
+          tenant: gamma
+          tier: enterprise
+        tolerations:
+          - key: "tenant"
+            operator: "Equal"
+            value: "gamma"
+            effect: "NoSchedule"
+
+    # Storage classes per tier
+    storageClasses:
+      enterprise:
+        class: "premium-ssd"
+        iops: 10000
+        throughput: 1000  # MB/s
+        replication: 3
+
+      standard:
+        class: "standard-ssd"
+        iops: 3000
+        throughput: 300  # MB/s
+        replication: 2
+
+      development:
+        class: "standard-hdd"
+        iops: 500
+        throughput: 100  # MB/s
+        replication: 1
+---
+# Tenant metrics configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tenant-metrics-config
+  namespace: orchestrator
+data:
+  prometheus.yaml: |
+    # Tenant-specific Prometheus recording rules
+    groups:
+    - name: tenant_quotas
+      interval: 30s
+      rules:
+      - record: tenant:cpu:usage_ratio
+        expr: |
+          sum(rate(container_cpu_usage_seconds_total{namespace=~"tenant-.*"}[5m])) by (namespace)
+          /
+          on(namespace) group_left()
+          kube_resourcequota{resource="requests.cpu",type="hard"}
+
+      - record: tenant:memory:usage_ratio
+        expr: |
+          sum(container_memory_working_set_bytes{namespace=~"tenant-.*"}) by (namespace)
+          /
+          on(namespace) group_left()
+          kube_resourcequota{resource="requests.memory",type="hard"}
+
+      - record: tenant:dominant_share
+        expr: |
+          max(
+            tenant:cpu:usage_ratio,
+            tenant:memory:usage_ratio,
+            tenant:gpu:usage_ratio
+          ) by (namespace)
+
+      # Alert on quota violations
+    - name: tenant_alerts
+      rules:
+      - alert: TenantQuotaExceeded
+        expr: tenant:cpu:usage_ratio > 0.95
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Tenant {{ $labels.namespace }} exceeding CPU quota"
+
+      - alert: TenantDominantShareImbalance
+        expr: |
+          max(tenant:dominant_share) - min(tenant:dominant_share) > 0.3
+        for: 10m
+        labels:
+          severity: info
+        annotations:
+          summary: "DRF fairness deviation detected"
