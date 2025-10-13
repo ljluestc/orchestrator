@@ -17,7 +17,8 @@
       "Bash(./go/bin/go test -v ./internal/storage/... -timeout 30s)",
       "Bash(./go/bin/go test -v ./cmd/app/... -timeout 30s)",
       "Bash(./go/bin/go list -f '{{.TestGoFiles}}' ./pkg/app/...)",
-      "Bash(./go/bin/go test:*)"
+      "Bash(./go/bin/go test:*)",
+      "Bash(./go/bin/go build:*)"
     ],
     "deny": [],
     "ask": []

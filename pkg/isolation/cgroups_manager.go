@@ -1,7 +1,6 @@
 package isolation
 
 import (
-	"bufio"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -115,6 +114,11 @@ func detectCgroupsVersion() (CgroupsVersion, error) {
 func (cm *CgroupsManager) CreateContainerCgroups(containerID string, limits ResourceLimits) error {
 	cm.mu.Lock()
 	defer cm.mu.Unlock()
+
+	// Validate container ID
+	if containerID == "" {
+		return fmt.Errorf("container ID cannot be empty")
+	}
 
 	log.Printf("Creating cgroups for container %s", containerID)
 

@@ -10,7 +10,7 @@ import (
 
 // AutoScaler implements horizontal pod autoscaling for Marathon applications
 type AutoScaler struct {
-	client          *MarathonClient
+	client          MarathonClient
 	applications    map[string]*AutoScaleConfig
 	mu              sync.RWMutex
 	checkInterval   time.Duration
@@ -86,7 +86,7 @@ type Task struct {
 }
 
 // NewAutoScaler creates a new autoscaler instance
-func NewAutoScaler(client *MarathonClient, metricsProvider MetricsProvider) *AutoScaler {
+func NewAutoScaler(client MarathonClient, metricsProvider MetricsProvider) *AutoScaler {
 	return &AutoScaler{
 		client:          client,
 		applications:    make(map[string]*AutoScaleConfig),
@@ -101,6 +101,9 @@ func (as *AutoScaler) RegisterApp(config *AutoScaleConfig) error {
 	defer as.mu.Unlock()
 
 	// Validate config
+	if config == nil {
+		return fmt.Errorf("config cannot be nil")
+	}
 	if config.MinInstances < 1 {
 		return fmt.Errorf("minInstances must be >= 1")
 	}
@@ -173,7 +176,7 @@ func (as *AutoScaler) checkAndScale(ctx context.Context) {
 // evaluateApp evaluates a single application for scaling
 func (as *AutoScaler) evaluateApp(ctx context.Context, config *AutoScaleConfig) error {
 	// Get current application state
-	app, err := (*as.client).GetApp(config.AppID)
+	app, err := as.client.GetApp(config.AppID)
 	if err != nil {
 		return fmt.Errorf("failed to get app: %w", err)
 	}
@@ -293,7 +296,7 @@ func (as *AutoScaler) executeScale(ctx context.Context, config *AutoScaleConfig,
 		config.AppID, app.Instances, decision.TargetCount, decision.Reason)
 
 	// Execute scale operation
-	err := (*as.client).ScaleApp(config.AppID, decision.TargetCount)
+	err := as.client.ScaleApp(config.AppID, decision.TargetCount)
 	if err != nil {
 		return fmt.Errorf("failed to scale app: %w", err)
 	}

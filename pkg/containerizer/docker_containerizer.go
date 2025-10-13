@@ -10,9 +10,10 @@ import (
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/api/types/network"
+	"github.com/docker/docker/api/types/registry"
 	"github.com/docker/docker/client"
+	"github.com/docker/go-connections/nat"
 )
 
 // DockerContainerizer implements Docker-based container management
@@ -132,7 +133,7 @@ func NewDockerContainerizer(config *ContainerizerConfig) (*DockerContainerizer, 
 
 // initializeImageCache populates the image cache with existing images
 func (dc *DockerContainerizer) initializeImageCache(ctx context.Context) error {
-	images, err := dc.client.ImageList(ctx, image.ListOptions{})
+	images, err := dc.client.ImageList(ctx, types.ImageListOptions{})
 	if err != nil {
 		return err
 	}
@@ -186,9 +187,9 @@ func (dc *DockerContainerizer) PullImage(ctx context.Context, imageName string) 
 	log.Printf("Pulling image: %s", imageName)
 
 	// Get registry credentials if configured
-	options := image.PullOptions{}
+	options := types.ImagePullOptions{}
 	if creds, exists := dc.config.RegistryAuth[dc.config.DefaultRegistry]; exists {
-		authConfig := types.AuthConfig{
+		authConfig := registry.AuthConfig{
 			Username:      creds.Username,
 			Password:      creds.Password,
 			Email:         creds.Email,
@@ -302,13 +303,19 @@ func (dc *DockerContainerizer) CreateContainer(ctx context.Context, config *Cont
 		return "", fmt.Errorf("failed to pull image: %w", err)
 	}
 
+	// Convert ExposedPorts to nat.PortSet
+	exposedPorts := make(nat.PortSet)
+	for port := range config.ExposedPorts {
+		exposedPorts[nat.Port(port)] = struct{}{}
+	}
+
 	// Build container configuration
 	containerConfig := &container.Config{
 		Image:        config.Image,
 		Cmd:          config.Command,
 		Env:          config.Environment,
 		WorkingDir:   config.WorkingDir,
-		ExposedPorts: config.ExposedPorts,
+		ExposedPorts: exposedPorts,
 		Labels:       config.Labels,
 	}
 
@@ -450,7 +457,7 @@ type ContainerConfig struct {
 }
 
 // Helper function to encode auth config (stub)
-func encodeAuthToBase64(authConfig types.AuthConfig) (string, error) {
+func encodeAuthToBase64(authConfig registry.AuthConfig) (string, error) {
 	// In production, implement proper base64 encoding of auth config
 	return "", nil
 }
