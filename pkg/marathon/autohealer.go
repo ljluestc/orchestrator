@@ -10,7 +10,7 @@ import (
 
 // AutoHealer implements automatic healing for Marathon applications
 type AutoHealer struct {
-	client              *MarathonClient
+	client              MarathonClient
 	applications        map[string]*HealingConfig
 	mu                  sync.RWMutex
 	checkInterval       time.Duration
@@ -81,7 +81,7 @@ type HealingEvent struct {
 }
 
 // NewAutoHealer creates a new auto-healer instance
-func NewAutoHealer(client *MarathonClient) *AutoHealer {
+func NewAutoHealer(client MarathonClient) *AutoHealer {
 	return &AutoHealer{
 		client:            client,
 		applications:      make(map[string]*HealingConfig),
@@ -94,6 +94,10 @@ func NewAutoHealer(client *MarathonClient) *AutoHealer {
 
 // RegisterApp registers an application for auto-healing
 func (ah *AutoHealer) RegisterApp(config *HealingConfig) error {
+	if config == nil {
+		return fmt.Errorf("config cannot be nil")
+	}
+	
 	ah.mu.Lock()
 	defer ah.mu.Unlock()
 
@@ -172,12 +176,12 @@ func (ah *AutoHealer) checkAndHeal(ctx context.Context) {
 // checkAppHealth checks health of all tasks for an application
 func (ah *AutoHealer) checkAppHealth(ctx context.Context, config *HealingConfig) error {
 	// Get app and tasks
-	app, err := (*ah.client).GetApp(config.AppID)
+	app, err := ah.client.GetApp(config.AppID)
 	if err != nil {
 		return fmt.Errorf("failed to get app: %w", err)
 	}
 
-	tasks, err := (*ah.client).GetAppTasks(config.AppID)
+	tasks, err := ah.client.GetAppTasks(config.AppID)
 	if err != nil {
 		return fmt.Errorf("failed to get tasks: %w", err)
 	}
@@ -407,7 +411,7 @@ func (ah *AutoHealer) GetHealthStatus(appID string) (*HealthStatus, error) {
 	ah.mu.RLock()
 	defer ah.mu.RUnlock()
 
-	app, err := (*ah.client).GetApp(appID)
+	app, err := ah.client.GetApp(appID)
 	if err != nil {
 		return nil, err
 	}

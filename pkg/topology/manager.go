@@ -178,7 +178,7 @@ type TopologyUpdate struct {
 
 // NewManager creates a new topology manager
 func NewManager(id string) *Manager {
-	return &Manager{
+	manager := &Manager{
 		ID:          id,
 		Nodes:       make(map[string]*Node),
 		Edges:       make(map[string]*Edge),
@@ -191,6 +191,11 @@ func NewManager(id string) *Manager {
 			},
 		},
 	}
+	
+	// Initialize default views
+	manager.initializeDefaultViews()
+	
+	return manager
 }
 
 // Start starts the topology manager
@@ -222,9 +227,12 @@ func (m *Manager) Stop() error {
 		m.updateTicker.Stop()
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-	return m.server.Shutdown(ctx)
+	if m.server != nil {
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+		return m.server.Shutdown(ctx)
+	}
+	return nil
 }
 
 // setupRoutes sets up HTTP routes
@@ -271,6 +279,16 @@ func (m *Manager) setupRoutes() *mux.Router {
 
 	// Health check
 	router.HandleFunc("/health", m.handleHealth).Methods("GET")
+
+	// Legacy API routes (without v1 prefix) for backward compatibility
+	api := router.PathPrefix("/api").Subrouter()
+	api.HandleFunc("/topology", m.handleGetTopology).Methods("GET")
+	api.HandleFunc("/topology/nodes", m.handleGetNodes).Methods("GET")
+	api.HandleFunc("/topology/edges", m.handleGetEdges).Methods("GET")
+	api.HandleFunc("/topology/search", m.handleSearch).Methods("GET")
+	api.HandleFunc("/topology/filter", m.handleFilter).Methods("POST")
+	api.HandleFunc("/views", m.handleGetViews).Methods("GET")
+	api.HandleFunc("/metrics", m.handleGetMetrics).Methods("GET")
 
 	return router
 }
@@ -616,10 +634,26 @@ func (m *Manager) handleGetTopology(w http.ResponseWriter, r *http.Request) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
+	// Convert maps to slices for JSON response
+	nodes := make([]*Node, 0, len(m.Nodes))
+	for _, node := range m.Nodes {
+		nodes = append(nodes, node)
+	}
+
+	edges := make([]*Edge, 0, len(m.Edges))
+	for _, edge := range m.Edges {
+		edges = append(edges, edge)
+	}
+
+	views := make([]*View, 0, len(m.Views))
+	for _, view := range m.Views {
+		views = append(views, view)
+	}
+
 	topology := map[string]interface{}{
-		"nodes":   m.Nodes,
-		"edges":   m.Edges,
-		"views":   m.Views,
+		"nodes":   nodes,
+		"edges":   edges,
+		"views":   views,
 		"metrics": m.getMetrics(),
 	}
 
@@ -773,6 +807,7 @@ func (m *Manager) handleCreateView(w http.ResponseWriter, r *http.Request) {
 	m.Views[view.ID] = &view
 
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(view)
 }
 
@@ -807,8 +842,12 @@ func (m *Manager) handleDeleteView(w http.ResponseWriter, r *http.Request) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	delete(m.Views, viewID)
-	w.WriteHeader(http.StatusOK)
+	if _, exists := m.Views[viewID]; exists {
+		delete(m.Views, viewID)
+		w.WriteHeader(http.StatusOK)
+	} else {
+		http.NotFound(w, r)
+	}
 }
 
 func (m *Manager) handleGetMetrics(w http.ResponseWriter, r *http.Request) {
@@ -1164,6 +1203,20 @@ func (m *Manager) handleAddEdge(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "edge target is required", http.StatusBadRequest)
 		return
 	}
+
+	// Validate that source and target nodes exist
+	m.mu.RLock()
+	if _, sourceExists := m.Nodes[edge.Source]; !sourceExists {
+		m.mu.RUnlock()
+		http.Error(w, "source node does not exist", http.StatusBadRequest)
+		return
+	}
+	if _, targetExists := m.Nodes[edge.Target]; !targetExists {
+		m.mu.RUnlock()
+		http.Error(w, "target node does not exist", http.StatusBadRequest)
+		return
+	}
+	m.mu.RUnlock()
 
 	// Add the edge
 	m.AddEdge(&edge)

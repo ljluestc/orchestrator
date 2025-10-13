@@ -5,7 +5,19 @@
       "Bash(go test:*)",
       "Bash(cat:*)",
       "Bash(export:*)",
-      "Bash(go version)"
+      "Bash(go version)",
+      "Read(//usr/local/**)",
+      "Bash(tar:*)",
+      "Bash(/home/calelin/dev/orchestrator/go/bin/go test:*)",
+      "Bash(tee:*)",
+      "Bash(/home/calelin/dev/orchestrator/go/bin/go build:*)",
+      "Bash(./app-server --help)",
+      "Bash(./go/bin/go test -v ./pkg/app/... -timeout 30s)",
+      "Bash(timeout:*)",
+      "Bash(./go/bin/go test -v ./internal/storage/... -timeout 30s)",
+      "Bash(./go/bin/go test -v ./cmd/app/... -timeout 30s)",
+      "Bash(./go/bin/go list -f '{{.TestGoFiles}}' ./pkg/app/...)",
+      "Bash(./go/bin/go test:*)"
     ],
     "deny": [],
     "ask": []

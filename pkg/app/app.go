@@ -131,7 +131,12 @@ func (a *App) handleReport(w http.ResponseWriter, r *http.Request) {
 	a.reports[report.AgentID] = &report
 	a.reportsMux.Unlock()
 
-	log.Printf("Received report from probe %s with %d containers", report.AgentID, len(report.DockerInfo.Containers))
+	log.Printf("Received report from probe %s with %d containers", report.AgentID, func() int {
+		if report.DockerInfo != nil {
+			return len(report.DockerInfo.Containers)
+		}
+		return 0
+	}())
 
 	w.WriteHeader(http.StatusAccepted)
 	json.NewEncoder(w).Encode(map[string]string{"status": "accepted"})
@@ -377,13 +382,19 @@ func (a *App) updateTopology() {
 		if report.HostInfo != nil {
 			topology.Hosts[report.Hostname] = report.HostInfo
 		}
-		for i := range report.DockerInfo.Containers {
-			topology.Containers[report.DockerInfo.Containers[i].ID] = &report.DockerInfo.Containers[i]
+		if report.DockerInfo != nil {
+			for i := range report.DockerInfo.Containers {
+				topology.Containers[report.DockerInfo.Containers[i].ID] = &report.DockerInfo.Containers[i]
+			}
 		}
-		for i := range report.ProcessesInfo.Processes {
-			topology.Processes[fmt.Sprintf("%d", report.ProcessesInfo.Processes[i].PID)] = &report.ProcessesInfo.Processes[i]
+		if report.ProcessesInfo != nil {
+			for i := range report.ProcessesInfo.Processes {
+				topology.Processes[fmt.Sprintf("%d", report.ProcessesInfo.Processes[i].PID)] = &report.ProcessesInfo.Processes[i]
+			}
 		}
-		topology.Networks = append(topology.Networks, report.NetworkInfo.Connections...)
+		if report.NetworkInfo != nil {
+			topology.Networks = append(topology.Networks, report.NetworkInfo.Connections...)
+		}
 	}
 
 	a.topology = topology

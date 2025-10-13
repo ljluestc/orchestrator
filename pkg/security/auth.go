@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"math/rand"
 	"sync"
 	"time"
 
@@ -93,7 +94,7 @@ func (am *AuthManager) Authenticate(username, password string) (*Token, error) {
 	}
 
 	// Generate token
-	token := am.generateToken(username)
+	token := am.GenerateToken(username)
 
 	am.mu.Lock()
 	user.LastLogin = time.Now()
@@ -139,8 +140,8 @@ func (am *AuthManager) Authorize(ctx context.Context, tokenValue, permission str
 	return nil
 }
 
-// generateToken generates a new authentication token
-func (am *AuthManager) generateToken(username string) *Token {
+// GenerateToken generates a new authentication token
+func (am *AuthManager) GenerateToken(username string) *Token {
 	now := time.Now()
 	data := fmt.Sprintf("%s:%d", username, now.UnixNano())
 	hash := sha256.Sum256([]byte(data))
@@ -196,6 +197,118 @@ func (am *AuthManager) RevokeToken(tokenValue string) {
 	am.mu.Lock()
 	defer am.mu.Unlock()
 	delete(am.tokens, tokenValue)
+}
+
+// UpdateUser updates an existing user's password and role
+func (am *AuthManager) UpdateUser(username, password string, roles []string) error {
+	am.mu.Lock()
+	defer am.mu.Unlock()
+	
+	user, exists := am.users[username]
+	if !exists {
+		return fmt.Errorf("user not found: %s", username)
+	}
+	
+	// Hash the new password
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return fmt.Errorf("failed to hash password: %v", err)
+	}
+	
+	// Update user
+	user.PasswordHash = string(hashedPassword)
+	user.Roles = roles
+	
+	return nil
+}
+
+// DeleteUser removes a user from the system
+func (am *AuthManager) DeleteUser(username string) error {
+	am.mu.Lock()
+	defer am.mu.Unlock()
+	
+	_, exists := am.users[username]
+	if !exists {
+		return fmt.Errorf("user not found: %s", username)
+	}
+	
+	delete(am.users, username)
+	
+	// Also remove all tokens for this user
+	for tokenValue, token := range am.tokens {
+		if token.Username == username {
+			delete(am.tokens, tokenValue)
+		}
+	}
+	
+	return nil
+}
+
+// RevokeUserTokens removes all tokens for a specific user
+func (am *AuthManager) RevokeUserTokens(username string) {
+	am.mu.Lock()
+	defer am.mu.Unlock()
+	
+	for tokenValue, token := range am.tokens {
+		if token.Username == username {
+			delete(am.tokens, tokenValue)
+		}
+	}
+}
+
+// ListUsers returns a list of all users
+func (am *AuthManager) ListUsers() []*User {
+	am.mu.RLock()
+	defer am.mu.RUnlock()
+	
+	users := make([]*User, 0, len(am.users))
+	for _, user := range am.users {
+		users = append(users, user)
+	}
+	return users
+}
+
+// GetUser retrieves a user by username
+func (am *AuthManager) GetUser(username string) (*User, error) {
+	am.mu.RLock()
+	defer am.mu.RUnlock()
+	
+	user, exists := am.users[username]
+	if !exists {
+		return nil, fmt.Errorf("user not found: %s", username)
+	}
+	return user, nil
+}
+
+// HashPassword hashes a password using bcrypt
+func (am *AuthManager) HashPassword(password string) (string, error) {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return "", fmt.Errorf("failed to hash password: %v", err)
+	}
+	return string(hashedPassword), nil
+}
+
+// VerifyPassword verifies a password against a hash
+func (am *AuthManager) VerifyPassword(password, hash string) error {
+	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+}
+
+// GenerateSessionID generates a unique session ID
+func (am *AuthManager) GenerateSessionID() string {
+	return fmt.Sprintf("session_%d_%d", time.Now().UnixNano(), rand.Int63())
+}
+
+// StartCleanupRoutine starts a background routine to clean up expired tokens
+func (am *AuthManager) StartCleanupRoutine(interval time.Duration) {
+	go func() {
+		ticker := time.NewTicker(interval)
+		defer ticker.Stop()
+		
+		for range ticker.C {
+			am.CleanupExpiredTokens()
+		}
+	}()
 }
 
 // CleanupExpiredTokens removes expired tokens

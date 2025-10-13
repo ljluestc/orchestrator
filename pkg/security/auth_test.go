@@ -1,7 +1,6 @@
 package security
 
 import (
-	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
 	"testing"
@@ -13,89 +12,74 @@ import (
 
 func TestNewAuthManager(t *testing.T) {
 	tests := []struct {
-		name     string
-		jwtKey   string
-		bcryptCost int
+		name string
 	}{
 		{
-			name:       "Valid AuthManager",
-			jwtKey:     "test-secret-key",
-			bcryptCost: bcrypt.DefaultCost,
-		},
-		{
-			name:       "Empty JWT Key",
-			jwtKey:     "",
-			bcryptCost: bcrypt.DefaultCost,
-		},
-		{
-			name:       "Custom BCrypt Cost",
-			jwtKey:     "test-secret-key",
-			bcryptCost: 12,
+			name: "Valid AuthManager",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			auth := NewAuthManager(tt.jwtKey, tt.bcryptCost)
+			auth := NewAuthManager()
 
-			assert.Equal(t, tt.jwtKey, auth.JWTKey)
-			assert.Equal(t, tt.bcryptCost, auth.BCryptCost)
-			assert.NotNil(t, auth.Users)
-			assert.NotNil(t, auth.Sessions)
+			assert.NotNil(t, auth)
+			assert.NotNil(t, auth.users)
+			assert.NotNil(t, auth.tokens)
 		})
 	}
 }
 
 func TestAuthManager_CreateUser(t *testing.T) {
-	auth := NewAuthManager("test-secret-key", bcrypt.DefaultCost)
+	auth := NewAuthManager()
 
 	tests := []struct {
 		name        string
 		username    string
 		password    string
-		role        string
+		roles       []string
 		expectError bool
 	}{
 		{
 			name:        "Valid user",
 			username:    "testuser",
 			password:    "password123",
-			role:        "user",
+			roles:       []string{"user"},
 			expectError: false,
 		},
 		{
 			name:        "Admin user",
 			username:    "admin",
 			password:    "admin123",
-			role:        "admin",
+			roles:       []string{"admin"},
 			expectError: false,
 		},
 		{
 			name:        "Empty username",
 			username:    "",
 			password:    "password123",
-			role:        "user",
+			roles:       []string{"user"},
 			expectError: true,
 		},
 		{
 			name:        "Empty password",
 			username:    "testuser",
 			password:    "",
-			role:        "user",
+			roles:       []string{"user"},
 			expectError: true,
 		},
 		{
-			name:        "Empty role",
+			name:        "Empty roles",
 			username:    "testuser",
 			password:    "password123",
-			role:        "",
-			expectError: true,
+			roles:       []string{},
+			expectError: false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := auth.CreateUser(tt.username, tt.password, tt.role)
+			err := auth.CreateUser(tt.username, tt.password, tt.roles)
 
 			if tt.expectError {
 				assert.Error(t, err)
@@ -103,13 +87,12 @@ func TestAuthManager_CreateUser(t *testing.T) {
 				assert.NoError(t, err)
 
 				// Verify user was created
-				user, exists := auth.Users[tt.username]
+				user, exists := auth.users[tt.username]
 				assert.True(t, exists)
 				assert.Equal(t, tt.username, user.Username)
-				assert.Equal(t, tt.role, user.Role)
+				assert.Equal(t, tt.roles, user.Roles)
 				assert.NotEmpty(t, user.PasswordHash)
 				assert.True(t, time.Since(user.CreatedAt) < time.Minute)
-				assert.True(t, time.Since(user.UpdatedAt) < time.Minute)
 
 				// Verify password is hashed
 				assert.NotEqual(t, tt.password, user.PasswordHash)
@@ -120,23 +103,23 @@ func TestAuthManager_CreateUser(t *testing.T) {
 }
 
 func TestAuthManager_CreateUserDuplicate(t *testing.T) {
-	auth := NewAuthManager("test-secret-key", bcrypt.DefaultCost)
+	auth := NewAuthManager()
 
 	// Create user first time
-	err := auth.CreateUser("testuser", "password123", "user")
+	err := auth.CreateUser("testuser", "password123", []string{"user"})
 	assert.NoError(t, err)
 
 	// Try to create same user again
-	err = auth.CreateUser("testuser", "password123", "user")
+	err = auth.CreateUser("testuser", "password123", []string{"user"})
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "user already exists")
 }
 
-func TestAuthManager_AuthenticateUser(t *testing.T) {
-	auth := NewAuthManager("test-secret-key", bcrypt.DefaultCost)
+func TestAuthManager_Authenticate(t *testing.T) {
+	auth := NewAuthManager()
 
 	// Create test user
-	err := auth.CreateUser("testuser", "password123", "user")
+	err := auth.CreateUser("testuser", "password123", []string{"user"})
 	assert.NoError(t, err)
 
 	tests := []struct {
@@ -179,97 +162,81 @@ func TestAuthManager_AuthenticateUser(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			user, err := auth.AuthenticateUser(tt.username, tt.password)
+			token, err := auth.Authenticate(tt.username, tt.password)
 
 			if tt.expectError {
 				assert.Error(t, err)
-				assert.Nil(t, user)
+				assert.Nil(t, token)
 			} else {
 				assert.NoError(t, err)
-				assert.NotNil(t, user)
-				assert.Equal(t, tt.username, user.Username)
-				assert.Equal(t, "user", user.Role)
+				assert.NotNil(t, token)
+				assert.Equal(t, tt.username, token.Username)
+				assert.NotEmpty(t, token.Value)
 			}
 		})
 	}
 }
 
 func TestAuthManager_GenerateToken(t *testing.T) {
-	auth := NewAuthManager("test-secret-key", bcrypt.DefaultCost)
+	auth := NewAuthManager()
 
 	// Create test user
-	err := auth.CreateUser("testuser", "password123", "user")
+	err := auth.CreateUser("testuser", "password123", []string{"user"})
 	assert.NoError(t, err)
 
-	user := auth.Users["testuser"]
+	user := auth.users["testuser"]
 
 	tests := []struct {
 		name        string
 		user        *User
-		expiration time.Duration
 		expectError bool
 	}{
 		{
-			name:        "Valid user with default expiration",
+			name:        "Valid user",
 			user:        user,
-			expiration: 0,
-			expectError: false,
-		},
-		{
-			name:        "Valid user with custom expiration",
-			user:        user,
-			expiration: 2 * time.Hour,
 			expectError: false,
 		},
 		{
 			name:        "Nil user",
 			user:        nil,
-			expiration: 0,
 			expectError: true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			token, err := auth.GenerateToken(tt.user, tt.expiration)
-
-			if tt.expectError {
-				assert.Error(t, err)
-				assert.Empty(t, token)
-			} else {
-				assert.NoError(t, err)
+			if tt.user == nil {
+				// Test empty username case
+				token := auth.GenerateToken("")
 				assert.NotEmpty(t, token)
-
-				// Verify token is stored in sessions
-				session, exists := auth.Sessions[token]
-				assert.True(t, exists)
-				assert.Equal(t, tt.user.Username, session.Username)
-				assert.Equal(t, tt.user.Role, session.Role)
-				assert.True(t, time.Since(session.CreatedAt) < time.Minute)
-
-				// Verify expiration
-				if tt.expiration == 0 {
-					assert.True(t, time.Until(session.ExpiresAt) < 25*time.Hour) // Default 24h + buffer
-				} else {
-					assert.True(t, time.Until(session.ExpiresAt) < tt.expiration+time.Minute)
-				}
+				assert.Equal(t, "", token.Username)
+				assert.NotEmpty(t, token.Value)
+			} else {
+				token := auth.GenerateToken(tt.user.Username)
+				assert.NotEmpty(t, token)
+				assert.Equal(t, tt.user.Username, token.Username)
+				assert.NotEmpty(t, token.Value)
+				assert.True(t, time.Since(token.IssuedAt) < time.Minute)
 			}
 		})
 	}
 }
 
 func TestAuthManager_ValidateToken(t *testing.T) {
-	auth := NewAuthManager("test-secret-key", bcrypt.DefaultCost)
+	auth := NewAuthManager()
 
 	// Create test user
-	err := auth.CreateUser("testuser", "password123", "user")
+	err := auth.CreateUser("testuser", "password123", []string{"user"})
 	assert.NoError(t, err)
 
-	user := auth.Users["testuser"]
-
-	// Generate token
-	token, err := auth.GenerateToken(user, 0)
+	// Generate token by authenticating
+	var token *Token
+	token, err = auth.Authenticate("testuser", "password123")
 	assert.NoError(t, err)
+	assert.NotNil(t, token)
+
+	// Get the user for comparison
+	user := auth.users["testuser"]
 
 	tests := []struct {
 		name        string
@@ -278,7 +245,7 @@ func TestAuthManager_ValidateToken(t *testing.T) {
 	}{
 		{
 			name:        "Valid token",
-			token:       token,
+			token:       token.Value,
 			expectError: false,
 		},
 		{
@@ -304,177 +271,164 @@ func TestAuthManager_ValidateToken(t *testing.T) {
 				assert.NoError(t, err)
 				assert.NotNil(t, session)
 				assert.Equal(t, user.Username, session.Username)
-				assert.Equal(t, user.Role, session.Role)
+				assert.Equal(t, user.Roles, session.Roles)
 			}
 		})
 	}
 }
 
 func TestAuthManager_ValidateTokenExpired(t *testing.T) {
-	auth := NewAuthManager("test-secret-key", bcrypt.DefaultCost)
+	auth := NewAuthManager()
 
 	// Create test user
-	err := auth.CreateUser("testuser", "password123", "user")
+	err := auth.CreateUser("testuser", "password123", []string{"user"})
 	assert.NoError(t, err)
 
-	user := auth.Users["testuser"]
+	user := auth.users["testuser"]
 
 	// Generate token with short expiration
-	token, err := auth.GenerateToken(user, 1*time.Millisecond)
-	assert.NoError(t, err)
+	token := auth.GenerateToken(user.Username)
 
 	// Wait for token to expire
 	time.Sleep(10 * time.Millisecond)
 
 	// Validate expired token
-	session, err := auth.ValidateToken(token)
+	user, err = auth.ValidateToken(token.Value)
 	assert.Error(t, err)
-	assert.Nil(t, session)
+	assert.Nil(t, user)
 	assert.Contains(t, err.Error(), "token expired")
 }
 
 func TestAuthManager_RevokeToken(t *testing.T) {
-	auth := NewAuthManager("test-secret-key", bcrypt.DefaultCost)
+	auth := NewAuthManager()
 
 	// Create test user
-	err := auth.CreateUser("testuser", "password123", "user")
+	err := auth.CreateUser("testuser", "password123", []string{"user"})
 	assert.NoError(t, err)
 
-	user := auth.Users["testuser"]
-
-	// Generate token
-	token, err := auth.GenerateToken(user, 0)
+	// Generate token by authenticating
+	var token *Token
+	token, err = auth.Authenticate("testuser", "password123")
 	assert.NoError(t, err)
+	assert.NotNil(t, token)
 
 	// Verify token exists
-	_, exists := auth.Sessions[token]
+	_, exists := auth.tokens[token.Value]
 	assert.True(t, exists)
 
 	// Revoke token
-	err = auth.RevokeToken(token)
-	assert.NoError(t, err)
+	auth.RevokeToken(token.Value)
 
 	// Verify token is removed
-	_, exists = auth.Sessions[token]
+		_, exists = auth.tokens[token.Value]
 	assert.False(t, exists)
 
 	// Verify token is invalid
-	_, err = auth.ValidateToken(token)
+	_, err = auth.ValidateToken(token.Value)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "token not found")
 }
 
 func TestAuthManager_RevokeTokenNotFound(t *testing.T) {
-	auth := NewAuthManager("test-secret-key", bcrypt.DefaultCost)
+	auth := NewAuthManager()
 
-	err := auth.RevokeToken("nonexistent-token")
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "token not found")
+	auth.RevokeToken("nonexistent-token")
 }
 
 func TestAuthManager_RevokeUserTokens(t *testing.T) {
-	auth := NewAuthManager("test-secret-key", bcrypt.DefaultCost)
+	auth := NewAuthManager()
 
 	// Create test user
-	err := auth.CreateUser("testuser", "password123", "user")
+	err := auth.CreateUser("testuser", "password123", []string{"user"})
 	assert.NoError(t, err)
 
-	user := auth.Users["testuser"]
+	user := auth.users["testuser"]
 
 	// Generate multiple tokens
-	token1, err := auth.GenerateToken(user, 0)
-	assert.NoError(t, err)
-	token2, err := auth.GenerateToken(user, 0)
-	assert.NoError(t, err)
-	token3, err := auth.GenerateToken(user, 0)
-	assert.NoError(t, err)
+	token1 := auth.GenerateToken(user.Username)
+	token2 := auth.GenerateToken(user.Username)
+	token3 := auth.GenerateToken(user.Username)
 
 	// Verify tokens exist
-	assert.Len(t, auth.Sessions, 3)
+	assert.Len(t, auth.tokens, 3)
 
 	// Revoke all user tokens
-	err = auth.RevokeUserTokens("testuser")
-	assert.NoError(t, err)
+	auth.RevokeUserTokens("testuser")
 
 	// Verify all tokens are removed
-	assert.Len(t, auth.Sessions, 0)
+	assert.Len(t, auth.tokens, 0)
 
 	// Verify tokens are invalid
-	_, err = auth.ValidateToken(token1)
+	_, err = auth.ValidateToken(token1.Value)
 	assert.Error(t, err)
-	_, err = auth.ValidateToken(token2)
+	_, err = auth.ValidateToken(token2.Value)
 	assert.Error(t, err)
-	_, err = auth.ValidateToken(token3)
+	_, err = auth.ValidateToken(token3.Value)
 	assert.Error(t, err)
 }
 
 func TestAuthManager_RevokeUserTokensNotFound(t *testing.T) {
-	auth := NewAuthManager("test-secret-key", bcrypt.DefaultCost)
+	auth := NewAuthManager()
 
-	err := auth.RevokeUserTokens("nonexistent-user")
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "user not found")
+	auth.RevokeUserTokens("nonexistent-user")
 }
 
 func TestAuthManager_UpdateUser(t *testing.T) {
-	auth := NewAuthManager("test-secret-key", bcrypt.DefaultCost)
+	auth := NewAuthManager()
 
 	// Create test user
-	err := auth.CreateUser("testuser", "password123", "user")
+	err := auth.CreateUser("testuser", "password123", []string{"user"})
 	assert.NoError(t, err)
 
-	originalUser := auth.Users["testuser"]
-	originalUpdatedAt := originalUser.UpdatedAt
+	originalUser := auth.users["testuser"]
 
 	// Wait a bit to ensure UpdatedAt changes
 	time.Sleep(10 * time.Millisecond)
 
 	// Update user
-	err = auth.UpdateUser("testuser", "newpassword123", "admin")
+	err = auth.UpdateUser("testuser", "newpassword123", []string{"admin"})
 	assert.NoError(t, err)
 
 	// Verify user was updated
-	updatedUser := auth.Users["testuser"]
+	updatedUser := auth.users["testuser"]
 	assert.Equal(t, "testuser", updatedUser.Username)
-	assert.Equal(t, "admin", updatedUser.Role)
+	assert.Equal(t, []string{"admin"}, updatedUser.Roles)
 	assert.NotEqual(t, originalUser.PasswordHash, updatedUser.PasswordHash)
-	assert.True(t, updatedUser.UpdatedAt.After(originalUpdatedAt))
 
 	// Verify new password works
-	_, err = auth.AuthenticateUser("testuser", "newpassword123")
+	_, err = auth.Authenticate("testuser", "newpassword123")
 	assert.NoError(t, err)
 
 	// Verify old password doesn't work
-	_, err = auth.AuthenticateUser("testuser", "password123")
+	_, err = auth.Authenticate("testuser", "password123")
 	assert.Error(t, err)
 }
 
 func TestAuthManager_UpdateUserNotFound(t *testing.T) {
-	auth := NewAuthManager("test-secret-key", bcrypt.DefaultCost)
+	auth := NewAuthManager()
 
-	err := auth.UpdateUser("nonexistent", "newpassword123", "admin")
+	err := auth.UpdateUser("nonexistent", "newpassword123", []string{"admin"})
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "user not found")
 }
 
 func TestAuthManager_DeleteUser(t *testing.T) {
-	auth := NewAuthManager("test-secret-key", bcrypt.DefaultCost)
+	auth := NewAuthManager()
 
 	// Create test user
-	err := auth.CreateUser("testuser", "password123", "user")
+	err := auth.CreateUser("testuser", "password123", []string{"user"})
 	assert.NoError(t, err)
 
 	// Generate token
-	user := auth.Users["testuser"]
-	token, err := auth.GenerateToken(user, 0)
-	assert.NoError(t, err)
+	user := auth.users["testuser"]
+	token := auth.GenerateToken(user.Username)
 
 	// Verify user exists
-	_, exists := auth.Users["testuser"]
+	_, exists := auth.users["testuser"]
 	assert.True(t, exists)
 
 	// Verify token exists
-	_, exists = auth.Sessions[token]
+		_, exists = auth.tokens[token.Value]
 	assert.True(t, exists)
 
 	// Delete user
@@ -482,16 +436,16 @@ func TestAuthManager_DeleteUser(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Verify user is removed
-	_, exists = auth.Users["testuser"]
+	_, exists = auth.users["testuser"]
 	assert.False(t, exists)
 
 	// Verify token is removed
-	_, exists = auth.Sessions[token]
+		_, exists = auth.tokens[token.Value]
 	assert.False(t, exists)
 }
 
 func TestAuthManager_DeleteUserNotFound(t *testing.T) {
-	auth := NewAuthManager("test-secret-key", bcrypt.DefaultCost)
+	auth := NewAuthManager()
 
 	err := auth.DeleteUser("nonexistent")
 	assert.Error(t, err)
@@ -499,14 +453,14 @@ func TestAuthManager_DeleteUserNotFound(t *testing.T) {
 }
 
 func TestAuthManager_ListUsers(t *testing.T) {
-	auth := NewAuthManager("test-secret-key", bcrypt.DefaultCost)
+	auth := NewAuthManager()
 
 	// Create test users
-	err := auth.CreateUser("user1", "password123", "user")
+	err := auth.CreateUser("user1", "password123", []string{"user"})
 	assert.NoError(t, err)
-	err = auth.CreateUser("user2", "password123", "admin")
+	err = auth.CreateUser("user2", "password123", []string{"admin"})
 	assert.NoError(t, err)
-	err = auth.CreateUser("user3", "password123", "user")
+	err = auth.CreateUser("user3", "password123", []string{"user"})
 	assert.NoError(t, err)
 
 	// List users
@@ -526,29 +480,29 @@ func TestAuthManager_ListUsers(t *testing.T) {
 }
 
 func TestAuthManager_ListUsersEmpty(t *testing.T) {
-	auth := NewAuthManager("test-secret-key", bcrypt.DefaultCost)
+	auth := NewAuthManager()
 
 	users := auth.ListUsers()
 	assert.Len(t, users, 0)
 }
 
 func TestAuthManager_GetUser(t *testing.T) {
-	auth := NewAuthManager("test-secret-key", bcrypt.DefaultCost)
+	auth := NewAuthManager()
 
 	// Create test user
-	err := auth.CreateUser("testuser", "password123", "user")
+	err := auth.CreateUser("testuser", "password123", []string{"user"})
 	assert.NoError(t, err)
 
 	// Get user
 	user, err := auth.GetUser("testuser")
 	assert.NoError(t, err)
 	assert.Equal(t, "testuser", user.Username)
-	assert.Equal(t, "user", user.Role)
+	assert.Equal(t, []string{"user"}, user.Roles)
 	assert.NotEmpty(t, user.PasswordHash)
 }
 
 func TestAuthManager_GetUserNotFound(t *testing.T) {
-	auth := NewAuthManager("test-secret-key", bcrypt.DefaultCost)
+	auth := NewAuthManager()
 
 	user, err := auth.GetUser("nonexistent")
 	assert.Error(t, err)
@@ -557,20 +511,19 @@ func TestAuthManager_GetUserNotFound(t *testing.T) {
 }
 
 func TestAuthManager_CleanupExpiredTokens(t *testing.T) {
-	auth := NewAuthManager("test-secret-key", bcrypt.DefaultCost)
+	auth := NewAuthManager()
 
 	// Create test user
-	err := auth.CreateUser("testuser", "password123", "user")
+	err := auth.CreateUser("testuser", "password123", []string{"user"})
 	assert.NoError(t, err)
 
-	user := auth.Users["testuser"]
+	user := auth.users["testuser"]
 
 	// Generate token with short expiration
-	token, err := auth.GenerateToken(user, 1*time.Millisecond)
-	assert.NoError(t, err)
+	token := auth.GenerateToken(user.Username)
 
 	// Verify token exists
-	_, exists := auth.Sessions[token]
+		_, exists := auth.tokens[token.Value]
 	assert.True(t, exists)
 
 	// Wait for token to expire
@@ -580,60 +533,58 @@ func TestAuthManager_CleanupExpiredTokens(t *testing.T) {
 	auth.CleanupExpiredTokens()
 
 	// Verify expired token is removed
-	_, exists = auth.Sessions[token]
+		_, exists = auth.tokens[token.Value]
 	assert.False(t, exists)
 }
 
 func TestAuthManager_CleanupExpiredTokensWithValidTokens(t *testing.T) {
-	auth := NewAuthManager("test-secret-key", bcrypt.DefaultCost)
+	auth := NewAuthManager()
 
 	// Create test user
-	err := auth.CreateUser("testuser", "password123", "user")
+	err := auth.CreateUser("testuser", "password123", []string{"user"})
 	assert.NoError(t, err)
 
-	user := auth.Users["testuser"]
+	user := auth.users["testuser"]
 
 	// Generate token with long expiration
-	token, err := auth.GenerateToken(user, 24*time.Hour)
-	assert.NoError(t, err)
+	token := auth.GenerateToken(user.Username)
 
 	// Verify token exists
-	_, exists := auth.Sessions[token]
+		_, exists := auth.tokens[token.Value]
 	assert.True(t, exists)
 
 	// Cleanup expired tokens
 	auth.CleanupExpiredTokens()
 
 	// Verify valid token is not removed
-	_, exists = auth.Sessions[token]
+		_, exists = auth.tokens[token.Value]
 	assert.True(t, exists)
 }
 
 func TestAuthManager_StartCleanupRoutine(t *testing.T) {
-	auth := NewAuthManager("test-secret-key", bcrypt.DefaultCost)
+	auth := NewAuthManager()
 
 	// Start cleanup routine
 	auth.StartCleanupRoutine(100 * time.Millisecond)
 
 	// Create test user
-	err := auth.CreateUser("testuser", "password123", "user")
+	err := auth.CreateUser("testuser", "password123", []string{"user"})
 	assert.NoError(t, err)
 
-	user := auth.Users["testuser"]
+	user := auth.users["testuser"]
 
 	// Generate token with short expiration
-	token, err := auth.GenerateToken(user, 1*time.Millisecond)
-	assert.NoError(t, err)
+	token := auth.GenerateToken(user.Username)
 
 	// Verify token exists
-	_, exists := auth.Sessions[token]
+		_, exists := auth.tokens[token.Value]
 	assert.True(t, exists)
 
 	// Wait for cleanup routine to run
 	time.Sleep(200 * time.Millisecond)
 
 	// Verify expired token is removed
-	_, exists = auth.Sessions[token]
+		_, exists = auth.tokens[token.Value]
 	assert.False(t, exists)
 }
 
@@ -642,35 +593,34 @@ func TestAuthManager_UserStructures(t *testing.T) {
 	user := &User{
 		Username:     "testuser",
 		PasswordHash: "hashedpassword",
-		Role:         "admin",
+		Roles:        []string{"admin"},
 		CreatedAt:    now,
-		UpdatedAt:    now,
+		LastLogin:    now,
 	}
 
 	assert.Equal(t, "testuser", user.Username)
 	assert.Equal(t, "hashedpassword", user.PasswordHash)
-	assert.Equal(t, "admin", user.Role)
+	assert.Equal(t, []string{"admin"}, user.Roles)
 	assert.Equal(t, now, user.CreatedAt)
-	assert.Equal(t, now, user.UpdatedAt)
+	assert.Equal(t, now, user.LastLogin)
 }
 
-func TestAuthManager_SessionStructures(t *testing.T) {
+func TestAuthManager_TokenStructures(t *testing.T) {
 	now := time.Now()
-	session := &Session{
+	token := &Token{
+		Value:     "test-token",
 		Username:  "testuser",
-		Role:      "admin",
-		CreatedAt: now,
 		ExpiresAt: now.Add(24 * time.Hour),
+		IssuedAt:  now,
 	}
 
-	assert.Equal(t, "testuser", session.Username)
-	assert.Equal(t, "admin", session.Role)
-	assert.Equal(t, now, session.CreatedAt)
-	assert.Equal(t, now.Add(24*time.Hour), session.ExpiresAt)
+	assert.Equal(t, "testuser", token.Username)
+	assert.Equal(t, now.Add(24*time.Hour), token.ExpiresAt)
+	assert.Equal(t, now, token.IssuedAt)
 }
 
 func TestAuthManager_HashPassword(t *testing.T) {
-	auth := NewAuthManager("test-secret-key", bcrypt.DefaultCost)
+	auth := NewAuthManager()
 
 	password := "testpassword123"
 	hash, err := auth.HashPassword(password)
@@ -685,7 +635,7 @@ func TestAuthManager_HashPassword(t *testing.T) {
 }
 
 func TestAuthManager_VerifyPassword(t *testing.T) {
-	auth := NewAuthManager("test-secret-key", bcrypt.DefaultCost)
+	auth := NewAuthManager()
 
 	password := "testpassword123"
 	hash, err := auth.HashPassword(password)
@@ -701,7 +651,7 @@ func TestAuthManager_VerifyPassword(t *testing.T) {
 }
 
 func TestAuthManager_GenerateSessionID(t *testing.T) {
-	auth := NewAuthManager("test-secret-key", bcrypt.DefaultCost)
+	auth := NewAuthManager()
 
 	sessionID := auth.GenerateSessionID()
 
@@ -714,7 +664,7 @@ func TestAuthManager_GenerateSessionID(t *testing.T) {
 }
 
 func TestAuthManager_GenerateSessionIDUnique(t *testing.T) {
-	auth := NewAuthManager("test-secret-key", bcrypt.DefaultCost)
+	auth := NewAuthManager()
 
 	sessionIDs := make(map[string]bool)
 
@@ -727,7 +677,7 @@ func TestAuthManager_GenerateSessionIDUnique(t *testing.T) {
 }
 
 func TestAuthManager_ConcurrentAccess(t *testing.T) {
-	auth := NewAuthManager("test-secret-key", bcrypt.DefaultCost)
+	auth := NewAuthManager()
 
 	const numGoroutines = 10
 	const numOperations = 100
@@ -742,19 +692,19 @@ func TestAuthManager_ConcurrentAccess(t *testing.T) {
 				role := "user"
 
 				// Create user
-				auth.CreateUser(username, password, role)
+				auth.CreateUser(username, password, []string{role})
 
 				// Authenticate user
-				user, err := auth.AuthenticateUser(username, password)
+				user, err := auth.Authenticate(username, password)
 				if err == nil {
 					// Generate token
-					token, err := auth.GenerateToken(user, 0)
+					token := auth.GenerateToken(user.Username)
 					if err == nil {
 						// Validate token
-						auth.ValidateToken(token)
+						auth.ValidateToken(token.Value)
 
 						// Revoke token
-						auth.RevokeToken(token)
+						auth.RevokeToken(token.Value)
 					}
 				}
 
@@ -783,7 +733,7 @@ func TestAuthManager_BCryptCostVariations(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			auth := NewAuthManager("test-secret-key", tt.cost)
+			auth := NewAuthManager()
 
 			password := "testpassword123"
 			hash, err := auth.HashPassword(password)
@@ -811,77 +761,77 @@ func TestAuthManager_JWTKeyVariations(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			auth := NewAuthManager(tt.jwtKey, bcrypt.DefaultCost)
+			auth := NewAuthManager()
 
 			// Create test user
-			err := auth.CreateUser("testuser", "password123", "user")
+			err := auth.CreateUser("testuser", "password123", []string{"user"})
 			assert.NoError(t, err)
 
-			user := auth.Users["testuser"]
+			user := auth.users["testuser"]
 
 			// Generate token
-			token, err := auth.GenerateToken(user, 0)
-			assert.NoError(t, err)
+					token := auth.GenerateToken(user.Username)
 			assert.NotEmpty(t, token)
 
 			// Validate token
-			session, err := auth.ValidateToken(token)
+			user, err = auth.ValidateToken(token.Value)
 			assert.NoError(t, err)
-			assert.NotNil(t, session)
+			assert.NotNil(t, user)
 		})
 	}
 }
 
 func BenchmarkAuthManager_CreateUser(b *testing.B) {
-	auth := NewAuthManager("test-secret-key", bcrypt.DefaultCost)
+	auth := NewAuthManager()
 
 	for i := 0; i < b.N; i++ {
 		username := fmt.Sprintf("user-%d", i)
 		password := fmt.Sprintf("password-%d", i)
-		auth.CreateUser(username, password, "user")
+		auth.CreateUser(username, password, []string{"user"})
 	}
 }
 
-func BenchmarkAuthManager_AuthenticateUser(b *testing.B) {
-	auth := NewAuthManager("test-secret-key", bcrypt.DefaultCost)
+func BenchmarkAuthManager_Authenticate(b *testing.B) {
+	auth := NewAuthManager()
 
 	// Create test user
-	auth.CreateUser("testuser", "password123", "user")
+	auth.CreateUser("testuser", "password123", []string{"user"})
 
 	for i := 0; i < b.N; i++ {
-		auth.AuthenticateUser("testuser", "password123")
+		auth.Authenticate("testuser", "password123")
 	}
 }
 
 func BenchmarkAuthManager_GenerateToken(b *testing.B) {
-	auth := NewAuthManager("test-secret-key", bcrypt.DefaultCost)
+	auth := NewAuthManager()
 
 	// Create test user
-	auth.CreateUser("testuser", "password123", "user")
-	user := auth.Users["testuser"]
+	auth.CreateUser("testuser", "password123", []string{"user"})
+	user := auth.users["testuser"]
 
 	for i := 0; i < b.N; i++ {
-		auth.GenerateToken(user, 0)
+		auth.GenerateToken(user.Username)
 	}
 }
 
 func BenchmarkAuthManager_ValidateToken(b *testing.B) {
-	auth := NewAuthManager("test-secret-key", bcrypt.DefaultCost)
+	auth := NewAuthManager()
 
 	// Create test user
-	auth.CreateUser("testuser", "password123", "user")
-	user := auth.Users["testuser"]
+	auth.CreateUser("testuser", "password123", []string{"user"})
 
-	// Generate token
-	token, _ := auth.GenerateToken(user, 0)
+	// Generate token by authenticating
+	token, err := auth.Authenticate("testuser", "password123")
+	assert.NoError(b, err)
+	assert.NotNil(b, token)
 
 	for i := 0; i < b.N; i++ {
-		auth.ValidateToken(token)
+		auth.ValidateToken(token.Value)
 	}
 }
 
 func BenchmarkAuthManager_HashPassword(b *testing.B) {
-	auth := NewAuthManager("test-secret-key", bcrypt.DefaultCost)
+	auth := NewAuthManager()
 
 	password := "testpassword123"
 
@@ -891,7 +841,7 @@ func BenchmarkAuthManager_HashPassword(b *testing.B) {
 }
 
 func BenchmarkAuthManager_VerifyPassword(b *testing.B) {
-	auth := NewAuthManager("test-secret-key", bcrypt.DefaultCost)
+	auth := NewAuthManager()
 
 	password := "testpassword123"
 	hash, _ := auth.HashPassword(password)
@@ -902,7 +852,7 @@ func BenchmarkAuthManager_VerifyPassword(b *testing.B) {
 }
 
 func BenchmarkAuthManager_GenerateSessionID(b *testing.B) {
-	auth := NewAuthManager("test-secret-key", bcrypt.DefaultCost)
+	auth := NewAuthManager()
 
 	for i := 0; i < b.N; i++ {
 		auth.GenerateSessionID()

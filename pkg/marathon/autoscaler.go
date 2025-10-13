@@ -64,8 +64,8 @@ type MarathonClient interface {
 	GetAppTasks(appID string) ([]Task, error)
 }
 
-// Application represents a Marathon application
-type Application struct {
+// ApplicationMetrics represents metrics for a Marathon application
+type ApplicationMetrics struct {
 	ID        string
 	Instances int
 	TasksRunning int

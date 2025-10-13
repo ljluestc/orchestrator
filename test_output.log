@@ -1,0 +1,696 @@
+=== RUN   TestNewAggregator
+--- PASS: TestNewAggregator (0.00s)
+=== RUN   TestProcessReportHostOnly
+--- PASS: TestProcessReportHostOnly (0.00s)
+=== RUN   TestProcessReportWithContainers
+--- PASS: TestProcessReportWithContainers (0.00s)
+=== RUN   TestProcessReportWithProcesses
+--- PASS: TestProcessReportWithProcesses (0.00s)
+=== RUN   TestProcessReportWithNetworkConnections
+--- PASS: TestProcessReportWithNetworkConnections (0.00s)
+=== RUN   TestGetNodesByType
+--- PASS: TestGetNodesByType (0.00s)
+=== RUN   TestGetNodeByID
+--- PASS: TestGetNodeByID (0.00s)
+=== RUN   TestCleanStaleNodes
+--- PASS: TestCleanStaleNodes (0.00s)
+=== RUN   TestAggregatorGetStats
+--- PASS: TestAggregatorGetStats (0.00s)
+=== RUN   TestExtractContainerIDFromCgroup
+=== RUN   TestExtractContainerIDFromCgroup/Docker_cgroup_with_full_ID
+=== RUN   TestExtractContainerIDFromCgroup/Docker_cgroup_with_prefix
+=== RUN   TestExtractContainerIDFromCgroup/No_docker_in_cgroup
+=== RUN   TestExtractContainerIDFromCgroup/Empty_cgroup
+--- PASS: TestExtractContainerIDFromCgroup (0.00s)
+    --- PASS: TestExtractContainerIDFromCgroup/Docker_cgroup_with_full_ID (0.00s)
+    --- PASS: TestExtractContainerIDFromCgroup/Docker_cgroup_with_prefix (0.00s)
+    --- PASS: TestExtractContainerIDFromCgroup/No_docker_in_cgroup (0.00s)
+    --- PASS: TestExtractContainerIDFromCgroup/Empty_cgroup (0.00s)
+=== RUN   TestTopologyConcurrency
+--- PASS: TestTopologyConcurrency (0.00s)
+=== RUN   TestAppIntegration
+2025/10/12 16:48:26 Starting app server on localhost:8080
+2025/10/12 16:48:26 App server started successfully
+2025/10/12 16:48:26 REST API: http://localhost:8080/api/v1
+2025/10/12 16:48:26 WebSocket: ws://localhost:8080/api/v1/ws
+2025/10/12 16:48:26 Health check: http://localhost:8080/health
+2025/10/12 16:48:26 Agent registered: agent-1 (hostname: host-agent-1)
+[GIN] 2025/10/12 - 16:48:26 | 201 |     235.429µs |                 | POST     "/api/v1/agents/register"
+2025/10/12 16:48:26 Agent registered: agent-2 (hostname: host-agent-2)
+[GIN] 2025/10/12 - 16:48:26 | 201 |       8.873µs |                 | POST     "/api/v1/agents/register"
+2025/10/12 16:48:26 Agent registered: agent-3 (hostname: host-agent-3)
+[GIN] 2025/10/12 - 16:48:26 | 201 |       8.051µs |                 | POST     "/api/v1/agents/register"
+2025/10/12 16:48:26 Report received from agent: agent-1 (hostname: host-agent-1)
+[GIN] 2025/10/12 - 16:48:26 | 202 |      79.366µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: agent-2 (hostname: host-agent-2)
+[GIN] 2025/10/12 - 16:48:26 | 202 |      31.689µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: agent-3 (hostname: host-agent-3)
+[GIN] 2025/10/12 - 16:48:26 | 202 |      98.433µs |                 | POST     "/api/v1/reports"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      43.833µs |                 | GET      "/api/v1/agents/list"
+[GIN] 2025/10/12 - 16:48:26 | 200 |     126.034µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      29.535µs |                 | GET      "/api/v1/query/agents/agent-1/latest"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      23.882µs |                 | GET      "/api/v1/query/agents/agent-1/timeseries?duration=1h"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      11.348µs |                 | GET      "/api/v1/query/stats"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       2.602µs |                 | GET      "/health"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       2.853µs |                 | GET      "/api/v1/ping"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       1.819µs |                 | POST     "/api/v1/agents/heartbeat/agent-1"
+2025/10/12 16:48:26 Config requested for agent: agent-1
+[GIN] 2025/10/12 - 16:48:26 | 200 |      14.101µs |                 | GET      "/api/v1/agents/config/agent-1"
+2025/10/12 16:48:26 Stopping app server...
+2025/10/12 16:48:26 App server stopped successfully
+    app_test.go:250: Integration test completed successfully!
+--- PASS: TestAppIntegration (0.10s)
+=== RUN   TestAppEndToEnd
+2025/10/12 16:48:26 Starting app server on localhost:8081
+2025/10/12 16:48:26 App server started successfully
+2025/10/12 16:48:26 REST API: http://localhost:8081/api/v1
+2025/10/12 16:48:26 WebSocket: ws://localhost:8081/api/v1/ws
+2025/10/12 16:48:26 Health check: http://localhost:8081/health
+2025/10/12 16:48:26 Agent registered: e2e-agent-1 (hostname: e2e-host-1)
+[GIN] 2025/10/12 - 16:48:26 | 201 |      47.114µs |                 | POST     "/api/v1/agents/register"
+2025/10/12 16:48:26 Report received from agent: e2e-agent-1 (hostname: e2e-host-1)
+[GIN] 2025/10/12 - 16:48:26 | 202 |      36.885µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: e2e-agent-1 (hostname: e2e-host-1)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     102.984µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: e2e-agent-1 (hostname: e2e-host-1)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     199.282µs |                 | POST     "/api/v1/reports"
+[GIN] 2025/10/12 - 16:48:26 | 200 |     220.912µs |                 | GET      "/api/v1/query/agents/e2e-agent-1/timeseries?duration=1m"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      48.454µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      10.733µs |                 | GET      "/api/v1/query/agents/e2e-agent-1/latest"
+    app_test.go:376: End-to-end test completed successfully!
+2025/10/12 16:48:26 Stopping app server...
+2025/10/12 16:48:26 App server stopped successfully
+--- PASS: TestAppEndToEnd (0.30s)
+=== RUN   TestAppResilience
+=== RUN   TestAppResilience/InvalidReport
+[GIN] 2025/10/12 - 16:48:26 | 400 |      97.105µs |                 | POST     "/api/v1/reports"
+=== RUN   TestAppResilience/NonExistentAgent
+[GIN] 2025/10/12 - 16:48:26 | 404 |       4.917µs |                 | GET      "/api/v1/query/agents/non-existent/latest"
+=== RUN   TestAppResilience/InvalidDuration
+[GIN] 2025/10/12 - 16:48:26 | 400 |      25.635µs |                 | GET      "/api/v1/query/agents/test-agent/timeseries?duration=invalid"
+=== RUN   TestAppResilience/InvalidRegistration
+[GIN] 2025/10/12 - 16:48:26 | 400 |      37.111µs |                 | POST     "/api/v1/agents/register"
+--- PASS: TestAppResilience (0.00s)
+    --- PASS: TestAppResilience/InvalidReport (0.00s)
+    --- PASS: TestAppResilience/NonExistentAgent (0.00s)
+    --- PASS: TestAppResilience/InvalidDuration (0.00s)
+    --- PASS: TestAppResilience/InvalidRegistration (0.00s)
+=== RUN   TestAppConfiguration
+=== RUN   TestAppConfiguration/DefaultConfig
+=== RUN   TestAppConfiguration/CustomConfig
+--- PASS: TestAppConfiguration (0.00s)
+    --- PASS: TestAppConfiguration/DefaultConfig (0.00s)
+    --- PASS: TestAppConfiguration/CustomConfig (0.00s)
+=== RUN   TestHealthCheck
+[GIN] 2025/10/12 - 16:48:26 | 200 |      26.843µs |                 | GET      "/health"
+--- PASS: TestHealthCheck (0.00s)
+=== RUN   TestPing
+[GIN] 2025/10/12 - 16:48:26 | 200 |      17.427µs |                 | GET      "/api/v1/ping"
+--- PASS: TestPing (0.00s)
+=== RUN   TestRegisterAgent
+2025/10/12 16:48:26 Agent registered: test-agent-1 (hostname: test-host)
+[GIN] 2025/10/12 - 16:48:26 | 201 |      20.528µs |                 | POST     "/api/v1/agents/register"
+--- PASS: TestRegisterAgent (0.00s)
+=== RUN   TestHeartbeat
+[GIN] 2025/10/12 - 16:48:26 | 200 |      19.135µs |                 | POST     "/api/v1/agents/heartbeat/test-agent-1"
+--- PASS: TestHeartbeat (0.00s)
+=== RUN   TestSubmitReport
+2025/10/12 16:48:26 Report received from agent: test-agent-1 (hostname: test-host)
+[GIN] 2025/10/12 - 16:48:26 | 202 |    2.280642ms |                 | POST     "/api/v1/reports"
+--- PASS: TestSubmitReport (0.00s)
+=== RUN   TestGetTopology
+[GIN] 2025/10/12 - 16:48:26 | 200 |      79.087µs |                 | GET      "/api/v1/query/topology"
+--- PASS: TestGetTopology (0.00s)
+=== RUN   TestGetStats
+[GIN] 2025/10/12 - 16:48:26 | 200 |      26.785µs |                 | GET      "/api/v1/query/stats"
+--- PASS: TestGetStats (0.00s)
+=== RUN   TestGetLatestReport
+[GIN] 2025/10/12 - 16:48:26 | 200 |      16.388µs |                 | GET      "/api/v1/query/agents/test-agent-1/latest"
+--- PASS: TestGetLatestReport (0.00s)
+=== RUN   TestGetLatestReportNotFound
+[GIN] 2025/10/12 - 16:48:26 | 404 |       4.351µs |                 | GET      "/api/v1/query/agents/non-existent/latest"
+--- PASS: TestGetLatestReportNotFound (0.00s)
+=== RUN   TestGetTimeSeries
+[GIN] 2025/10/12 - 16:48:26 | 200 |      32.682µs |                 | GET      "/api/v1/query/agents/test-agent-1/timeseries?duration=1h"
+--- PASS: TestGetTimeSeries (0.00s)
+=== RUN   TestListAgents
+[GIN] 2025/10/12 - 16:48:26 | 200 |      17.445µs |                 | GET      "/api/v1/agents/list"
+--- PASS: TestListAgents (0.00s)
+=== RUN   TestServerStartStop
+2025/10/12 16:48:26 Starting app server on localhost:8080
+2025/10/12 16:48:26 App server started successfully
+2025/10/12 16:48:26 REST API: http://localhost:8080/api/v1
+2025/10/12 16:48:26 WebSocket: ws://localhost:8080/api/v1/ws
+2025/10/12 16:48:26 Health check: http://localhost:8080/health
+2025/10/12 16:48:26 Stopping app server...
+2025/10/12 16:48:26 App server stopped successfully
+--- PASS: TestServerStartStop (0.10s)
+=== RUN   TestLoadMultipleProbes
+2025/10/12 16:48:26 Agent registered: load-test-agent-4 (hostname: load-test-host-4)
+2025/10/12 16:48:26 Agent registered: load-test-agent-0 (hostname: load-test-host-0)
+2025/10/12 16:48:26 Agent registered: load-test-agent-3 (hostname: load-test-host-3)
+[GIN] 2025/10/12 - 16:48:26 | 201 |        76.6µs |                 | POST     "/api/v1/agents/register"
+[GIN] 2025/10/12 - 16:48:26 | 201 |      82.068µs |                 | POST     "/api/v1/agents/register"
+2025/10/12 16:48:26 Agent registered: load-test-agent-2 (hostname: load-test-host-2)
+[GIN] 2025/10/12 - 16:48:26 | 201 |     100.447µs |                 | POST     "/api/v1/agents/register"
+[GIN] 2025/10/12 - 16:48:26 | 201 |      63.773µs |                 | POST     "/api/v1/agents/register"
+2025/10/12 16:48:26 Agent registered: load-test-agent-1 (hostname: load-test-host-1)
+[GIN] 2025/10/12 - 16:48:26 | 201 |     147.194µs |                 | POST     "/api/v1/agents/register"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-4 (hostname: load-test-host-4)
+[GIN] 2025/10/12 - 16:48:26 | 202 |      60.204µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-3 (hostname: load-test-host-3)
+[GIN] 2025/10/12 - 16:48:26 | 202 |      47.994µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-1 (hostname: load-test-host-1)
+[GIN] 2025/10/12 - 16:48:26 | 202 |      46.623µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-2 (hostname: load-test-host-2)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     143.274µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-0 (hostname: load-test-host-0)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     172.654µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-3 (hostname: load-test-host-3)
+2025/10/12 16:48:26 Report received from agent: load-test-agent-0 (hostname: load-test-host-0)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     201.658µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-1 (hostname: load-test-host-1)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     215.306µs |                 | POST     "/api/v1/reports"
+[GIN] 2025/10/12 - 16:48:26 | 202 |     228.955µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-2 (hostname: load-test-host-2)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     210.502µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-4 (hostname: load-test-host-4)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     391.604µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-3 (hostname: load-test-host-3)
+2025/10/12 16:48:26 Report received from agent: load-test-agent-2 (hostname: load-test-host-2)
+2025/10/12 16:48:26 Report received from agent: load-test-agent-4 (hostname: load-test-host-4)
+[GIN] 2025/10/12 - 16:48:26 | 202 |      94.035µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-0 (hostname: load-test-host-0)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     110.263µs |                 | POST     "/api/v1/reports"
+[GIN] 2025/10/12 - 16:48:26 | 202 |      34.571µs |                 | POST     "/api/v1/reports"
+[GIN] 2025/10/12 - 16:48:26 | 202 |      94.236µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-1 (hostname: load-test-host-1)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     158.349µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-4 (hostname: load-test-host-4)
+2025/10/12 16:48:26 Report received from agent: load-test-agent-3 (hostname: load-test-host-3)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     155.153µs |                 | POST     "/api/v1/reports"
+[GIN] 2025/10/12 - 16:48:26 | 202 |     160.904µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-0 (hostname: load-test-host-0)
+2025/10/12 16:48:26 Report received from agent: load-test-agent-1 (hostname: load-test-host-1)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     183.043µs |                 | POST     "/api/v1/reports"
+[GIN] 2025/10/12 - 16:48:26 | 202 |     142.241µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-2 (hostname: load-test-host-2)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     225.394µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-4 (hostname: load-test-host-4)
+2025/10/12 16:48:26 Report received from agent: load-test-agent-2 (hostname: load-test-host-2)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     128.726µs |                 | POST     "/api/v1/reports"
+[GIN] 2025/10/12 - 16:48:26 | 202 |     148.972µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-1 (hostname: load-test-host-1)
+2025/10/12 16:48:26 Report received from agent: load-test-agent-0 (hostname: load-test-host-0)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     135.881µs |                 | POST     "/api/v1/reports"
+[GIN] 2025/10/12 - 16:48:26 | 202 |     128.503µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-3 (hostname: load-test-host-3)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     274.037µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-1 (hostname: load-test-host-1)
+2025/10/12 16:48:26 Report received from agent: load-test-agent-2 (hostname: load-test-host-2)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     168.347µs |                 | POST     "/api/v1/reports"
+[GIN] 2025/10/12 - 16:48:26 | 202 |      82.969µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-4 (hostname: load-test-host-4)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     110.764µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-3 (hostname: load-test-host-3)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     101.297µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-0 (hostname: load-test-host-0)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     321.195µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-3 (hostname: load-test-host-3)
+2025/10/12 16:48:26 Report received from agent: load-test-agent-4 (hostname: load-test-host-4)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     107.938µs |                 | POST     "/api/v1/reports"
+[GIN] 2025/10/12 - 16:48:26 | 202 |     104.021µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-2 (hostname: load-test-host-2)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     119.583µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-1 (hostname: load-test-host-1)
+2025/10/12 16:48:26 Report received from agent: load-test-agent-0 (hostname: load-test-host-0)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     138.713µs |                 | POST     "/api/v1/reports"
+[GIN] 2025/10/12 - 16:48:26 | 202 |       58.56µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-4 (hostname: load-test-host-4)
+2025/10/12 16:48:26 Report received from agent: load-test-agent-0 (hostname: load-test-host-0)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     308.555µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-1 (hostname: load-test-host-1)
+2025/10/12 16:48:26 Report received from agent: load-test-agent-2 (hostname: load-test-host-2)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     183.569µs |                 | POST     "/api/v1/reports"
+[GIN] 2025/10/12 - 16:48:26 | 202 |      43.576µs |                 | POST     "/api/v1/reports"
+[GIN] 2025/10/12 - 16:48:26 | 202 |     226.676µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-3 (hostname: load-test-host-3)
+[GIN] 2025/10/12 - 16:48:26 | 202 |      147.36µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-3 (hostname: load-test-host-3)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     161.421µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-1 (hostname: load-test-host-1)
+2025/10/12 16:48:26 Report received from agent: load-test-agent-2 (hostname: load-test-host-2)
+[GIN] 2025/10/12 - 16:48:26 | 202 |      35.279µs |                 | POST     "/api/v1/reports"
+[GIN] 2025/10/12 - 16:48:26 | 202 |     308.261µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-0 (hostname: load-test-host-0)
+[GIN] 2025/10/12 - 16:48:26 | 202 |      243.43µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-4 (hostname: load-test-host-4)
+[GIN] 2025/10/12 - 16:48:26 | 202 |       414.3µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-0 (hostname: load-test-host-0)
+2025/10/12 16:48:26 Report received from agent: load-test-agent-3 (hostname: load-test-host-3)
+2025/10/12 16:48:26 Report received from agent: load-test-agent-1 (hostname: load-test-host-1)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     114.449µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-2 (hostname: load-test-host-2)
+[GIN] 2025/10/12 - 16:48:26 | 202 |      56.669µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-4 (hostname: load-test-host-4)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     133.445µs |                 | POST     "/api/v1/reports"
+[GIN] 2025/10/12 - 16:48:26 | 202 |     132.634µs |                 | POST     "/api/v1/reports"
+[GIN] 2025/10/12 - 16:48:26 | 202 |     144.307µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-0 (hostname: load-test-host-0)
+2025/10/12 16:48:26 Report received from agent: load-test-agent-3 (hostname: load-test-host-3)
+[GIN] 2025/10/12 - 16:48:26 | 202 |      75.319µs |                 | POST     "/api/v1/reports"
+[GIN] 2025/10/12 - 16:48:26 | 202 |     130.791µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-4 (hostname: load-test-host-4)
+[GIN] 2025/10/12 - 16:48:26 | 202 |      197.06µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-2 (hostname: load-test-host-2)
+2025/10/12 16:48:26 Report received from agent: load-test-agent-1 (hostname: load-test-host-1)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     194.649µs |                 | POST     "/api/v1/reports"
+[GIN] 2025/10/12 - 16:48:26 | 202 |     211.441µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-1 (hostname: load-test-host-1)
+2025/10/12 16:48:26 Report received from agent: load-test-agent-3 (hostname: load-test-host-3)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     129.014µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-2 (hostname: load-test-host-2)
+[GIN] 2025/10/12 - 16:48:26 | 202 |      155.18µs |                 | POST     "/api/v1/reports"
+[GIN] 2025/10/12 - 16:48:26 | 202 |     168.986µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-4 (hostname: load-test-host-4)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     153.032µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-0 (hostname: load-test-host-0)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     188.086µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-4 (hostname: load-test-host-4)
+2025/10/12 16:48:26 Report received from agent: load-test-agent-1 (hostname: load-test-host-1)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     148.519µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-2 (hostname: load-test-host-2)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     158.251µs |                 | POST     "/api/v1/reports"
+[GIN] 2025/10/12 - 16:48:26 | 202 |     164.174µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-3 (hostname: load-test-host-3)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     206.522µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-0 (hostname: load-test-host-0)
+[GIN] 2025/10/12 - 16:48:26 | 202 |      222.24µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-0 (hostname: load-test-host-0)
+2025/10/12 16:48:26 Report received from agent: load-test-agent-3 (hostname: load-test-host-3)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     118.893µs |                 | POST     "/api/v1/reports"
+[GIN] 2025/10/12 - 16:48:26 | 202 |      76.175µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-4 (hostname: load-test-host-4)
+2025/10/12 16:48:26 Report received from agent: load-test-agent-2 (hostname: load-test-host-2)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     152.636µs |                 | POST     "/api/v1/reports"
+[GIN] 2025/10/12 - 16:48:26 | 202 |     142.532µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-1 (hostname: load-test-host-1)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     214.115µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-3 (hostname: load-test-host-3)
+2025/10/12 16:48:26 Report received from agent: load-test-agent-0 (hostname: load-test-host-0)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     118.993µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-4 (hostname: load-test-host-4)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     187.611µs |                 | POST     "/api/v1/reports"
+[GIN] 2025/10/12 - 16:48:26 | 202 |     145.783µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-1 (hostname: load-test-host-1)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     202.582µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-2 (hostname: load-test-host-2)
+[GIN] 2025/10/12 - 16:48:26 | 202 |      77.029µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-1 (hostname: load-test-host-1)
+2025/10/12 16:48:26 Report received from agent: load-test-agent-0 (hostname: load-test-host-0)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     183.572µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-2 (hostname: load-test-host-2)
+[GIN] 2025/10/12 - 16:48:26 | 202 |       201.8µs |                 | POST     "/api/v1/reports"
+[GIN] 2025/10/12 - 16:48:26 | 202 |      73.953µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-3 (hostname: load-test-host-3)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     123.932µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-4 (hostname: load-test-host-4)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     365.743µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-3 (hostname: load-test-host-3)
+2025/10/12 16:48:26 Report received from agent: load-test-agent-1 (hostname: load-test-host-1)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     212.451µs |                 | POST     "/api/v1/reports"
+[GIN] 2025/10/12 - 16:48:26 | 202 |     100.409µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-2 (hostname: load-test-host-2)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     183.392µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-4 (hostname: load-test-host-4)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     123.249µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-0 (hostname: load-test-host-0)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     404.668µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-2 (hostname: load-test-host-2)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     239.319µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-1 (hostname: load-test-host-1)
+2025/10/12 16:48:26 Report received from agent: load-test-agent-0 (hostname: load-test-host-0)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     311.781µs |                 | POST     "/api/v1/reports"
+[GIN] 2025/10/12 - 16:48:26 | 202 |      78.448µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-4 (hostname: load-test-host-4)
+2025/10/12 16:48:26 Report received from agent: load-test-agent-3 (hostname: load-test-host-3)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     516.306µs |                 | POST     "/api/v1/reports"
+[GIN] 2025/10/12 - 16:48:26 | 202 |     469.898µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-0 (hostname: load-test-host-0)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     117.879µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-3 (hostname: load-test-host-3)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     223.151µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-2 (hostname: load-test-host-2)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     228.016µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-1 (hostname: load-test-host-1)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     261.631µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-4 (hostname: load-test-host-4)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     318.025µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-0 (hostname: load-test-host-0)
+2025/10/12 16:48:26 Report received from agent: load-test-agent-1 (hostname: load-test-host-1)
+2025/10/12 16:48:26 Report received from agent: load-test-agent-4 (hostname: load-test-host-4)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     154.572µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-2 (hostname: load-test-host-2)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     163.002µs |                 | POST     "/api/v1/reports"
+[GIN] 2025/10/12 - 16:48:26 | 202 |     178.053µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: load-test-agent-3 (hostname: load-test-host-3)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     192.706µs |                 | POST     "/api/v1/reports"
+[GIN] 2025/10/12 - 16:48:26 | 202 |     152.733µs |                 | POST     "/api/v1/reports"
+    loadtest_test.go:102: Load test completed in 211.805951ms
+    loadtest_test.go:103: Total requests: 100
+    loadtest_test.go:104: Successful reports: 100
+    loadtest_test.go:105: Failed reports: 0
+    loadtest_test.go:106: Requests per second: 472.13
+    loadtest_test.go:118: Storage stats: map[max_age:1h0m0s resolution:15s total_agents:5 total_points:100]
+--- PASS: TestLoadMultipleProbes (0.21s)
+=== RUN   TestLoadConcurrentReads
+[GIN] 2025/10/12 - 16:48:26 | 200 |      67.376µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      66.904µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       47.92µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      51.278µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      70.674µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       5.315µs |                 | GET      "/api/v1/query/stats"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      13.645µs |                 | GET      "/api/v1/query/stats"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       3.918µs |                 | GET      "/api/v1/agents/list"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       2.399µs |                 | GET      "/health"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      22.759µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      19.423µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      12.411µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       7.182µs |                 | GET      "/api/v1/query/stats"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       2.127µs |                 | GET      "/api/v1/agents/list"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       2.719µs |                 | GET      "/health"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      13.421µs |                 | GET      "/api/v1/query/stats"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      78.718µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      24.861µs |                 | GET      "/api/v1/query/stats"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      10.606µs |                 | GET      "/api/v1/agents/list"
+[GIN] 2025/10/12 - 16:48:26 | 200 |     440.234µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |     545.624µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      17.926µs |                 | GET      "/api/v1/query/stats"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      56.275µs |                 | GET      "/api/v1/query/stats"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       2.893µs |                 | GET      "/api/v1/agents/list"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       2.777µs |                 | GET      "/health"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       8.871µs |                 | GET      "/api/v1/agents/list"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       24.07µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      15.294µs |                 | GET      "/health"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      10.463µs |                 | GET      "/api/v1/query/stats"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       5.046µs |                 | GET      "/api/v1/agents/list"
+[GIN] 2025/10/12 - 16:48:26 | 200 |     162.687µs |                 | GET      "/api/v1/agents/list"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      32.925µs |                 | GET      "/health"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      73.819µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       4.623µs |                 | GET      "/api/v1/agents/list"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      27.863µs |                 | GET      "/api/v1/query/stats"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       5.302µs |                 | GET      "/api/v1/agents/list"
+[GIN] 2025/10/12 - 16:48:26 | 200 |        68.1µs |                 | GET      "/health"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       9.534µs |                 | GET      "/health"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      10.442µs |                 | GET      "/health"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      69.479µs |                 | GET      "/health"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      38.999µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      91.456µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      70.244µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      22.027µs |                 | GET      "/api/v1/query/stats"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       5.714µs |                 | GET      "/api/v1/agents/list"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       6.129µs |                 | GET      "/health"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      62.644µs |                 | GET      "/api/v1/query/stats"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       7.501µs |                 | GET      "/api/v1/agents/list"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       4.305µs |                 | GET      "/health"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      28.691µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      46.182µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       9.098µs |                 | GET      "/api/v1/query/stats"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       34.32µs |                 | GET      "/api/v1/query/stats"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      49.307µs |                 | GET      "/api/v1/query/stats"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       5.468µs |                 | GET      "/api/v1/agents/list"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       3.546µs |                 | GET      "/health"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       6.909µs |                 | GET      "/api/v1/agents/list"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       6.874µs |                 | GET      "/health"
+[GIN] 2025/10/12 - 16:48:26 | 200 |     342.941µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       16.32µs |                 | GET      "/api/v1/query/stats"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      12.495µs |                 | GET      "/api/v1/query/stats"
+[GIN] 2025/10/12 - 16:48:26 | 200 |     748.214µs |                 | GET      "/api/v1/query/stats"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      27.643µs |                 | GET      "/api/v1/agents/list"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      14.333µs |                 | GET      "/health"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      75.874µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |    2.138307ms |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      29.357µs |                 | GET      "/api/v1/query/stats"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       7.243µs |                 | GET      "/api/v1/agents/list"
+[GIN] 2025/10/12 - 16:48:26 | 200 |        3.21µs |                 | GET      "/health"
+[GIN] 2025/10/12 - 16:48:26 | 200 |     2.51084ms |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |    2.633228ms |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |    2.640481ms |                 | GET      "/api/v1/query/stats"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      211.55µs |                 | GET      "/api/v1/query/stats"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      70.365µs |                 | GET      "/api/v1/query/stats"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       9.228µs |                 | GET      "/api/v1/agents/list"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       6.559µs |                 | GET      "/api/v1/agents/list"
+[GIN] 2025/10/12 - 16:48:26 | 200 |    2.368105ms |                 | GET      "/api/v1/query/stats"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       6.319µs |                 | GET      "/health"
+[GIN] 2025/10/12 - 16:48:26 | 200 |         8.4µs |                 | GET      "/health"
+[GIN] 2025/10/12 - 16:48:26 | 200 |     188.092µs |                 | GET      "/api/v1/agents/list"
+[GIN] 2025/10/12 - 16:48:26 | 200 |     817.659µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |    2.070647ms |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      24.012µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      18.556µs |                 | GET      "/api/v1/query/stats"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       5.298µs |                 | GET      "/api/v1/agents/list"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      14.852µs |                 | GET      "/api/v1/query/stats"
+[GIN] 2025/10/12 - 16:48:26 | 200 |    2.079858ms |                 | GET      "/api/v1/agents/list"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       5.521µs |                 | GET      "/health"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      20.168µs |                 | GET      "/api/v1/query/stats"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      12.844µs |                 | GET      "/health"
+[GIN] 2025/10/12 - 16:48:26 | 200 |     177.995µs |                 | GET      "/api/v1/agents/list"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       4.376µs |                 | GET      "/api/v1/agents/list"
+[GIN] 2025/10/12 - 16:48:26 | 200 |        7.81µs |                 | GET      "/health"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       5.703µs |                 | GET      "/health"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      18.904µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      22.006µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      22.389µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      13.368µs |                 | GET      "/api/v1/query/stats"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       2.889µs |                 | GET      "/api/v1/agents/list"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      10.133µs |                 | GET      "/api/v1/query/stats"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       6.556µs |                 | GET      "/health"
+[GIN] 2025/10/12 - 16:48:26 | 200 |    1.833539ms |                 | GET      "/api/v1/query/stats"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       4.943µs |                 | GET      "/api/v1/agents/list"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       5.322µs |                 | GET      "/api/v1/agents/list"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       5.015µs |                 | GET      "/health"
+[GIN] 2025/10/12 - 16:48:26 | 200 |        4.37µs |                 | GET      "/health"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      31.683µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      20.578µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       6.274µs |                 | GET      "/api/v1/agents/list"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       6.755µs |                 | GET      "/api/v1/agents/list"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       3.547µs |                 | GET      "/health"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      19.136µs |                 | GET      "/api/v1/query/stats"
+[GIN] 2025/10/12 - 16:48:26 | 200 |        7.45µs |                 | GET      "/health"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       5.233µs |                 | GET      "/health"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      19.775µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       18.61µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      13.986µs |                 | GET      "/api/v1/query/stats"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       2.492µs |                 | GET      "/api/v1/agents/list"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       3.524µs |                 | GET      "/health"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      22.745µs |                 | GET      "/api/v1/query/stats"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      15.164µs |                 | GET      "/api/v1/query/stats"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       4.608µs |                 | GET      "/api/v1/agents/list"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       4.934µs |                 | GET      "/api/v1/agents/list"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      26.264µs |                 | GET      "/api/v1/query/stats"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       2.922µs |                 | GET      "/health"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       7.614µs |                 | GET      "/health"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       4.406µs |                 | GET      "/api/v1/agents/list"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       9.209µs |                 | GET      "/health"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      31.303µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      42.635µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      25.472µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       3.638µs |                 | GET      "/api/v1/agents/list"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       3.807µs |                 | GET      "/health"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       30.46µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       1.832µs |                 | GET      "/api/v1/agents/list"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      11.216µs |                 | GET      "/api/v1/query/stats"
+[GIN] 2025/10/12 - 16:48:26 | 200 |           3µs |                 | GET      "/health"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      11.547µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      22.896µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |     313.357µs |                 | GET      "/api/v1/query/stats"
+[GIN] 2025/10/12 - 16:48:26 | 200 |     311.991µs |                 | GET      "/api/v1/query/stats"
+[GIN] 2025/10/12 - 16:48:26 | 200 |        6.14µs |                 | GET      "/api/v1/agents/list"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       6.008µs |                 | GET      "/api/v1/agents/list"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       4.954µs |                 | GET      "/health"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      11.251µs |                 | GET      "/health"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       8.999µs |                 | GET      "/api/v1/query/stats"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      32.628µs |                 | GET      "/api/v1/query/stats"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      13.861µs |                 | GET      "/api/v1/query/stats"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      39.244µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       8.857µs |                 | GET      "/api/v1/agents/list"
+[GIN] 2025/10/12 - 16:48:26 | 200 |     387.782µs |                 | GET      "/api/v1/agents/list"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       7.086µs |                 | GET      "/health"
+[GIN] 2025/10/12 - 16:48:26 | 200 |     395.892µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      51.284µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      11.904µs |                 | GET      "/health"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      25.894µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      24.911µs |                 | GET      "/api/v1/query/stats"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      29.007µs |                 | GET      "/api/v1/query/stats"
+[GIN] 2025/10/12 - 16:48:26 | 200 |        3.47µs |                 | GET      "/api/v1/agents/list"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       13.83µs |                 | GET      "/api/v1/query/stats"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       6.014µs |                 | GET      "/health"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       3.223µs |                 | GET      "/api/v1/agents/list"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      13.915µs |                 | GET      "/api/v1/agents/list"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       6.115µs |                 | GET      "/health"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       86.88µs |                 | GET      "/api/v1/agents/list"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      56.878µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      21.749µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       9.374µs |                 | GET      "/health"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       8.943µs |                 | GET      "/health"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      11.888µs |                 | GET      "/api/v1/query/stats"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      24.821µs |                 | GET      "/api/v1/query/stats"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      11.924µs |                 | GET      "/api/v1/agents/list"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      37.568µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       5.326µs |                 | GET      "/health"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      39.128µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      37.845µs |                 | GET      "/api/v1/agents/list"
+[GIN] 2025/10/12 - 16:48:26 | 200 |        66.7µs |                 | GET      "/api/v1/query/stats"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      34.205µs |                 | GET      "/api/v1/query/stats"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       9.239µs |                 | GET      "/health"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       3.126µs |                 | GET      "/api/v1/agents/list"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      46.388µs |                 | GET      "/api/v1/query/stats"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       7.758µs |                 | GET      "/api/v1/agents/list"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       4.755µs |                 | GET      "/health"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      10.327µs |                 | GET      "/api/v1/agents/list"
+[GIN] 2025/10/12 - 16:48:26 | 200 |        3.62µs |                 | GET      "/health"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      10.436µs |                 | GET      "/api/v1/agents/list"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      27.525µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      18.733µs |                 | GET      "/health"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      14.676µs |                 | GET      "/api/v1/query/stats"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       4.012µs |                 | GET      "/health"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      15.027µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      11.827µs |                 | GET      "/api/v1/query/stats"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      32.904µs |                 | GET      "/api/v1/agents/list"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       9.377µs |                 | GET      "/api/v1/agents/list"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      30.268µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      14.968µs |                 | GET      "/health"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       2.466µs |                 | GET      "/health"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      14.237µs |                 | GET      "/api/v1/query/stats"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       4.709µs |                 | GET      "/api/v1/agents/list"
+[GIN] 2025/10/12 - 16:48:26 | 200 |        3.73µs |                 | GET      "/health"
+    loadtest_test.go:197: Concurrent read test completed in 5.27591ms
+    loadtest_test.go:198: Total reads: 200
+    loadtest_test.go:199: Successful reads: 200
+    loadtest_test.go:200: Reads per second: 37908.15
+--- PASS: TestLoadConcurrentReads (0.01s)
+=== RUN   TestLoadMixedWorkload
+2025/10/12 16:48:26 Report received from agent: worker-agent-1 (hostname: worker-host-1)
+2025/10/12 16:48:26 Report received from agent: worker-agent-2 (hostname: worker-host-2)
+[GIN] 2025/10/12 - 16:48:26 | 202 |      68.302µs |                 | POST     "/api/v1/reports"
+[GIN] 2025/10/12 - 16:48:26 | 202 |       67.21µs |                 | POST     "/api/v1/reports"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      21.073µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      18.776µs |                 | GET      "/api/v1/query/topology"
+2025/10/12 16:48:26 Report received from agent: worker-agent-4 (hostname: worker-host-4)
+2025/10/12 16:48:26 Report received from agent: worker-agent-0 (hostname: worker-host-0)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     143.245µs |                 | POST     "/api/v1/reports"
+[GIN] 2025/10/12 - 16:48:26 | 202 |      83.939µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: worker-agent-2 (hostname: worker-host-2)
+[GIN] 2025/10/12 - 16:48:26 | 202 |      21.415µs |                 | POST     "/api/v1/reports"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       23.43µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      26.093µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      20.359µs |                 | GET      "/api/v1/query/topology"
+2025/10/12 16:48:26 Report received from agent: worker-agent-4 (hostname: worker-host-4)
+2025/10/12 16:48:26 Report received from agent: worker-agent-0 (hostname: worker-host-0)
+[GIN] 2025/10/12 - 16:48:26 | 202 |      18.674µs |                 | POST     "/api/v1/reports"
+[GIN] 2025/10/12 - 16:48:26 | 202 |      14.522µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: worker-agent-2 (hostname: worker-host-2)
+[GIN] 2025/10/12 - 16:48:26 | 202 |      16.358µs |                 | POST     "/api/v1/reports"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      19.475µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      16.547µs |                 | GET      "/api/v1/query/topology"
+2025/10/12 16:48:26 Report received from agent: worker-agent-3 (hostname: worker-host-3)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     177.909µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: worker-agent-0 (hostname: worker-host-0)
+[GIN] 2025/10/12 - 16:48:26 | 202 |      11.234µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: worker-agent-2 (hostname: worker-host-2)
+[GIN] 2025/10/12 - 16:48:26 | 202 |      13.004µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: worker-agent-1 (hostname: worker-host-1)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     117.499µs |                 | POST     "/api/v1/reports"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      24.625µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       23.56µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      25.468µs |                 | GET      "/api/v1/query/topology"
+2025/10/12 16:48:26 Report received from agent: worker-agent-3 (hostname: worker-host-3)
+[GIN] 2025/10/12 - 16:48:26 | 202 |       11.23µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: worker-agent-2 (hostname: worker-host-2)
+2025/10/12 16:48:26 Report received from agent: worker-agent-0 (hostname: worker-host-0)
+[GIN] 2025/10/12 - 16:48:26 | 202 |      14.211µs |                 | POST     "/api/v1/reports"
+[GIN] 2025/10/12 - 16:48:26 | 202 |      19.375µs |                 | POST     "/api/v1/reports"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      24.707µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      45.752µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      21.644µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      19.723µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      25.635µs |                 | GET      "/api/v1/query/topology"
+2025/10/12 16:48:26 Report received from agent: worker-agent-3 (hostname: worker-host-3)
+[GIN] 2025/10/12 - 16:48:26 | 202 |      12.206µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: worker-agent-0 (hostname: worker-host-0)
+[GIN] 2025/10/12 - 16:48:26 | 202 |      11.373µs |                 | POST     "/api/v1/reports"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      19.803µs |                 | GET      "/api/v1/query/topology"
+2025/10/12 16:48:26 Report received from agent: worker-agent-4 (hostname: worker-host-4)
+[GIN] 2025/10/12 - 16:48:26 | 202 |      47.035µs |                 | POST     "/api/v1/reports"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      18.873µs |                 | GET      "/api/v1/query/topology"
+2025/10/12 16:48:26 Report received from agent: worker-agent-4 (hostname: worker-host-4)
+[GIN] 2025/10/12 - 16:48:26 | 202 |      13.888µs |                 | POST     "/api/v1/reports"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      78.697µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      27.697µs |                 | GET      "/api/v1/query/topology"
+2025/10/12 16:48:26 Report received from agent: worker-agent-1 (hostname: worker-host-1)
+2025/10/12 16:48:26 Report received from agent: worker-agent-4 (hostname: worker-host-4)
+[GIN] 2025/10/12 - 16:48:26 | 202 |       17.03µs |                 | POST     "/api/v1/reports"
+[GIN] 2025/10/12 - 16:48:26 | 202 |     145.277µs |                 | POST     "/api/v1/reports"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      19.919µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      30.032µs |                 | GET      "/api/v1/query/topology"
+2025/10/12 16:48:26 Report received from agent: worker-agent-1 (hostname: worker-host-1)
+[GIN] 2025/10/12 - 16:48:26 | 202 |      14.879µs |                 | POST     "/api/v1/reports"
+2025/10/12 16:48:26 Report received from agent: worker-agent-3 (hostname: worker-host-3)
+[GIN] 2025/10/12 - 16:48:26 | 202 |     184.728µs |                 | POST     "/api/v1/reports"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      20.854µs |                 | GET      "/api/v1/query/topology"
+2025/10/12 16:48:26 Report received from agent: worker-agent-1 (hostname: worker-host-1)
+[GIN] 2025/10/12 - 16:48:26 | 202 |      11.482µs |                 | POST     "/api/v1/reports"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      28.761µs |                 | GET      "/api/v1/query/topology"
+[GIN] 2025/10/12 - 16:48:26 | 200 |       23.49µs |                 | GET      "/api/v1/query/topology"
+2025/10/12 16:48:26 Report received from agent: worker-agent-3 (hostname: worker-host-3)
+[GIN] 2025/10/12 - 16:48:26 | 202 |      15.935µs |                 | POST     "/api/v1/reports"
+[GIN] 2025/10/12 - 16:48:26 | 200 |      17.489µs |                 | GET      "/api/v1/query/topology"
+    loadtest_test.go:270: Mixed workload test completed in 632.042µs
+    loadtest_test.go:271: Total operations: 50
+    loadtest_test.go:272: Successful writes: 25
+    loadtest_test.go:273: Successful reads: 25
+    loadtest_test.go:274: Operations per second: 79108.67
+--- PASS: TestLoadMixedWorkload (0.00s)
+=== RUN   TestMemoryUsage
+2025/10/12 16:48:26 Starting app server on localhost:8080
+2025/10/12 16:48:26 App server started successfully
+2025/10/12 16:48:26 REST API: http://localhost:8080/api/v1
+2025/10/12 16:48:26 WebSocket: ws://localhost:8080/api/v1/ws
+2025/10/12 16:48:26 Health check: http://localhost:8080/health
+    loadtest_test.go:372: Server stats after 100 reports: map[agents:0 storage:map[max_age:1h0m0s resolution:15s total_agents:10 total_points:100] topology:map[edges_by_type:map[] last_update:2025-10-12 16:48:26.9256805 -0700 PDT m=+0.731757814 nodes_by_type:map[host:10] total_edges:0 total_nodes:10] uptime:602.975µs websocket_clients:0]
+2025/10/12 16:48:26 Running cleanup...
+2025/10/12 16:48:26 Cleanup completed. Removed 0 stale agents
+    loadtest_test.go:378: Server stats after cleanup: map[agents:0 storage:map[max_age:1h0m0s resolution:15s total_agents:10 total_points:100] topology:map[edges_by_type:map[] last_update:2025-10-12 16:48:26.9256805 -0700 PDT m=+0.731757814 nodes_by_type:map[host:10] total_edges:0 total_nodes:10] uptime:879.256µs websocket_clients:0]
+2025/10/12 16:48:26 Stopping app server...
+2025/10/12 16:48:26 App server stopped successfully
+--- PASS: TestMemoryUsage (0.00s)
+=== RUN   TestNewWSHub
+--- PASS: TestNewWSHub (0.00s)
+=== RUN   TestWSHubClientRegistration
+2025/10/12 16:48:26 WebSocket client registered: test-client (total: 1)
+2025/10/12 16:48:27 WebSocket client unregistered: test-client (total: 0)
+--- PASS: TestWSHubClientRegistration (0.30s)
+=== RUN   TestWSHubBroadcast
+2025/10/12 16:48:27 WebSocket client registered: test-client (total: 1)
+    websocket_test.go:126: WebSocket message timeout - this may be due to test environment limitations
+--- PASS: TestWSHubBroadcast (2.00s)
+=== RUN   TestWSHubBroadcastTopologyUpdate
+--- PASS: TestWSHubBroadcastTopologyUpdate (0.00s)
+=== RUN   TestWSHubBroadcastReportUpdate
+--- PASS: TestWSHubBroadcastReportUpdate (0.00s)
+=== RUN   TestNewWSClient
+--- PASS: TestNewWSClient (0.10s)
+=== RUN   TestWSClientSendMessage
+--- PASS: TestWSClientSendMessage (0.10s)
+=== RUN   TestWSClientClose
+--- PASS: TestWSClientClose (0.10s)
+=== RUN   TestWSMessageSerialization
+--- PASS: TestWSMessageSerialization (0.00s)
+=== RUN   TestWSHubGetClientCount
+--- PASS: TestWSHubGetClientCount (0.00s)
+=== RUN   TestWSClientPumpsIntegration
+2025/10/12 16:48:29 WebSocket client registered: test-client (total: 1)
+2025/10/12 16:48:29 WebSocket client unregistered: test-client (total: 0)
+--- PASS: TestWSClientPumpsIntegration (0.30s)
+PASS
+ok  	github.com/ljluestc/orchestrator/pkg/app	3.646s

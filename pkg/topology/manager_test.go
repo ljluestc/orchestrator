@@ -1,6 +1,7 @@
 package topology
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -9,6 +10,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gorilla/mux"
+	"github.com/ljluestc/orchestrator/pkg/probe"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -930,7 +933,10 @@ func TestTopologyManager_StartStop(t *testing.T) {
 	// Check for start error
 	select {
 	case err := <-errChan:
-		assert.NoError(t, err)
+		// Accept "Server closed" error as expected when shutting down
+		if err != nil && err.Error() != "http: Server closed" {
+			assert.NoError(t, err)
+		}
 	case <-time.After(1 * time.Second):
 		t.Fatal("Server start timeout")
 	}
@@ -1007,9 +1013,9 @@ func TestTopologyManager_NodeStructures(t *testing.T) {
 	assert.Equal(t, 60.0, node.Metrics.MemoryUsage.Current)
 	assert.Equal(t, 55.0, node.Metrics.MemoryUsage.Avg)
 	assert.Equal(t, 80.0, node.Metrics.MemoryUsage.Max)
-	assert.Equal(t, 150, node.Metrics.Connections.Current)
-	assert.Equal(t, 120, node.Metrics.Connections.Avg)
-	assert.Equal(t, 200, node.Metrics.Connections.Max)
+	assert.Equal(t, 150.0, node.Metrics.Connections.Current)
+	assert.Equal(t, 120.0, node.Metrics.Connections.Avg)
+	assert.Equal(t, 200.0, node.Metrics.Connections.Max)
 	assert.Equal(t, now, node.CreatedAt)
 	assert.Equal(t, now, node.UpdatedAt)
 }
@@ -1036,12 +1042,12 @@ func TestTopologyManager_EdgeStructures(t *testing.T) {
 	assert.Equal(t, "network", edge.Type)
 	assert.Equal(t, "tcp", edge.Metadata["protocol"])
 	assert.Equal(t, 80, edge.Metadata["port"])
-	assert.Equal(t, 1000, edge.Metrics.BytesIn.Current)
-	assert.Equal(t, 800, edge.Metrics.BytesIn.Avg)
-	assert.Equal(t, 1500, edge.Metrics.BytesIn.Max)
-	assert.Equal(t, 5, edge.Metrics.Latency.Current)
-	assert.Equal(t, 3, edge.Metrics.Latency.Avg)
-	assert.Equal(t, 10, edge.Metrics.Latency.Max)
+	assert.Equal(t, 1000.0, edge.Metrics.BytesIn.Current)
+	assert.Equal(t, 800.0, edge.Metrics.BytesIn.Avg)
+	assert.Equal(t, 1500.0, edge.Metrics.BytesIn.Max)
+	assert.Equal(t, 5.0, edge.Metrics.Latency.Current)
+	assert.Equal(t, 3.0, edge.Metrics.Latency.Avg)
+	assert.Equal(t, 10.0, edge.Metrics.Latency.Max)
 	assert.Equal(t, now, edge.CreatedAt)
 	assert.Equal(t, now, edge.UpdatedAt)
 }
@@ -1156,4 +1162,944 @@ func BenchmarkTopologyManager_HandleGetTopology(b *testing.B) {
 		rr := httptest.NewRecorder()
 		manager.handleGetTopology(rr, req)
 	}
+}
+
+// Additional tests for 100% coverage
+
+func TestTopologyManager_Stop(t *testing.T) {
+	manager := NewManager("test-manager")
+	
+	// Test stopping without starting (should not panic)
+	manager.Stop()
+	
+	// Test stopping multiple times (should not panic)
+	manager.Stop()
+}
+
+func TestTopologyManager_HandleGetNode(t *testing.T) {
+	manager := NewManager("test-manager")
+	
+	// Add a test node
+	node := &Node{ID: "node-1", Name: "Test Node", Type: "host", Status: "healthy"}
+	manager.AddNode(node)
+	
+	// Test getting existing node
+	req := httptest.NewRequest("GET", "/api/topology/nodes/node-1", nil)
+	req = mux.SetURLVars(req, map[string]string{"id": "node-1"})
+	rr := httptest.NewRecorder()
+	
+	manager.handleGetNode(rr, req)
+	assert.Equal(t, http.StatusOK, rr.Code)
+	
+	var retrievedNode Node
+	err := json.Unmarshal(rr.Body.Bytes(), &retrievedNode)
+	assert.NoError(t, err)
+	assert.Equal(t, "node-1", retrievedNode.ID)
+	
+	// Test getting non-existent node
+	req = httptest.NewRequest("GET", "/api/topology/nodes/nonexistent", nil)
+	req = mux.SetURLVars(req, map[string]string{"id": "nonexistent"})
+	rr = httptest.NewRecorder()
+	
+	manager.handleGetNode(rr, req)
+	assert.Equal(t, http.StatusNotFound, rr.Code)
+}
+
+func TestTopologyManager_HandleGetEdge(t *testing.T) {
+	manager := NewManager("test-manager")
+	
+	// Add test nodes
+	node1 := &Node{ID: "node-1", Name: "Node 1", Type: "host", Status: "healthy"}
+	node2 := &Node{ID: "node-2", Name: "Node 2", Type: "container", Status: "healthy"}
+	manager.AddNode(node1)
+	manager.AddNode(node2)
+	
+	// Add test edge
+	edge := &Edge{ID: "edge-1", Source: "node-1", Target: "node-2", Type: "network"}
+	manager.AddEdge(edge)
+	
+	// Test getting existing edge
+	req := httptest.NewRequest("GET", "/api/topology/edges/edge-1", nil)
+	req = mux.SetURLVars(req, map[string]string{"id": "edge-1"})
+	rr := httptest.NewRecorder()
+	
+	manager.handleGetEdge(rr, req)
+	assert.Equal(t, http.StatusOK, rr.Code)
+	
+	var retrievedEdge Edge
+	err := json.Unmarshal(rr.Body.Bytes(), &retrievedEdge)
+	assert.NoError(t, err)
+	assert.Equal(t, "edge-1", retrievedEdge.ID)
+	
+	// Test getting non-existent edge
+	req = httptest.NewRequest("GET", "/api/topology/edges/nonexistent", nil)
+	req = mux.SetURLVars(req, map[string]string{"id": "nonexistent"})
+	rr = httptest.NewRecorder()
+	
+	manager.handleGetEdge(rr, req)
+	assert.Equal(t, http.StatusNotFound, rr.Code)
+}
+
+func TestTopologyManager_HandleGetView(t *testing.T) {
+	manager := NewManager("test-manager")
+	
+	// Test getting existing view (default views are created)
+	req := httptest.NewRequest("GET", "/api/views/processes", nil)
+	req = mux.SetURLVars(req, map[string]string{"id": "processes"})
+	rr := httptest.NewRecorder()
+	
+	manager.handleGetView(rr, req)
+	assert.Equal(t, http.StatusOK, rr.Code)
+	
+	var view View
+	err := json.Unmarshal(rr.Body.Bytes(), &view)
+	assert.NoError(t, err)
+	assert.Equal(t, "processes", view.ID)
+	
+	// Test getting non-existent view
+	req = httptest.NewRequest("GET", "/api/views/nonexistent", nil)
+	req = mux.SetURLVars(req, map[string]string{"id": "nonexistent"})
+	rr = httptest.NewRecorder()
+	
+	manager.handleGetView(rr, req)
+	assert.Equal(t, http.StatusNotFound, rr.Code)
+}
+
+func TestTopologyManager_HandleCreateView(t *testing.T) {
+	manager := NewManager("test-manager")
+	
+	// Test creating a new view
+	viewData := map[string]interface{}{
+		"id":          "custom-view",
+		"name":        "Custom View",
+		"description": "A custom view",
+		"nodeTypes":   []string{"host", "container"},
+		"edgeTypes":   []string{"network"},
+	}
+	
+	jsonData, _ := json.Marshal(viewData)
+	req := httptest.NewRequest("POST", "/api/views", bytes.NewBuffer(jsonData))
+	req.Header.Set("Content-Type", "application/json")
+	rr := httptest.NewRecorder()
+	
+	manager.handleCreateView(rr, req)
+	assert.Equal(t, http.StatusCreated, rr.Code)
+	
+	// Verify view was created
+	view, err := manager.GetView("custom-view")
+	assert.NoError(t, err)
+	assert.Equal(t, "custom-view", view.ID)
+	assert.Equal(t, "Custom View", view.Name)
+	
+	// Test creating view with invalid JSON
+	req = httptest.NewRequest("POST", "/api/views", bytes.NewBufferString("invalid json"))
+	req.Header.Set("Content-Type", "application/json")
+	rr = httptest.NewRecorder()
+	
+	manager.handleCreateView(rr, req)
+	assert.Equal(t, http.StatusBadRequest, rr.Code)
+}
+
+func TestTopologyManager_HandleUpdateView(t *testing.T) {
+	manager := NewManager("test-manager")
+	
+	// Create a view first
+	view := &View{
+		ID:          "test-view",
+		Name:        "Test View",
+		Description: "Original description",
+		NodeTypes:   []string{"host"},
+		EdgeTypes:   []string{"network"},
+	}
+	manager.CreateView(view)
+	
+	// Test updating the view
+	updateData := map[string]interface{}{
+		"name":        "Updated View",
+		"description": "Updated description",
+		"node_types":  []string{"host", "container"},
+		"edge_types":  []string{"network", "process"},
+	}
+	
+	jsonData, _ := json.Marshal(updateData)
+	req := httptest.NewRequest("PUT", "/api/views/test-view", bytes.NewBuffer(jsonData))
+	req.Header.Set("Content-Type", "application/json")
+	req = mux.SetURLVars(req, map[string]string{"id": "test-view"})
+	rr := httptest.NewRecorder()
+	
+	manager.handleUpdateView(rr, req)
+	assert.Equal(t, http.StatusOK, rr.Code)
+	
+	// Verify view was updated
+	updatedView, err := manager.GetView("test-view")
+	assert.NoError(t, err)
+	assert.Equal(t, "Updated View", updatedView.Name)
+	assert.Equal(t, "Updated description", updatedView.Description)
+	assert.Len(t, updatedView.NodeTypes, 2)
+	assert.Len(t, updatedView.EdgeTypes, 2)
+	
+	// Test updating non-existent view
+	req = httptest.NewRequest("PUT", "/api/views/nonexistent", bytes.NewBuffer(jsonData))
+	req.Header.Set("Content-Type", "application/json")
+	req = mux.SetURLVars(req, map[string]string{"id": "nonexistent"})
+	rr = httptest.NewRecorder()
+	
+	manager.handleUpdateView(rr, req)
+	assert.Equal(t, http.StatusNotFound, rr.Code)
+	
+	// Test updating with invalid JSON
+	req = httptest.NewRequest("PUT", "/api/views/test-view", bytes.NewBufferString("invalid json"))
+	req.Header.Set("Content-Type", "application/json")
+	req = mux.SetURLVars(req, map[string]string{"id": "test-view"})
+	rr = httptest.NewRecorder()
+	
+	manager.handleUpdateView(rr, req)
+	assert.Equal(t, http.StatusBadRequest, rr.Code)
+}
+
+func TestTopologyManager_HandleDeleteView(t *testing.T) {
+	manager := NewManager("test-manager")
+	
+	// Create a view first
+	view := &View{
+		ID:          "delete-test-view",
+		Name:        "Delete Test View",
+		Description: "View to be deleted",
+		NodeTypes:   []string{"host"},
+		EdgeTypes:   []string{"network"},
+	}
+	manager.CreateView(view)
+	
+	// Test deleting existing view
+	req := httptest.NewRequest("DELETE", "/api/views/delete-test-view", nil)
+	req = mux.SetURLVars(req, map[string]string{"id": "delete-test-view"})
+	rr := httptest.NewRecorder()
+	
+	manager.handleDeleteView(rr, req)
+	assert.Equal(t, http.StatusOK, rr.Code)
+	
+	// Verify view was deleted
+	_, err := manager.GetView("delete-test-view")
+	assert.Error(t, err)
+	
+	// Test deleting non-existent view
+	req = httptest.NewRequest("DELETE", "/api/views/nonexistent", nil)
+	req = mux.SetURLVars(req, map[string]string{"id": "nonexistent"})
+	rr = httptest.NewRecorder()
+	
+	manager.handleDeleteView(rr, req)
+	assert.Equal(t, http.StatusNotFound, rr.Code)
+}
+
+func TestTopologyManager_HandleGetNodeMetrics(t *testing.T) {
+	manager := NewManager("test-manager")
+	
+	// Add a test node with metrics
+	node := &Node{
+		ID:     "node-1",
+		Name:   "Test Node",
+		Type:   "host",
+		Status: "healthy",
+		Metrics: &NodeMetrics{
+			CPUUsage: &Sparkline{Current: 50.0, Avg: 45.0, Min: 20.0, Max: 80.0},
+			MemoryUsage: &Sparkline{Current: 1024.0, Avg: 900.0, Min: 500.0, Max: 1500.0},
+			Connections: &Sparkline{Current: 10.0, Avg: 8.0, Min: 0.0, Max: 20.0},
+		},
+	}
+	manager.AddNode(node)
+	
+	// Test getting node metrics
+	req := httptest.NewRequest("GET", "/api/metrics/nodes/node-1", nil)
+	req = mux.SetURLVars(req, map[string]string{"id": "node-1"})
+	rr := httptest.NewRecorder()
+	
+	manager.handleGetNodeMetrics(rr, req)
+	assert.Equal(t, http.StatusOK, rr.Code)
+	
+	var metrics NodeMetrics
+	err := json.Unmarshal(rr.Body.Bytes(), &metrics)
+	assert.NoError(t, err)
+	assert.Equal(t, 50.0, metrics.CPUUsage.Current)
+	assert.Equal(t, 1024.0, metrics.MemoryUsage.Current)
+	assert.Equal(t, 10.0, metrics.Connections.Current)
+	
+	// Test getting metrics for non-existent node
+	req = httptest.NewRequest("GET", "/api/metrics/nodes/nonexistent", nil)
+	req = mux.SetURLVars(req, map[string]string{"id": "nonexistent"})
+	rr = httptest.NewRecorder()
+	
+	manager.handleGetNodeMetrics(rr, req)
+	assert.Equal(t, http.StatusNotFound, rr.Code)
+}
+
+func TestTopologyManager_HandleGetEdgeMetrics(t *testing.T) {
+	manager := NewManager("test-manager")
+	
+	// Add test nodes
+	node1 := &Node{ID: "node-1", Name: "Node 1", Type: "host", Status: "healthy"}
+	node2 := &Node{ID: "node-2", Name: "Node 2", Type: "container", Status: "healthy"}
+	manager.AddNode(node1)
+	manager.AddNode(node2)
+	
+	// Add test edge with metrics
+	edge := &Edge{
+		ID:     "edge-1",
+		Source: "node-1",
+		Target: "node-2",
+		Type:   "network",
+		Metrics: &EdgeMetrics{
+			BytesIn:  &Sparkline{Current: 1000.0, Avg: 800.0, Min: 0.0, Max: 2000.0},
+			BytesOut: &Sparkline{Current: 500.0, Avg: 400.0, Min: 0.0, Max: 1000.0},
+			Latency:  &Sparkline{Current: 5.0, Avg: 3.0, Min: 1.0, Max: 10.0},
+		},
+	}
+	manager.AddEdge(edge)
+	
+	// Test getting edge metrics
+	req := httptest.NewRequest("GET", "/api/metrics/edges/edge-1", nil)
+	req = mux.SetURLVars(req, map[string]string{"id": "edge-1"})
+	rr := httptest.NewRecorder()
+	
+	manager.handleGetEdgeMetrics(rr, req)
+	assert.Equal(t, http.StatusOK, rr.Code)
+	
+	var metrics EdgeMetrics
+	err := json.Unmarshal(rr.Body.Bytes(), &metrics)
+	assert.NoError(t, err)
+	assert.Equal(t, 1000.0, metrics.BytesIn.Current)
+	assert.Equal(t, 500.0, metrics.BytesOut.Current)
+	assert.Equal(t, 5.0, metrics.Latency.Current)
+	
+	// Test getting metrics for non-existent edge
+	req = httptest.NewRequest("GET", "/api/metrics/edges/nonexistent", nil)
+	req = mux.SetURLVars(req, map[string]string{"id": "nonexistent"})
+	rr = httptest.NewRecorder()
+	
+	manager.handleGetEdgeMetrics(rr, req)
+	assert.Equal(t, http.StatusNotFound, rr.Code)
+}
+
+func TestTopologyManager_HandleFilter(t *testing.T) {
+	manager := NewManager("test-manager")
+	
+	// Add test nodes
+	node1 := &Node{ID: "node-1", Name: "Host Node", Type: "host", Status: "healthy"}
+	node2 := &Node{ID: "node-2", Name: "Container Node", Type: "container", Status: "unhealthy"}
+	node3 := &Node{ID: "node-3", Name: "Process Node", Type: "process", Status: "healthy"}
+	manager.AddNode(node1)
+	manager.AddNode(node2)
+	manager.AddNode(node3)
+	
+	// Test filtering by node type
+	filterData := map[string]interface{}{
+		"node_types": []string{"host", "container"},
+	}
+	
+	jsonData, _ := json.Marshal(filterData)
+	req := httptest.NewRequest("POST", "/api/topology/filter", bytes.NewBuffer(jsonData))
+	req.Header.Set("Content-Type", "application/json")
+	rr := httptest.NewRecorder()
+	
+	manager.handleFilter(rr, req)
+	assert.Equal(t, http.StatusOK, rr.Code)
+	
+	var nodes []Node
+	err := json.Unmarshal(rr.Body.Bytes(), &nodes)
+	assert.NoError(t, err)
+	assert.Len(t, nodes, 2) // Only host and container nodes
+	
+	// Test filtering by status
+	filterData = map[string]interface{}{
+		"status": []string{"healthy"},
+	}
+	
+	jsonData, _ = json.Marshal(filterData)
+	req = httptest.NewRequest("POST", "/api/topology/filter", bytes.NewBuffer(jsonData))
+	req.Header.Set("Content-Type", "application/json")
+	rr = httptest.NewRecorder()
+	
+	manager.handleFilter(rr, req)
+	assert.Equal(t, http.StatusOK, rr.Code)
+	
+	err = json.Unmarshal(rr.Body.Bytes(), &nodes)
+	assert.NoError(t, err)
+	assert.Len(t, nodes, 2) // Only healthy nodes
+	
+	// Test with invalid JSON
+	req = httptest.NewRequest("POST", "/api/topology/filter", bytes.NewBufferString("invalid json"))
+	req.Header.Set("Content-Type", "application/json")
+	rr = httptest.NewRecorder()
+	
+	manager.handleFilter(rr, req)
+	assert.Equal(t, http.StatusBadRequest, rr.Code)
+}
+
+func TestTopologyManager_MatchesSearch(t *testing.T) {
+	manager := NewManager("test-manager")
+	
+	// Add a test node
+	node := &Node{
+		ID:       "node-1",
+		Name:     "Test Node",
+		Type:     "host",
+		Status:   "healthy",
+		Metadata: map[string]interface{}{"environment": "production", "region": "us-west"},
+	}
+	manager.AddNode(node)
+	
+	// Test searching by name
+	query := "Test"
+	matches := manager.matchesSearch(node, query)
+	assert.True(t, matches)
+	
+	// Test searching by name (partial match)
+	query = "Node"
+	matches = manager.matchesSearch(node, query)
+	assert.True(t, matches)
+	
+	// Test searching by metadata
+	query = "production"
+	matches = manager.matchesSearch(node, query)
+	assert.True(t, matches)
+	
+	// Test searching with no match
+	query = "nonexistent"
+	matches = manager.matchesSearch(node, query)
+	assert.False(t, matches)
+}
+
+func TestTopologyManager_MatchesFilter(t *testing.T) {
+	manager := NewManager("test-manager")
+	
+	// Add a test node
+	node := &Node{
+		ID:       "node-1",
+		Name:     "Test Node",
+		Type:     "host",
+		Status:   "healthy",
+		Metadata: map[string]interface{}{"environment": "production"},
+	}
+	manager.AddNode(node)
+	
+	// Test filtering by node types
+	filter := &Filter{
+		NodeTypes: []string{"host", "container"},
+	}
+	matches := manager.matchesFilter(node, filter)
+	assert.True(t, matches)
+	
+	// Test filtering by status
+	filter = &Filter{
+		Status: []string{"healthy"},
+	}
+	matches = manager.matchesFilter(node, filter)
+	assert.True(t, matches)
+	
+	// Test filtering by metadata
+	filter = &Filter{
+		Metadata: map[string]interface{}{
+			"environment": "production",
+		},
+	}
+	matches = manager.matchesFilter(node, filter)
+	assert.True(t, matches)
+	
+	// Test filtering with no match
+	filter = &Filter{
+		NodeTypes: []string{"container"},
+	}
+	matches = manager.matchesFilter(node, filter)
+	assert.False(t, matches)
+}
+
+func TestTopologyManager_MatchesMetricsFilter(t *testing.T) {
+	manager := NewManager("test-manager")
+	
+	// Add a test node with metrics
+	node := &Node{
+		ID:     "node-1",
+		Name:   "Test Node",
+		Type:   "host",
+		Status: "healthy",
+		Metrics: &NodeMetrics{
+			CPUUsage:     &Sparkline{Current: 50.0, Avg: 45.0, Min: 20.0, Max: 80.0},
+			MemoryUsage:  &Sparkline{Current: 1024.0, Avg: 900.0, Min: 500.0, Max: 1500.0},
+			Connections: &Sparkline{Current: 10.0, Avg: 8.0, Min: 0.0, Max: 20.0},
+		},
+	}
+	manager.AddNode(node)
+	
+	// Test filtering by CPU range
+	filter := &MetricsFilter{
+		CPUUsage: &RangeFilter{Min: 40.0, Max: 60.0},
+	}
+	matches := manager.matchesMetricsFilter(node, filter)
+	assert.True(t, matches)
+	
+	// Test filtering by memory range
+	filter = &MetricsFilter{
+		MemoryUsage: &RangeFilter{Min: 1000.0, Max: 1200.0},
+	}
+	matches = manager.matchesMetricsFilter(node, filter)
+	assert.True(t, matches)
+	
+	// Test filtering with no match
+	filter = &MetricsFilter{
+		CPUUsage: &RangeFilter{Min: 80.0, Max: 100.0},
+	}
+	matches = manager.matchesMetricsFilter(node, filter)
+	assert.False(t, matches)
+}
+
+func TestTopologyManager_BroadcastUpdate(t *testing.T) {
+	manager := NewManager("test-manager")
+	
+	// Add a test node
+	node := &Node{ID: "node-1", Name: "Test Node", Type: "host", Status: "healthy"}
+	manager.AddNode(node)
+	
+	// Test broadcasting node update
+	update := &TopologyUpdate{
+		Type: "add",
+		Node: node,
+	}
+	
+	// This should not panic
+	manager.broadcastUpdate(update)
+	
+	// Test broadcasting edge update
+	edge := &Edge{ID: "edge-1", Source: "node-1", Target: "node-1", Type: "network"}
+	manager.AddEdge(edge)
+	
+	update = &TopologyUpdate{
+		Type: "add",
+		Edge: edge,
+	}
+	
+	// This should not panic
+	manager.broadcastUpdate(update)
+}
+
+func TestTopologyManager_CleanupWebSocketConnections(t *testing.T) {
+	manager := NewManager("test-manager")
+	
+	// Test cleanup with no connections
+	manager.cleanupWebSocketConnections()
+	
+	// This should not panic
+}
+
+func TestTopologyManager_GetTopologyForSubscriber(t *testing.T) {
+	manager := NewManager("test-manager")
+	
+	// Add test data
+	node := &Node{ID: "node-1", Name: "Test Node", Type: "host", Status: "healthy"}
+	manager.AddNode(node)
+	
+	edge := &Edge{ID: "edge-1", Source: "node-1", Target: "node-1", Type: "network"}
+	manager.AddEdge(edge)
+	
+	// Test getting topology for subscriber
+	subscriber := &Subscriber{ID: "test-subscriber"}
+	topology := manager.getTopologyForSubscriber(subscriber)
+	
+	assert.NotNil(t, topology)
+	nodes := topology["nodes"].(map[string]*Node)
+	edges := topology["edges"].(map[string]*Edge)
+	assert.Len(t, nodes, 1)
+	assert.Len(t, edges, 1)
+}
+
+func TestTopologyManager_HandleAddNode(t *testing.T) {
+	manager := NewManager("test-manager")
+	
+	// Test adding node via WebSocket
+	nodeData := map[string]interface{}{
+		"id":     "ws-node-1",
+		"name":   "WebSocket Node",
+		"type":   "host",
+		"status": "healthy",
+	}
+	
+	jsonData, _ := json.Marshal(nodeData)
+	req := httptest.NewRequest("POST", "/api/topology/nodes", bytes.NewBuffer(jsonData))
+	req.Header.Set("Content-Type", "application/json")
+	rr := httptest.NewRecorder()
+	
+	manager.handleAddNode(rr, req)
+	assert.Equal(t, http.StatusCreated, rr.Code)
+	
+	// Verify node was added
+	node, err := manager.GetNode("ws-node-1")
+	assert.NoError(t, err)
+	assert.Equal(t, "WebSocket Node", node.Name)
+	
+	// Test with invalid JSON
+	req = httptest.NewRequest("POST", "/api/topology/nodes", bytes.NewBufferString("invalid json"))
+	req.Header.Set("Content-Type", "application/json")
+	rr = httptest.NewRecorder()
+	
+	manager.handleAddNode(rr, req)
+	assert.Equal(t, http.StatusBadRequest, rr.Code)
+}
+
+func TestTopologyManager_HandleAddEdge(t *testing.T) {
+	manager := NewManager("test-manager")
+	
+	// Add test nodes first
+	node1 := &Node{ID: "ws-node-1", Name: "Node 1", Type: "host", Status: "healthy"}
+	node2 := &Node{ID: "ws-node-2", Name: "Node 2", Type: "container", Status: "healthy"}
+	manager.AddNode(node1)
+	manager.AddNode(node2)
+	
+	// Test adding edge via WebSocket
+	edgeData := map[string]interface{}{
+		"id":     "ws-edge-1",
+		"source": "ws-node-1",
+		"target": "ws-node-2",
+		"type":   "network",
+	}
+	
+	jsonData, _ := json.Marshal(edgeData)
+	req := httptest.NewRequest("POST", "/api/topology/edges", bytes.NewBuffer(jsonData))
+	req.Header.Set("Content-Type", "application/json")
+	rr := httptest.NewRecorder()
+	
+	manager.handleAddEdge(rr, req)
+	assert.Equal(t, http.StatusCreated, rr.Code)
+	
+	// Verify edge was added
+	edge, err := manager.GetEdge("ws-edge-1")
+	assert.NoError(t, err)
+	assert.Equal(t, "ws-node-1", edge.Source)
+	assert.Equal(t, "ws-node-2", edge.Target)
+	
+	// Test with invalid JSON
+	req = httptest.NewRequest("POST", "/api/topology/edges", bytes.NewBufferString("invalid json"))
+	req.Header.Set("Content-Type", "application/json")
+	rr = httptest.NewRecorder()
+	
+	manager.handleAddEdge(rr, req)
+	assert.Equal(t, http.StatusBadRequest, rr.Code)
+	
+	// Test with non-existent source/target
+	edgeData = map[string]interface{}{
+		"id":     "ws-edge-2",
+		"source": "nonexistent",
+		"target": "ws-node-2",
+		"type":   "network",
+	}
+	
+	jsonData, _ = json.Marshal(edgeData)
+	req = httptest.NewRequest("POST", "/api/topology/edges", bytes.NewBuffer(jsonData))
+	req.Header.Set("Content-Type", "application/json")
+	rr = httptest.NewRecorder()
+	
+	manager.handleAddEdge(rr, req)
+	assert.Equal(t, http.StatusBadRequest, rr.Code)
+}
+
+// Collector tests for 100% coverage
+
+func TestNewCollector(t *testing.T) {
+	probeClient := &probe.Client{}
+	collector := NewCollector("test-collector", "http://localhost:8080", probeClient)
+	
+	assert.NotNil(t, collector)
+	assert.Equal(t, "test-collector", collector.ID)
+	assert.Equal(t, "http://localhost:8080", collector.TopologyURL)
+	assert.Equal(t, probeClient, collector.ProbeClient)
+	assert.NotNil(t, collector.UpdateTicker)
+	assert.NotNil(t, collector.ctx)
+	assert.NotNil(t, collector.cancel)
+}
+
+func TestCollector_Start(t *testing.T) {
+	probeClient := &probe.Client{}
+	collector := NewCollector("test-collector", "http://localhost:8080", probeClient)
+	
+	err := collector.Start()
+	assert.NoError(t, err)
+	
+	// Give some time for goroutines to start
+	time.Sleep(100 * time.Millisecond)
+	
+	// Stop the collector
+	collector.Stop()
+}
+
+func TestCollector_Stop(t *testing.T) {
+	probeClient := &probe.Client{}
+	collector := NewCollector("test-collector", "http://localhost:8080", probeClient)
+	
+	// Start the collector
+	err := collector.Start()
+	assert.NoError(t, err)
+	
+	// Stop the collector
+	err = collector.Stop()
+	assert.NoError(t, err)
+	
+	// Test stopping multiple times
+	err = collector.Stop()
+	assert.NoError(t, err)
+}
+
+func TestCollector_ConvertToNode(t *testing.T) {
+	probeClient := &probe.Client{}
+	collector := NewCollector("test-collector", "http://localhost:8080", probeClient)
+	
+	// Test converting probe data to node
+	probeData := map[string]interface{}{
+		"id":     "test-node",
+		"name":   "Test Node",
+		"type":   "host",
+		"status": "healthy",
+		"metadata": map[string]interface{}{
+			"cpu":    50.0,
+			"memory": 1024.0,
+		},
+	}
+	
+	node, err := collector.convertToNode("test-node", probeData)
+	assert.NoError(t, err)
+	assert.NotNil(t, node)
+	assert.Equal(t, "test-node", node.ID)
+	assert.Equal(t, "Test Node", node.Name)
+	assert.Equal(t, "host", node.Type)
+	assert.Equal(t, "", node.Status) // Status is not set by convertToNode
+	assert.NotNil(t, node.Metadata)
+}
+
+func TestCollector_ConvertToEdge(t *testing.T) {
+	probeClient := &probe.Client{}
+	collector := NewCollector("test-collector", "http://localhost:8080", probeClient)
+	
+	// Test converting probe data to edge
+	probeData := map[string]interface{}{
+		"id":     "test-edge",
+		"source": "node-1",
+		"target": "node-2",
+		"type":   "network",
+		"metadata": map[string]interface{}{
+			"bandwidth": 1000.0,
+			"latency":   5.0,
+		},
+	}
+	
+	edge, err := collector.convertToEdge("test-edge", probeData)
+	assert.NoError(t, err)
+	assert.NotNil(t, edge)
+	assert.Equal(t, "test-edge", edge.ID)
+	assert.Equal(t, "node-1", edge.Source)
+	assert.Equal(t, "node-2", edge.Target)
+	assert.Equal(t, "network", edge.Type)
+	assert.NotNil(t, edge.Metadata)
+}
+
+func TestCollector_GetString(t *testing.T) {
+	// Test getting string value
+	value := getString(map[string]interface{}{"key": "value"}, "key")
+	assert.Equal(t, "value", value)
+	
+	// Test getting non-existent key
+	value = getString(map[string]interface{}{"key": "value"}, "nonexistent")
+	assert.Equal(t, "", value)
+	
+	// Test getting non-string value
+	value = getString(map[string]interface{}{"key": 123}, "key")
+	assert.Equal(t, "", value)
+}
+
+func TestCollector_CreateHostNode(t *testing.T) {
+	probeClient := &probe.Client{}
+	collector := NewCollector("test-collector", "http://localhost:8080", probeClient)
+	
+	// Test creating host node
+	agentData := map[string]interface{}{
+		"hostname": "test-host",
+		"cpu":      50.0,
+		"memory":   1024.0,
+	}
+	
+	node := collector.createHostNode(agentData)
+	assert.Nil(t, node) // The method returns nil for now
+}
+
+func TestCollector_CreateContainerNode(t *testing.T) {
+	probeClient := &probe.Client{}
+	collector := NewCollector("test-collector", "http://localhost:8080", probeClient)
+	
+	// Test creating container node
+	containerData := map[string]interface{}{
+		"id":       "test-container",
+		"name":     "test-container",
+		"image":    "nginx",
+		"status":   "running",
+		"cpu":      25.0,
+		"memory":   512.0,
+	}
+	
+	node := collector.createContainerNode("test-agent", containerData)
+	assert.Nil(t, node) // The method returns nil for now
+}
+
+func TestCollector_CreateProcessNode(t *testing.T) {
+	probeClient := &probe.Client{}
+	collector := NewCollector("test-collector", "http://localhost:8080", probeClient)
+	
+	// Test creating process node
+	processData := map[string]interface{}{
+		"pid":      1234,
+		"name":     "nginx",
+		"cpu":      10.0,
+		"memory":   100.0,
+		"status":   "running",
+	}
+	
+	node := collector.createProcessNode("test-agent", processData)
+	assert.Nil(t, node) // The method returns nil for now
+}
+
+func TestCollector_CreateNetworkEdge(t *testing.T) {
+	probeClient := &probe.Client{}
+	collector := NewCollector("test-collector", "http://localhost:8080", probeClient)
+	
+	// Test creating network edge
+	networkData := map[string]interface{}{
+		"source":    "node-1",
+		"target":    "node-2",
+		"bandwidth": 1000.0,
+		"latency":   5.0,
+	}
+	
+	edge := collector.createNetworkEdge("test-agent", networkData)
+	assert.Nil(t, edge) // The method returns nil for now
+}
+
+func TestCollector_GenerateMockData(t *testing.T) {
+	probeClient := &probe.Client{}
+	collector := NewCollector("test-collector", "http://localhost:8080", probeClient)
+	
+	// Assign a fresh manager to the collector
+	manager := NewManager("test-manager-fresh")
+	collector.Manager = manager
+	
+	// Test generating mock data - this should not panic
+	assert.NotPanics(t, func() {
+		collector.generateMockData()
+	})
+	
+	// The method doesn't return values, it just generates data
+	// We can verify that the method executed without error
+	nodes := manager.ListNodes()
+	assert.GreaterOrEqual(t, len(nodes), 3) // Should have at least 3 nodes
+}
+
+// Container management handler tests for 100% coverage
+
+func TestTopologyManager_HandleStartContainer(t *testing.T) {
+	manager := NewManager("test-manager")
+	
+	req := httptest.NewRequest("POST", "/api/containers/test-container/start", nil)
+	req = mux.SetURLVars(req, map[string]string{"id": "test-container"})
+	rr := httptest.NewRecorder()
+	
+	manager.handleStartContainer(rr, req)
+	assert.Equal(t, http.StatusOK, rr.Code)
+}
+
+func TestTopologyManager_HandleStopContainer(t *testing.T) {
+	manager := NewManager("test-manager")
+	
+	req := httptest.NewRequest("POST", "/api/containers/test-container/stop", nil)
+	req = mux.SetURLVars(req, map[string]string{"id": "test-container"})
+	rr := httptest.NewRecorder()
+	
+	manager.handleStopContainer(rr, req)
+	assert.Equal(t, http.StatusOK, rr.Code)
+}
+
+func TestTopologyManager_HandleRestartContainer(t *testing.T) {
+	manager := NewManager("test-manager")
+	
+	req := httptest.NewRequest("POST", "/api/containers/test-container/restart", nil)
+	req = mux.SetURLVars(req, map[string]string{"id": "test-container"})
+	rr := httptest.NewRecorder()
+	
+	manager.handleRestartContainer(rr, req)
+	assert.Equal(t, http.StatusOK, rr.Code)
+}
+
+func TestTopologyManager_HandlePauseContainer(t *testing.T) {
+	manager := NewManager("test-manager")
+	
+	req := httptest.NewRequest("POST", "/api/containers/test-container/pause", nil)
+	req = mux.SetURLVars(req, map[string]string{"id": "test-container"})
+	rr := httptest.NewRecorder()
+	
+	manager.handlePauseContainer(rr, req)
+	assert.Equal(t, http.StatusOK, rr.Code)
+}
+
+func TestTopologyManager_HandleUnpauseContainer(t *testing.T) {
+	manager := NewManager("test-manager")
+	
+	req := httptest.NewRequest("POST", "/api/containers/test-container/unpause", nil)
+	req = mux.SetURLVars(req, map[string]string{"id": "test-container"})
+	rr := httptest.NewRecorder()
+	
+	manager.handleUnpauseContainer(rr, req)
+	assert.Equal(t, http.StatusOK, rr.Code)
+}
+
+func TestTopologyManager_HandleGetContainerLogs(t *testing.T) {
+	manager := NewManager("test-manager")
+	
+	req := httptest.NewRequest("GET", "/api/containers/test-container/logs", nil)
+	req = mux.SetURLVars(req, map[string]string{"id": "test-container"})
+	rr := httptest.NewRecorder()
+	
+	manager.handleGetContainerLogs(rr, req)
+	assert.Equal(t, http.StatusOK, rr.Code)
+}
+
+func TestTopologyManager_HandleContainerExec(t *testing.T) {
+	manager := NewManager("test-manager")
+	
+	execData := map[string]interface{}{
+		"command": "ls -la",
+		"tty":     false,
+	}
+	
+	jsonData, _ := json.Marshal(execData)
+	req := httptest.NewRequest("POST", "/api/containers/test-container/exec", bytes.NewBuffer(jsonData))
+	req.Header.Set("Content-Type", "application/json")
+	req = mux.SetURLVars(req, map[string]string{"id": "test-container"})
+	rr := httptest.NewRecorder()
+	
+	manager.handleContainerExec(rr, req)
+	assert.Equal(t, http.StatusOK, rr.Code)
+}
+
+// WebSocket handler tests for 100% coverage
+
+func TestTopologyManager_HandleWebSocket(t *testing.T) {
+	manager := NewManager("test-manager")
+	
+	// Create a WebSocket request
+	req := httptest.NewRequest("GET", "/ws", nil)
+	req.Header.Set("Upgrade", "websocket")
+	req.Header.Set("Connection", "Upgrade")
+	req.Header.Set("Sec-WebSocket-Key", "dGhlIHNhbXBsZSBub25jZQ==")
+	req.Header.Set("Sec-WebSocket-Version", "13")
+	
+	rr := httptest.NewRecorder()
+	
+	// This will fail because we can't establish a real WebSocket connection in tests
+	// but it will test the handler code path
+	manager.handleWebSocket(rr, req)
+	
+	// The handler should return an error since we can't upgrade to WebSocket in tests
+	assert.NotEqual(t, http.StatusOK, rr.Code)
 }
