@@ -1,0 +1,108 @@
+repos:
+  # Go formatting
+  - repo: https://github.com/dnephin/pre-commit-golang
+    rev: v0.5.1
+    hooks:
+      - id: go-fmt
+        name: Go Format
+        description: Run gofmt on all Go files
+      - id: go-imports
+        name: Go Imports
+        description: Run goimports on all Go files
+      - id: go-vet
+        name: Go Vet
+        description: Run go vet on all Go files
+      - id: go-mod-tidy
+        name: Go Mod Tidy
+        description: Ensure go.mod and go.sum are up to date
+
+  # Security scanning
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.4.0
+    hooks:
+      - id: detect-secrets
+        name: Detect Secrets
+        args: ['--baseline', '.secrets.baseline']
+        exclude: 'go\.sum|.*\.lock'
+
+  # General file checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+        name: Trim Trailing Whitespace
+      - id: end-of-file-fixer
+        name: Fix End of Files
+      - id: check-yaml
+        name: Check YAML
+      - id: check-added-large-files
+        name: Check for Large Files
+        args: ['--maxkb=1000']
+      - id: check-case-conflict
+        name: Check Case Conflict
+      - id: check-merge-conflict
+        name: Check Merge Conflict
+      - id: check-json
+        name: Check JSON
+      - id: detect-private-key
+        name: Detect Private Keys
+
+  # Go linting
+  - repo: https://github.com/golangci/golangci-lint
+    rev: v1.55.2
+    hooks:
+      - id: golangci-lint
+        name: GolangCI-Lint
+        args: ['--timeout=10m', '--config=.golangci.yml']
+
+  # Markdown linting
+  - repo: https://github.com/markdownlint/markdownlint
+    rev: v0.12.0
+    hooks:
+      - id: markdownlint
+        name: Markdown Lint
+        args: ['--fix']
+
+  # Shell script linting
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.9.0.6
+    hooks:
+      - id: shellcheck
+        name: ShellCheck
+        args: ['--severity=warning']
+
+  # YAML linting
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.33.0
+    hooks:
+      - id: yamllint
+        name: YAML Lint
+        args: ['-c', '.yamllint.yml']
+
+  # Custom Go test hook
+  - repo: local
+    hooks:
+      - id: go-test
+        name: Go Test (Fast)
+        entry: go test -short -timeout=30s ./...
+        language: system
+        pass_filenames: false
+        files: \.go$
+
+      - id: go-coverage-check
+        name: Go Coverage Check
+        entry: bash -c 'go test -coverprofile=coverage.out ./... && go tool cover -func=coverage.out | tail -1 | awk "{if (\$3+0 < 85.0) exit 1}"'
+        language: system
+        pass_filenames: false
+        files: \.go$
+
+      - id: go-build
+        name: Go Build
+        entry: go build -v ./...
+        language: system
+        pass_filenames: false
+        files: \.go$
+
+# Global settings
+fail_fast: false
+minimum_pre_commit_version: '2.20.0'

@@ -1,0 +1,197 @@
+=== RUN   TestDockerContainerizer_KillContainer
+2025/10/17 23:14:56 Image cache initialized with 1 images (0.01 GB)
+2025/10/17 23:14:56 Docker containerizer initialized successfully
+2025/10/17 23:14:56 Image alpine:latest found in cache, skipping pull
+2025/10/17 23:14:56 Container created: test-kill-container (ID: 9492731c5c2dea90c05e302ac62205b99dbcccc2c3174b42bbaf43dacf585a90)
+2025/10/17 23:14:57 Container 9492731c5c2d started in 239.245811ms
+2025/10/17 23:14:57 Container 9492731c5c2d killed
+2025/10/17 23:14:57 Container 9492731c5c2d removed
+--- PASS: TestDockerContainerizer_KillContainer (0.70s)
+=== RUN   TestDockerContainerizer_RestartContainer
+2025/10/17 23:14:57 Image cache initialized with 1 images (0.01 GB)
+2025/10/17 23:14:57 Docker containerizer initialized successfully
+2025/10/17 23:14:57 Image alpine:latest found in cache, skipping pull
+2025/10/17 23:14:57 Container created: test-restart-container (ID: ea081909f32811a9c1c1ca6ce1c8a8bcc9b8be8f30fecf801329f299181587c7)
+2025/10/17 23:14:57 Container ea081909f328 started in 180.733267ms
+2025/10/17 23:15:03 Container ea081909f328 restarted in 5.388262059s
+2025/10/17 23:15:03 Container ea081909f328 killed
+2025/10/17 23:15:03 Container ea081909f328 removed
+--- PASS: TestDockerContainerizer_RestartContainer (6.00s)
+=== RUN   TestDockerContainerizer_PushImage
+    docker_containerizer_additional_test.go:89: Skipping push test as it requires a registry
+--- SKIP: TestDockerContainerizer_PushImage (0.00s)
+=== RUN   TestDockerContainerizer_UpdateImageCache
+2025/10/17 23:15:03 Image cache initialized with 1 images (0.01 GB)
+2025/10/17 23:15:03 Docker containerizer initialized successfully
+2025/10/17 23:15:03 Image alpine:latest found in cache, skipping pull
+--- PASS: TestDockerContainerizer_UpdateImageCache (0.00s)
+=== RUN   TestDockerContainerizer_EvictLRUImages
+2025/10/17 23:15:03 Image cache initialized with 1 images (0.01 GB)
+2025/10/17 23:15:03 Docker containerizer initialized successfully
+2025/10/17 23:15:03 Image alpine:latest found in cache, skipping pull
+--- PASS: TestDockerContainerizer_EvictLRUImages (0.00s)
+=== RUN   TestDockerContainerizer_EncodeAuthToBase64
+--- PASS: TestDockerContainerizer_EncodeAuthToBase64 (0.00s)
+=== RUN   TestDockerContainerizer_CountContainersByStatus
+2025/10/17 23:15:03 Image cache initialized with 1 images (0.01 GB)
+2025/10/17 23:15:03 Docker containerizer initialized successfully
+2025/10/17 23:15:03 Image alpine:latest found in cache, skipping pull
+2025/10/17 23:15:03 Container created: test-count-1 (ID: 9048b07607952a65ebf943bea7aefa5957e759ed0ab263d95919175fa0fc2610)
+2025/10/17 23:15:03 Image alpine:latest found in cache, skipping pull
+2025/10/17 23:15:03 Container created: test-count-2 (ID: 155f8e5b89a15b52f36a9c4ad2e09b2e3f7315878c0998e56503d45aa387b8a3)
+2025/10/17 23:15:03 Container 9048b0760795 started in 180.57557ms
+2025/10/17 23:15:04 Container 9048b0760795 killed
+2025/10/17 23:15:04 Container 9048b0760795 removed
+2025/10/17 23:15:04 Container 155f8e5b89a1 removed
+--- PASS: TestDockerContainerizer_CountContainersByStatus (0.70s)
+=== RUN   TestDockerContainerizer_GetStats
+2025/10/17 23:15:04 Image cache initialized with 1 images (0.01 GB)
+2025/10/17 23:15:04 Docker containerizer initialized successfully
+2025/10/17 23:15:04 Image alpine:latest found in cache, skipping pull
+2025/10/17 23:15:04 Container created: test-stats (ID: dcc0c4f66f3b52e3068703979873268a2d3fba853e6d9de1c1f817807d0b2241)
+2025/10/17 23:15:04 Container dcc0c4f66f3b started in 167.641253ms
+2025/10/17 23:15:04 Container dcc0c4f66f3b killed
+2025/10/17 23:15:04 Container dcc0c4f66f3b removed
+--- PASS: TestDockerContainerizer_GetStats (0.48s)
+=== RUN   TestDockerContainerizer_ImageCacheWithPullTimeout
+2025/10/17 23:15:04 Image cache initialized with 1 images (0.01 GB)
+2025/10/17 23:15:04 Docker containerizer initialized successfully
+2025/10/17 23:15:04 Image alpine:latest found in cache, skipping pull
+2025/10/17 23:15:04 Image alpine:latest found in cache, skipping pull
+--- PASS: TestDockerContainerizer_ImageCacheWithPullTimeout (0.00s)
+=== RUN   TestDockerContainerizer_PullImageWithAuth
+2025/10/17 23:15:04 Image cache initialized with 1 images (0.01 GB)
+2025/10/17 23:15:04 Docker containerizer initialized successfully
+2025/10/17 23:15:04 Image alpine:latest found in cache, skipping pull
+--- PASS: TestDockerContainerizer_PullImageWithAuth (0.00s)
+=== RUN   TestDockerContainerizer_ListContainers_All
+2025/10/17 23:15:04 Image cache initialized with 1 images (0.01 GB)
+2025/10/17 23:15:04 Docker containerizer initialized successfully
+2025/10/17 23:15:04 Image alpine:latest found in cache, skipping pull
+2025/10/17 23:15:04 Container created: test-list-all (ID: cceaf659c7c1f91b0bcfedf7cb819629dcd580724ca05185c5279f2a82a7d4c7)
+2025/10/17 23:15:04 Container cceaf659c7c1 removed
+--- PASS: TestDockerContainerizer_ListContainers_All (0.11s)
+=== RUN   TestDockerContainerizer_RemoveImage_WithCache
+2025/10/17 23:15:04 Image cache initialized with 1 images (0.01 GB)
+2025/10/17 23:15:04 Docker containerizer initialized successfully
+2025/10/17 23:15:04 Image alpine:latest found in cache, skipping pull
+2025/10/17 23:15:04 Image sha256:706db57fb2063f39f69632c5b5c9c439633fda35110e65587c5d85553fd1cc38 removed
+--- PASS: TestDockerContainerizer_RemoveImage_WithCache (0.02s)
+=== RUN   TestDockerContainerizer_TagImage_Success
+2025/10/17 23:15:04 Image cache initialized with 0 images (0.00 GB)
+2025/10/17 23:15:04 Docker containerizer initialized successfully
+2025/10/17 23:15:04 Pulling image: alpine:latest
+2025/10/17 23:15:07 Image alpine:latest pulled successfully in 2.462680064s
+2025/10/17 23:15:07 Image tagged: alpine:latest -> alpine:test-tag
+2025/10/17 23:15:07 Image alpine:test-tag removed
+--- PASS: TestDockerContainerizer_TagImage_Success (2.49s)
+=== RUN   TestEncodeAuthToBase64
+=== RUN   TestEncodeAuthToBase64/Empty_auth_config
+    docker_containerizer_test.go:41: Encoded: e30=
+=== RUN   TestEncodeAuthToBase64/Auth_config_with_credentials
+    docker_containerizer_test.go:41: Encoded: eyJ1c2VybmFtZSI6InRlc3R1c2VyIiwicGFzc3dvcmQiOiJ0ZXN0cGFzcyIsImVtYWlsIjoidGVzdEBleGFtcGxlLmNvbSIsInNlcnZlcmFkZHJlc3MiOiJkb2NrZXIuaW8ifQ==
+--- PASS: TestEncodeAuthToBase64 (0.00s)
+    --- PASS: TestEncodeAuthToBase64/Empty_auth_config (0.00s)
+    --- PASS: TestEncodeAuthToBase64/Auth_config_with_credentials (0.00s)
+=== RUN   TestImageCache_Operations
+=== RUN   TestImageCache_Operations/Add_image_to_cache
+=== RUN   TestImageCache_Operations/Get_image_from_cache
+=== RUN   TestImageCache_Operations/Remove_image_from_cache
+--- PASS: TestImageCache_Operations (0.00s)
+    --- PASS: TestImageCache_Operations/Add_image_to_cache (0.00s)
+    --- PASS: TestImageCache_Operations/Get_image_from_cache (0.00s)
+    --- PASS: TestImageCache_Operations/Remove_image_from_cache (0.00s)
+=== RUN   TestContainerizerConfig_Validation
+=== RUN   TestContainerizerConfig_Validation/Valid_config
+=== RUN   TestContainerizerConfig_Validation/Nil_config
+--- PASS: TestContainerizerConfig_Validation (0.00s)
+    --- PASS: TestContainerizerConfig_Validation/Valid_config (0.00s)
+    --- PASS: TestContainerizerConfig_Validation/Nil_config (0.00s)
+=== RUN   TestContainerConfig_Validation
+=== RUN   TestContainerConfig_Validation/Valid_config
+=== RUN   TestContainerConfig_Validation/Empty_config
+--- PASS: TestContainerConfig_Validation (0.00s)
+    --- PASS: TestContainerConfig_Validation/Valid_config (0.00s)
+    --- PASS: TestContainerConfig_Validation/Empty_config (0.00s)
+=== RUN   TestRegistryCredentials_Validation
+=== RUN   TestRegistryCredentials_Validation/Valid_credentials
+=== RUN   TestRegistryCredentials_Validation/Empty_credentials
+--- PASS: TestRegistryCredentials_Validation (0.00s)
+    --- PASS: TestRegistryCredentials_Validation/Valid_credentials (0.00s)
+    --- PASS: TestRegistryCredentials_Validation/Empty_credentials (0.00s)
+=== RUN   TestContainerState_Operations
+=== RUN   TestContainerState_Operations/Container_state_creation
+=== RUN   TestContainerState_Operations/Container_state_update
+--- PASS: TestContainerState_Operations (0.00s)
+    --- PASS: TestContainerState_Operations/Container_state_creation (0.00s)
+    --- PASS: TestContainerState_Operations/Container_state_update (0.00s)
+=== RUN   TestCachedImage_Operations
+=== RUN   TestCachedImage_Operations/Cached_image_creation
+=== RUN   TestCachedImage_Operations/Cached_image_update
+--- PASS: TestCachedImage_Operations (0.00s)
+    --- PASS: TestCachedImage_Operations/Cached_image_creation (0.00s)
+    --- PASS: TestCachedImage_Operations/Cached_image_update (0.00s)
+=== RUN   TestDockerContainerizer_EdgeCases
+=== RUN   TestDockerContainerizer_EdgeCases/Nil_containerizer_operations
+=== RUN   TestDockerContainerizer_EdgeCases/Empty_string_validations
+=== RUN   TestDockerContainerizer_EdgeCases/Negative_resource_values
+--- PASS: TestDockerContainerizer_EdgeCases (0.00s)
+    --- PASS: TestDockerContainerizer_EdgeCases/Nil_containerizer_operations (0.00s)
+    --- PASS: TestDockerContainerizer_EdgeCases/Empty_string_validations (0.00s)
+    --- PASS: TestDockerContainerizer_EdgeCases/Negative_resource_values (0.00s)
+=== RUN   TestIntegration_NewDockerContainerizer
+2025/10/17 23:15:07 Image cache initialized with 1 images (0.01 GB)
+2025/10/17 23:15:07 Docker containerizer initialized successfully
+--- PASS: TestIntegration_NewDockerContainerizer (0.00s)
+=== RUN   TestIntegration_ContainerLifecycle
+2025/10/17 23:15:07 Image cache initialized with 1 images (0.01 GB)
+2025/10/17 23:15:07 Docker containerizer initialized successfully
+2025/10/17 23:15:07 Image alpine:latest found in cache, skipping pull
+2025/10/17 23:15:07 Image alpine:latest found in cache, skipping pull
+2025/10/17 23:15:07 Container created: integration-test (ID: 05e4ab9cb071390c5f4f414cb64ce17dbf2f549d23ca6b9d82a8c8de0856f0f0)
+2025/10/17 23:15:07 Container 05e4ab9cb071 started in 152.118025ms
+2025/10/17 23:15:19 Container 05e4ab9cb071 stopped
+2025/10/17 23:15:19 Container 05e4ab9cb071 removed
+--- PASS: TestIntegration_ContainerLifecycle (12.52s)
+=== RUN   TestIntegration_ContainerStartupTime
+2025/10/17 23:15:19 Image cache initialized with 1 images (0.01 GB)
+2025/10/17 23:15:19 Docker containerizer initialized successfully
+2025/10/17 23:15:19 Image alpine:latest found in cache, skipping pull
+2025/10/17 23:15:19 Image alpine:latest found in cache, skipping pull
+    docker_containerizer_test.go:452: 
+        	Error Trace:	/home/calelin/dev/orchestrator/pkg/containerizer/docker_containerizer_test.go:452
+        	Error:      	Received unexpected error:
+        	            	failed to create container: Error response from daemon: Conflict. The container name "/startup-test" is already in use by container "b31c2438a1e3ab4344b833b985d8a45caa703f546987fd1a3d5c791ace789e27". You have to remove (or rename) that container to be able to reuse that name.
+        	Test:       	TestIntegration_ContainerStartupTime
+--- FAIL: TestIntegration_ContainerStartupTime (0.00s)
+=== RUN   TestIntegration_GetContainerLogs
+2025/10/17 23:15:19 Docker containerizer initialized successfully
+2025/10/17 23:15:19 Pulling image: alpine:latest
+2025/10/17 23:15:20 Image alpine:latest pulled successfully in 929.134087ms
+2025/10/17 23:15:20 Pulling image: alpine:latest
+2025/10/17 23:15:21 Image alpine:latest pulled successfully in 1.06302955s
+2025/10/17 23:15:21 Container created: log-test (ID: 0c584b0810ef6184ddb6a5952b5bc7db26eb5ba2b3458c8d629437c48b82695b)
+2025/10/17 23:15:22 Container 0c584b0810ef started in 162.029329ms
+2025/10/17 23:15:28 Container 0c584b0810ef stopped
+2025/10/17 23:15:28 Container 0c584b0810ef removed
+--- PASS: TestIntegration_GetContainerLogs (8.50s)
+=== RUN   TestIntegration_ListContainers
+2025/10/17 23:15:28 Docker containerizer initialized successfully
+    docker_containerizer_test.go:532: Found 25 containers
+--- PASS: TestIntegration_ListContainers (0.00s)
+=== RUN   TestIntegration_ImageOperations
+2025/10/17 23:15:28 Image cache initialized with 1 images (0.01 GB)
+2025/10/17 23:15:28 Docker containerizer initialized successfully
+2025/10/17 23:15:28 Image alpine:latest found in cache, skipping pull
+2025/10/17 23:15:28 Image tagged: alpine:latest -> alpine:test-tag
+2025/10/17 23:15:28 Image alpine:test-tag removed
+--- PASS: TestIntegration_ImageOperations (0.02s)
+=== RUN   TestIntegration_GetStats
+2025/10/17 23:15:28 Image cache initialized with 1 images (0.01 GB)
+2025/10/17 23:15:28 Docker containerizer initialized successfully
+    docker_containerizer_test.go:589: Stats: map[containers:map[running:0 stopped:0 total:0] images:map[cache_size_gb:0.007750745862722397 cached:1 max_size_gb:0]]
+--- PASS: TestIntegration_GetStats (0.00s)
+FAIL
+coverage: 72.6% of statements
+FAIL	github.com/ljluestc/orchestrator/pkg/containerizer	31.554s
+FAIL

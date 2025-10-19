@@ -1,0 +1,13 @@
+=== RUN   TestPrintConfig
+--- PASS: TestPrintConfig (0.00s)
+=== RUN   TestPrintConfigDefaultValues
+--- PASS: TestPrintConfigDefaultValues (0.00s)
+=== RUN   TestPrintConfigEndpoints
+--- PASS: TestPrintConfigEndpoints (0.00s)
+=== RUN   TestPrintConfigURLFormats
+--- PASS: TestPrintConfigURLFormats (0.00s)
+=== RUN   TestPrintConfigStructure
+--- PASS: TestPrintConfigStructure (0.00s)
+PASS
+coverage: 53.7% of statements
+ok  	github.com/ljluestc/orchestrator/cmd/app	0.003s	coverage: 53.7% of statements

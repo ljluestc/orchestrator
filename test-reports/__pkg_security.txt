@@ -1,0 +1,222 @@
+=== RUN   TestNewAuthManager
+=== RUN   TestNewAuthManager/Valid_AuthManager
+--- PASS: TestNewAuthManager (0.00s)
+    --- PASS: TestNewAuthManager/Valid_AuthManager (0.00s)
+=== RUN   TestAuthManager_CreateUser
+=== RUN   TestAuthManager_CreateUser/Valid_user
+=== RUN   TestAuthManager_CreateUser/Admin_user
+=== RUN   TestAuthManager_CreateUser/Empty_username
+    auth_test.go:85: 
+        	Error Trace:	/home/calelin/dev/orchestrator/pkg/security/auth_test.go:85
+        	Error:      	An error is expected but got nil.
+        	Test:       	TestAuthManager_CreateUser/Empty_username
+=== RUN   TestAuthManager_CreateUser/Empty_password
+=== RUN   TestAuthManager_CreateUser/Empty_roles
+    auth_test.go:87: 
+        	Error Trace:	/home/calelin/dev/orchestrator/pkg/security/auth_test.go:87
+        	Error:      	Received unexpected error:
+        	            	user testuser already exists
+        	Test:       	TestAuthManager_CreateUser/Empty_roles
+    auth_test.go:93: 
+        	Error Trace:	/home/calelin/dev/orchestrator/pkg/security/auth_test.go:93
+        	Error:      	Not equal: 
+        	            	expected: []string{}
+        	            	actual  : []string{"user"}
+        	            	
+        	            	Diff:
+        	            	--- Expected
+        	            	+++ Actual
+        	            	@@ -1,2 +1,3 @@
+        	            	-([]string) {
+        	            	+([]string) (len=1) {
+        	            	+ (string) (len=4) "user"
+        	            	 }
+        	Test:       	TestAuthManager_CreateUser/Empty_roles
+--- FAIL: TestAuthManager_CreateUser (0.25s)
+    --- PASS: TestAuthManager_CreateUser/Valid_user (0.09s)
+    --- PASS: TestAuthManager_CreateUser/Admin_user (0.08s)
+    --- FAIL: TestAuthManager_CreateUser/Empty_username (0.04s)
+    --- PASS: TestAuthManager_CreateUser/Empty_password (0.00s)
+    --- FAIL: TestAuthManager_CreateUser/Empty_roles (0.04s)
+=== RUN   TestAuthManager_CreateUserDuplicate
+--- PASS: TestAuthManager_CreateUserDuplicate (0.04s)
+=== RUN   TestAuthManager_Authenticate
+=== RUN   TestAuthManager_Authenticate/Valid_credentials
+=== RUN   TestAuthManager_Authenticate/Invalid_username
+=== RUN   TestAuthManager_Authenticate/Invalid_password
+=== RUN   TestAuthManager_Authenticate/Empty_username
+=== RUN   TestAuthManager_Authenticate/Empty_password
+--- PASS: TestAuthManager_Authenticate (0.17s)
+    --- PASS: TestAuthManager_Authenticate/Valid_credentials (0.04s)
+    --- PASS: TestAuthManager_Authenticate/Invalid_username (0.00s)
+    --- PASS: TestAuthManager_Authenticate/Invalid_password (0.04s)
+    --- PASS: TestAuthManager_Authenticate/Empty_username (0.00s)
+    --- PASS: TestAuthManager_Authenticate/Empty_password (0.04s)
+=== RUN   TestAuthManager_GenerateToken
+=== RUN   TestAuthManager_GenerateToken/Valid_user
+=== RUN   TestAuthManager_GenerateToken/Nil_user
+--- PASS: TestAuthManager_GenerateToken (0.04s)
+    --- PASS: TestAuthManager_GenerateToken/Valid_user (0.00s)
+    --- PASS: TestAuthManager_GenerateToken/Nil_user (0.00s)
+=== RUN   TestAuthManager_ValidateToken
+=== RUN   TestAuthManager_ValidateToken/Valid_token
+=== RUN   TestAuthManager_ValidateToken/Invalid_token
+=== RUN   TestAuthManager_ValidateToken/Empty_token
+--- PASS: TestAuthManager_ValidateToken (0.08s)
+    --- PASS: TestAuthManager_ValidateToken/Valid_token (0.00s)
+    --- PASS: TestAuthManager_ValidateToken/Invalid_token (0.00s)
+    --- PASS: TestAuthManager_ValidateToken/Empty_token (0.00s)
+=== RUN   TestAuthManager_ValidateTokenExpired
+    auth_test.go:299: 
+        	Error Trace:	/home/calelin/dev/orchestrator/pkg/security/auth_test.go:299
+        	Error:      	"unauthorized" does not contain "token expired"
+        	Test:       	TestAuthManager_ValidateTokenExpired
+--- FAIL: TestAuthManager_ValidateTokenExpired (0.05s)
+=== RUN   TestAuthManager_RevokeToken
+    auth_test.go:329: 
+        	Error Trace:	/home/calelin/dev/orchestrator/pkg/security/auth_test.go:329
+        	Error:      	"unauthorized" does not contain "token not found"
+        	Test:       	TestAuthManager_RevokeToken
+--- FAIL: TestAuthManager_RevokeToken (0.08s)
+=== RUN   TestAuthManager_RevokeTokenNotFound
+--- PASS: TestAuthManager_RevokeTokenNotFound (0.00s)
+=== RUN   TestAuthManager_RevokeUserTokens
+    auth_test.go:353: 
+        	Error Trace:	/home/calelin/dev/orchestrator/pkg/security/auth_test.go:353
+        	Error:      	"map[]" should have 3 item(s), but has 0
+        	Test:       	TestAuthManager_RevokeUserTokens
+--- FAIL: TestAuthManager_RevokeUserTokens (0.04s)
+=== RUN   TestAuthManager_RevokeUserTokensNotFound
+--- PASS: TestAuthManager_RevokeUserTokensNotFound (0.00s)
+=== RUN   TestAuthManager_UpdateUser
+    auth_test.go:396: 
+        	Error Trace:	/home/calelin/dev/orchestrator/pkg/security/auth_test.go:396
+        	Error:      	Should not be: "$2a$10$.8qOWRW9xkO/oHJSzfCk1uTXSaEd.RVVtviglPkqmquTe7BLEtzSG"
+        	Test:       	TestAuthManager_UpdateUser
+--- FAIL: TestAuthManager_UpdateUser (0.18s)
+=== RUN   TestAuthManager_UpdateUserNotFound
+--- PASS: TestAuthManager_UpdateUserNotFound (0.00s)
+=== RUN   TestAuthManager_DeleteUser
+    auth_test.go:432: 
+        	Error Trace:	/home/calelin/dev/orchestrator/pkg/security/auth_test.go:432
+        	Error:      	Should be true
+        	Test:       	TestAuthManager_DeleteUser
+--- FAIL: TestAuthManager_DeleteUser (0.04s)
+=== RUN   TestAuthManager_DeleteUserNotFound
+--- PASS: TestAuthManager_DeleteUserNotFound (0.00s)
+=== RUN   TestAuthManager_ListUsers
+--- PASS: TestAuthManager_ListUsers (0.12s)
+=== RUN   TestAuthManager_ListUsersEmpty
+--- PASS: TestAuthManager_ListUsersEmpty (0.00s)
+=== RUN   TestAuthManager_GetUser
+--- PASS: TestAuthManager_GetUser (0.04s)
+=== RUN   TestAuthManager_GetUserNotFound
+--- PASS: TestAuthManager_GetUserNotFound (0.00s)
+=== RUN   TestAuthManager_CleanupExpiredTokens
+    auth_test.go:527: 
+        	Error Trace:	/home/calelin/dev/orchestrator/pkg/security/auth_test.go:527
+        	Error:      	Should be true
+        	Test:       	TestAuthManager_CleanupExpiredTokens
+--- FAIL: TestAuthManager_CleanupExpiredTokens (0.05s)
+=== RUN   TestAuthManager_CleanupExpiredTokensWithValidTokens
+    auth_test.go:554: 
+        	Error Trace:	/home/calelin/dev/orchestrator/pkg/security/auth_test.go:554
+        	Error:      	Should be true
+        	Test:       	TestAuthManager_CleanupExpiredTokensWithValidTokens
+    auth_test.go:561: 
+        	Error Trace:	/home/calelin/dev/orchestrator/pkg/security/auth_test.go:561
+        	Error:      	Should be true
+        	Test:       	TestAuthManager_CleanupExpiredTokensWithValidTokens
+--- FAIL: TestAuthManager_CleanupExpiredTokensWithValidTokens (0.04s)
+=== RUN   TestAuthManager_StartCleanupRoutine
+    auth_test.go:581: 
+        	Error Trace:	/home/calelin/dev/orchestrator/pkg/security/auth_test.go:581
+        	Error:      	Should be true
+        	Test:       	TestAuthManager_StartCleanupRoutine
+--- FAIL: TestAuthManager_StartCleanupRoutine (0.24s)
+=== RUN   TestAuthManager_UserStructures
+--- PASS: TestAuthManager_UserStructures (0.00s)
+=== RUN   TestAuthManager_TokenStructures
+--- PASS: TestAuthManager_TokenStructures (0.00s)
+=== RUN   TestAuthManager_HashPassword
+--- PASS: TestAuthManager_HashPassword (0.08s)
+=== RUN   TestAuthManager_VerifyPassword
+    auth_test.go:646: 
+        	Error Trace:	/home/calelin/dev/orchestrator/pkg/security/auth_test.go:646
+        	Error:      	Received unexpected error:
+        	            	crypto/bcrypt: hashedSecret too short to be a bcrypted password
+        	Test:       	TestAuthManager_VerifyPassword
+--- FAIL: TestAuthManager_VerifyPassword (0.04s)
+=== RUN   TestAuthManager_GenerateSessionID
+    auth_test.go:659: 
+        	Error Trace:	/home/calelin/dev/orchestrator/pkg/security/auth_test.go:659
+        	Error:      	"session_1760768155677731184_684183229274990129" should have 64 item(s), but has 46
+        	Test:       	TestAuthManager_GenerateSessionID
+    auth_test.go:663: 
+        	Error Trace:	/home/calelin/dev/orchestrator/pkg/security/auth_test.go:663
+        	Error:      	Received unexpected error:
+        	            	encoding/hex: invalid byte: U+0073 's'
+        	Test:       	TestAuthManager_GenerateSessionID
+--- FAIL: TestAuthManager_GenerateSessionID (0.00s)
+=== RUN   TestAuthManager_GenerateSessionIDUnique
+--- PASS: TestAuthManager_GenerateSessionIDUnique (0.00s)
+=== RUN   TestAuthManager_ConcurrentAccess
+--- PASS: TestAuthManager_ConcurrentAccess (8.56s)
+=== RUN   TestAuthManager_BCryptCostVariations
+=== RUN   TestAuthManager_BCryptCostVariations/MinCost
+=== RUN   TestAuthManager_BCryptCostVariations/DefaultCost
+=== RUN   TestAuthManager_BCryptCostVariations/MaxCost
+--- PASS: TestAuthManager_BCryptCostVariations (0.26s)
+    --- PASS: TestAuthManager_BCryptCostVariations/MinCost (0.09s)
+    --- PASS: TestAuthManager_BCryptCostVariations/DefaultCost (0.09s)
+    --- PASS: TestAuthManager_BCryptCostVariations/MaxCost (0.09s)
+=== RUN   TestAuthManager_JWTKeyVariations
+=== RUN   TestAuthManager_JWTKeyVariations/Short_Key
+    auth_test.go:778: 
+        	Error Trace:	/home/calelin/dev/orchestrator/pkg/security/auth_test.go:778
+        	Error:      	Received unexpected error:
+        	            	unauthorized
+        	Test:       	TestAuthManager_JWTKeyVariations/Short_Key
+    auth_test.go:779: 
+        	Error Trace:	/home/calelin/dev/orchestrator/pkg/security/auth_test.go:779
+        	Error:      	Expected value not to be nil.
+        	Test:       	TestAuthManager_JWTKeyVariations/Short_Key
+=== RUN   TestAuthManager_JWTKeyVariations/Long_Key
+    auth_test.go:778: 
+        	Error Trace:	/home/calelin/dev/orchestrator/pkg/security/auth_test.go:778
+        	Error:      	Received unexpected error:
+        	            	unauthorized
+        	Test:       	TestAuthManager_JWTKeyVariations/Long_Key
+    auth_test.go:779: 
+        	Error Trace:	/home/calelin/dev/orchestrator/pkg/security/auth_test.go:779
+        	Error:      	Expected value not to be nil.
+        	Test:       	TestAuthManager_JWTKeyVariations/Long_Key
+=== RUN   TestAuthManager_JWTKeyVariations/Empty_Key
+    auth_test.go:778: 
+        	Error Trace:	/home/calelin/dev/orchestrator/pkg/security/auth_test.go:778
+        	Error:      	Received unexpected error:
+        	            	unauthorized
+        	Test:       	TestAuthManager_JWTKeyVariations/Empty_Key
+    auth_test.go:779: 
+        	Error Trace:	/home/calelin/dev/orchestrator/pkg/security/auth_test.go:779
+        	Error:      	Expected value not to be nil.
+        	Test:       	TestAuthManager_JWTKeyVariations/Empty_Key
+=== RUN   TestAuthManager_JWTKeyVariations/Special_Chars
+    auth_test.go:778: 
+        	Error Trace:	/home/calelin/dev/orchestrator/pkg/security/auth_test.go:778
+        	Error:      	Received unexpected error:
+        	            	unauthorized
+        	Test:       	TestAuthManager_JWTKeyVariations/Special_Chars
+    auth_test.go:779: 
+        	Error Trace:	/home/calelin/dev/orchestrator/pkg/security/auth_test.go:779
+        	Error:      	Expected value not to be nil.
+        	Test:       	TestAuthManager_JWTKeyVariations/Special_Chars
+--- FAIL: TestAuthManager_JWTKeyVariations (0.20s)
+    --- FAIL: TestAuthManager_JWTKeyVariations/Short_Key (0.04s)
+    --- FAIL: TestAuthManager_JWTKeyVariations/Long_Key (0.04s)
+    --- FAIL: TestAuthManager_JWTKeyVariations/Empty_Key (0.05s)
+    --- FAIL: TestAuthManager_JWTKeyVariations/Special_Chars (0.06s)
+FAIL
+coverage: 77.5% of statements
+FAIL	github.com/ljluestc/orchestrator/pkg/security	10.636s
+FAIL

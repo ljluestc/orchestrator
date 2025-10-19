@@ -1,0 +1,2340 @@
+=== RUN   TestNewSyncEngine
+=== RUN   TestNewSyncEngine/Valid_sync_engine_with_last-write-wins
+    sync_engine_test.go:87: 
+        	Error Trace:	/home/calelin/dev/orchestrator/pkg/migration/sync_engine_test.go:87
+        	Error:      	Not equal: 
+        	            	expected: 30s
+        	            	actual  : 1s
+        	Test:       	TestNewSyncEngine/Valid_sync_engine_with_last-write-wins
+    sync_engine_test.go:88: 
+        	Error Trace:	/home/calelin/dev/orchestrator/pkg/migration/sync_engine_test.go:88
+        	Error:      	Not equal: 
+        	            	expected: 5s
+        	            	actual  : 50ms
+        	Test:       	TestNewSyncEngine/Valid_sync_engine_with_last-write-wins
+=== RUN   TestNewSyncEngine/Valid_sync_engine_with_source-wins
+    sync_engine_test.go:87: 
+        	Error Trace:	/home/calelin/dev/orchestrator/pkg/migration/sync_engine_test.go:87
+        	Error:      	Not equal: 
+        	            	expected: 30s
+        	            	actual  : 1s
+        	Test:       	TestNewSyncEngine/Valid_sync_engine_with_source-wins
+    sync_engine_test.go:88: 
+        	Error Trace:	/home/calelin/dev/orchestrator/pkg/migration/sync_engine_test.go:88
+        	Error:      	Not equal: 
+        	            	expected: 5s
+        	            	actual  : 50ms
+        	Test:       	TestNewSyncEngine/Valid_sync_engine_with_source-wins
+=== RUN   TestNewSyncEngine/Valid_sync_engine_with_manual_resolution
+    sync_engine_test.go:87: 
+        	Error Trace:	/home/calelin/dev/orchestrator/pkg/migration/sync_engine_test.go:87
+        	Error:      	Not equal: 
+        	            	expected: 30s
+        	            	actual  : 1s
+        	Test:       	TestNewSyncEngine/Valid_sync_engine_with_manual_resolution
+    sync_engine_test.go:88: 
+        	Error Trace:	/home/calelin/dev/orchestrator/pkg/migration/sync_engine_test.go:88
+        	Error:      	Not equal: 
+        	            	expected: 5s
+        	            	actual  : 50ms
+        	Test:       	TestNewSyncEngine/Valid_sync_engine_with_manual_resolution
+--- FAIL: TestNewSyncEngine (0.00s)
+    --- FAIL: TestNewSyncEngine/Valid_sync_engine_with_last-write-wins (0.00s)
+    --- FAIL: TestNewSyncEngine/Valid_sync_engine_with_source-wins (0.00s)
+    --- FAIL: TestNewSyncEngine/Valid_sync_engine_with_manual_resolution (0.00s)
+=== RUN   TestSyncEngine_getHosts
+=== RUN   TestSyncEngine_getHosts/Single_host
+=== RUN   TestSyncEngine_getHosts/Multiple_hosts
+=== RUN   TestSyncEngine_getHosts/Empty_hosts
+--- PASS: TestSyncEngine_getHosts (0.00s)
+    --- PASS: TestSyncEngine_getHosts/Single_host (0.00s)
+    --- PASS: TestSyncEngine_getHosts/Multiple_hosts (0.00s)
+    --- PASS: TestSyncEngine_getHosts/Empty_hosts (0.00s)
+=== RUN   TestSyncEngine_GetMetrics
+--- PASS: TestSyncEngine_GetMetrics (0.00s)
+=== RUN   TestSyncEngine_Stop
+2025/10/17 23:15:32 Stopping sync engine test
+--- PASS: TestSyncEngine_Stop (0.00s)
+=== RUN   TestSyncEngine_Start_ContextCancellation
+2025/10/17 23:15:32 Starting sync engine test:  -> 
+--- PASS: TestSyncEngine_Start_ContextCancellation (0.00s)
+=== RUN   TestSyncEngine_Start_InvalidSourceHosts
+2025/10/17 23:15:32 Starting sync engine test:  -> 
+--- PASS: TestSyncEngine_Start_InvalidSourceHosts (0.00s)
+=== RUN   TestSyncEngine_Start_InvalidTargetHosts
+2025/10/17 23:15:32 Starting sync engine test:  -> 
+--- PASS: TestSyncEngine_Start_InvalidTargetHosts (0.20s)
+=== RUN   TestSyncEngine_EdgeCases
+=== RUN   TestSyncEngine_EdgeCases/Empty_ID
+=== RUN   TestSyncEngine_EdgeCases/Nil_clusters
+=== RUN   TestSyncEngine_EdgeCases/Invalid_conflict_strategy
+--- PASS: TestSyncEngine_EdgeCases (0.00s)
+    --- PASS: TestSyncEngine_EdgeCases/Empty_ID (0.00s)
+    --- PASS: TestSyncEngine_EdgeCases/Nil_clusters (0.00s)
+    --- PASS: TestSyncEngine_EdgeCases/Invalid_conflict_strategy (0.00s)
+=== RUN   TestConflictStrategy_Constants
+--- PASS: TestConflictStrategy_Constants (0.00s)
+=== RUN   TestSyncMetrics_Initialization
+    sync_engine_test.go:236: 
+        	Error Trace:	/home/calelin/dev/orchestrator/pkg/migration/sync_engine_test.go:236
+        	Error:      	Should be true
+        	Test:       	TestSyncMetrics_Initialization
+--- FAIL: TestSyncMetrics_Initialization (0.00s)
+=== RUN   TestZNode_Structure
+--- PASS: TestZNode_Structure (0.00s)
+=== RUN   TestSyncEngine_ConcurrentAccess
+--- PASS: TestSyncEngine_ConcurrentAccess (0.00s)
+=== RUN   TestSyncEngine_Stop_MultipleCalls
+2025/10/17 23:15:32 Stopping sync engine test
+2025/10/17 23:15:32 Stopping sync engine test
+2025/10/17 23:15:32 Stopping sync engine test
+--- PASS: TestSyncEngine_Stop_MultipleCalls (0.00s)
+=== RUN   TestSyncEngine_GetMetrics_ThreadSafety
+--- PASS: TestSyncEngine_GetMetrics_ThreadSafety (0.11s)
+=== RUN   TestNewMigrationManager
+=== RUN   TestNewMigrationManager/Valid_migration_manager
+=== RUN   TestNewMigrationManager/Empty_ID
+--- PASS: TestNewMigrationManager (0.00s)
+    --- PASS: TestNewMigrationManager/Valid_migration_manager (0.00s)
+    --- PASS: TestNewMigrationManager/Empty_ID (0.00s)
+=== RUN   TestCreateMigrationPhases
+--- PASS: TestCreateMigrationPhases (0.00s)
+=== RUN   TestMigrationManager_StartMigration
+=== RUN   TestMigrationManager_StartMigration/Valid_start
+2025/10/17 23:15:32 Starting migration from cluster-a to cluster-b
+=== RUN   TestMigrationManager_StartMigration/Already_started
+=== RUN   TestMigrationManager_StartMigration/Already_completed
+--- PASS: TestMigrationManager_StartMigration (0.00s)
+    --- PASS: TestMigrationManager_StartMigration/Valid_start (0.00s)
+    --- PASS: TestMigrationManager_StartMigration/Already_started (0.00s)
+    --- PASS: TestMigrationManager_StartMigration/Already_completed (0.00s)
+=== RUN   TestMigrationManager_StartPhase
+=== RUN   TestMigrationManager_StartPhase/Valid_phase_1
+2025/10/17 23:15:32 Starting phase 1: Deploy Target Zookeeper Cluster
+=== RUN   TestMigrationManager_StartPhase/Valid_phase_6
+2025/10/17 23:15:32 Starting phase 6: Final Cutover
+=== RUN   TestMigrationManager_StartPhase/Invalid_phase_0
+=== RUN   TestMigrationManager_StartPhase/Invalid_phase_7
+=== RUN   TestMigrationManager_StartPhase/Invalid_phase_-1
+--- PASS: TestMigrationManager_StartPhase (0.00s)
+    --- PASS: TestMigrationManager_StartPhase/Valid_phase_1 (0.00s)
+    --- PASS: TestMigrationManager_StartPhase/Valid_phase_6 (0.00s)
+    --- PASS: TestMigrationManager_StartPhase/Invalid_phase_0 (0.00s)
+    --- PASS: TestMigrationManager_StartPhase/Invalid_phase_7 (0.00s)
+    --- PASS: TestMigrationManager_StartPhase/Invalid_phase_-1 (0.00s)
+=== RUN   TestMigrationManager_StartPhaseAlreadyRunning
+2025/10/17 23:15:32 Starting phase 1: Deploy Target Zookeeper Cluster
+--- PASS: TestMigrationManager_StartPhaseAlreadyRunning (0.00s)
+=== RUN   TestMigrationManager_ValidatePhase
+=== RUN   TestMigrationManager_ValidatePhase/Valid_phase_1
+=== RUN   TestMigrationManager_ValidatePhase/Valid_phase_6
+=== RUN   TestMigrationManager_ValidatePhase/Invalid_phase_0
+=== RUN   TestMigrationManager_ValidatePhase/Invalid_phase_7
+--- PASS: TestMigrationManager_ValidatePhase (0.00s)
+    --- PASS: TestMigrationManager_ValidatePhase/Valid_phase_1 (0.00s)
+    --- PASS: TestMigrationManager_ValidatePhase/Valid_phase_6 (0.00s)
+    --- PASS: TestMigrationManager_ValidatePhase/Invalid_phase_0 (0.00s)
+    --- PASS: TestMigrationManager_ValidatePhase/Invalid_phase_7 (0.00s)
+=== RUN   TestMigrationManager_RollbackPhase
+=== RUN   TestMigrationManager_RollbackPhase/Valid_phase_1
+2025/10/17 23:15:32 Rolling back phase 1: Deploy Target Zookeeper Cluster
+2025/10/17 23:15:32 Executing rollback step: Stop Zookeeper Cluster-B
+2025/10/17 23:15:33 Executing rollback step: Remove Zookeeper Cluster-B configuration
+=== RUN   TestMigrationManager_RollbackPhase/Valid_phase_6
+2025/10/17 23:15:34 Rolling back phase 6: Final Cutover
+2025/10/17 23:15:34 Executing rollback step: Switch back to Cluster-A
+2025/10/17 23:15:35 Executing rollback step: Restart Cluster-A services
+=== RUN   TestMigrationManager_RollbackPhase/Invalid_phase_0
+=== RUN   TestMigrationManager_RollbackPhase/Invalid_phase_7
+--- PASS: TestMigrationManager_RollbackPhase (4.00s)
+    --- PASS: TestMigrationManager_RollbackPhase/Valid_phase_1 (2.00s)
+    --- PASS: TestMigrationManager_RollbackPhase/Valid_phase_6 (2.00s)
+    --- PASS: TestMigrationManager_RollbackPhase/Invalid_phase_0 (0.00s)
+    --- PASS: TestMigrationManager_RollbackPhase/Invalid_phase_7 (0.00s)
+=== RUN   TestMigrationManager_StartSync
+=== RUN   TestMigrationManager_StartSync/Valid_start
+2025/10/17 23:15:36 Started bidirectional synchronization between cluster-a and cluster-b
+=== RUN   TestMigrationManager_StartSync/Already_running
+=== RUN   TestMigrationManager_StartSync/Already_stopped
+2025/10/17 23:15:36 Started bidirectional synchronization between cluster-a and cluster-b
+--- PASS: TestMigrationManager_StartSync (0.00s)
+    --- PASS: TestMigrationManager_StartSync/Valid_start (0.00s)
+    --- PASS: TestMigrationManager_StartSync/Already_running (0.00s)
+    --- PASS: TestMigrationManager_StartSync/Already_stopped (0.00s)
+=== RUN   TestMigrationManager_StopSync
+=== RUN   TestMigrationManager_StopSync/Valid_stop
+2025/10/17 23:15:36 Stopped synchronization between cluster-a and cluster-b
+=== RUN   TestMigrationManager_StopSync/Not_running
+=== RUN   TestMigrationManager_StopSync/Already_stopped
+--- PASS: TestMigrationManager_StopSync (0.00s)
+    --- PASS: TestMigrationManager_StopSync/Valid_stop (0.00s)
+    --- PASS: TestMigrationManager_StopSync/Not_running (0.00s)
+    --- PASS: TestMigrationManager_StopSync/Already_stopped (0.00s)
+=== RUN   TestMigrationManager_UpdateSyncStatus
+--- PASS: TestMigrationManager_UpdateSyncStatus (0.00s)
+=== RUN   TestMigrationManager_ExecutePhase
+2025/10/17 23:15:36 Starting phase 1: Deploy Target Zookeeper Cluster
+2025/10/17 23:15:37 Completed phase 1: Deploy Target Zookeeper Cluster
+2025/10/17 23:15:37 Completed phase 1: Deploy Target Zookeeper Cluster
+2025/10/17 23:15:37 Completed phase 6: Final Cutover
+2025/10/17 23:15:41 Completed phase 1: Deploy Target Zookeeper Cluster
+--- PASS: TestMigrationManager_ExecutePhase (6.00s)
+=== RUN   TestMigrationManager_HTTPHandlers
+=== RUN   TestMigrationManager_HTTPHandlers/Migration_Status
+=== RUN   TestMigrationManager_HTTPHandlers/List_Phases
+=== RUN   TestMigrationManager_HTTPHandlers/Start_Phase
+2025/10/17 23:15:42 Starting phase 1: Deploy Target Zookeeper Cluster
+=== RUN   TestMigrationManager_HTTPHandlers/Validate_Phase
+=== RUN   TestMigrationManager_HTTPHandlers/Rollback_Phase
+2025/10/17 23:15:42 Rolling back phase 1: Deploy Target Zookeeper Cluster
+2025/10/17 23:15:42 Executing rollback step: Stop Zookeeper Cluster-B
+2025/10/17 23:15:43 Executing rollback step: Remove Zookeeper Cluster-B configuration
+=== RUN   TestMigrationManager_HTTPHandlers/Sync_Status
+=== RUN   TestMigrationManager_HTTPHandlers/Start_Sync
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+=== RUN   TestMigrationManager_HTTPHandlers/Stop_Sync
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+=== RUN   TestMigrationManager_HTTPHandlers/List_Conflicts
+=== RUN   TestMigrationManager_HTTPHandlers/List_Clusters
+=== RUN   TestMigrationManager_HTTPHandlers/Cluster_Status
+=== RUN   TestMigrationManager_HTTPHandlers/Health_Check
+--- PASS: TestMigrationManager_HTTPHandlers (2.01s)
+    --- PASS: TestMigrationManager_HTTPHandlers/Migration_Status (0.00s)
+    --- PASS: TestMigrationManager_HTTPHandlers/List_Phases (0.00s)
+    --- PASS: TestMigrationManager_HTTPHandlers/Start_Phase (0.00s)
+    --- PASS: TestMigrationManager_HTTPHandlers/Validate_Phase (0.00s)
+    --- PASS: TestMigrationManager_HTTPHandlers/Rollback_Phase (2.00s)
+    --- PASS: TestMigrationManager_HTTPHandlers/Sync_Status (0.00s)
+    --- PASS: TestMigrationManager_HTTPHandlers/Start_Sync (0.00s)
+    --- PASS: TestMigrationManager_HTTPHandlers/Stop_Sync (0.00s)
+    --- PASS: TestMigrationManager_HTTPHandlers/List_Conflicts (0.00s)
+    --- PASS: TestMigrationManager_HTTPHandlers/List_Clusters (0.00s)
+    --- PASS: TestMigrationManager_HTTPHandlers/Cluster_Status (0.00s)
+    --- PASS: TestMigrationManager_HTTPHandlers/Health_Check (0.00s)
+=== RUN   TestMigrationManager_HandleMigrationStatus
+--- PASS: TestMigrationManager_HandleMigrationStatus (0.00s)
+=== RUN   TestMigrationManager_HandleListPhases
+--- PASS: TestMigrationManager_HandleListPhases (0.00s)
+=== RUN   TestMigrationManager_HandleStartPhase
+2025/10/17 23:15:44 Starting phase 1: Deploy Target Zookeeper Cluster
+--- PASS: TestMigrationManager_HandleStartPhase (0.00s)
+=== RUN   TestMigrationManager_HandleStartPhaseInvalidID
+--- PASS: TestMigrationManager_HandleStartPhaseInvalidID (0.00s)
+=== RUN   TestMigrationManager_HandleValidatePhase
+--- PASS: TestMigrationManager_HandleValidatePhase (0.00s)
+=== RUN   TestMigrationManager_HandleRollbackPhase
+    zookeeper_test.go:586: 
+        	Error Trace:	/home/calelin/dev/orchestrator/pkg/migration/zookeeper_test.go:586
+        	Error:      	Not equal: 
+        	            	expected: 200
+        	            	actual  : 400
+        	Test:       	TestMigrationManager_HandleRollbackPhase
+--- FAIL: TestMigrationManager_HandleRollbackPhase (0.00s)
+=== RUN   TestMigrationManager_HandleSyncStatus
+    zookeeper_test.go:605: 
+        	Error Trace:	/home/calelin/dev/orchestrator/pkg/migration/zookeeper_test.go:605
+        	Error:      	Not equal: 
+        	            	expected: string("cluster-a")
+        	            	actual  : <nil>(<nil>)
+        	Test:       	TestMigrationManager_HandleSyncStatus
+    zookeeper_test.go:606: 
+        	Error Trace:	/home/calelin/dev/orchestrator/pkg/migration/zookeeper_test.go:606
+        	Error:      	Not equal: 
+        	            	expected: string("cluster-b")
+        	            	actual  : <nil>(<nil>)
+        	Test:       	TestMigrationManager_HandleSyncStatus
+    zookeeper_test.go:607: 
+        	Error Trace:	/home/calelin/dev/orchestrator/pkg/migration/zookeeper_test.go:607
+        	Error:      	Not equal: 
+        	            	expected: string("not_started")
+        	            	actual  : <nil>(<nil>)
+        	Test:       	TestMigrationManager_HandleSyncStatus
+--- FAIL: TestMigrationManager_HandleSyncStatus (0.00s)
+=== RUN   TestMigrationManager_HandleStartSync
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+--- PASS: TestMigrationManager_HandleStartSync (0.00s)
+=== RUN   TestMigrationManager_HandleStopSync
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+--- PASS: TestMigrationManager_HandleStopSync (0.00s)
+=== RUN   TestMigrationManager_HandleListConflicts
+--- PASS: TestMigrationManager_HandleListConflicts (0.00s)
+=== RUN   TestMigrationManager_HandleListClusters
+    zookeeper_test.go:677: 
+        	Error Trace:	/home/calelin/dev/orchestrator/pkg/migration/zookeeper_test.go:677
+        	Error:      	Not equal: 
+        	            	expected: string("cluster-a")
+        	            	actual  : <nil>(<nil>)
+        	Test:       	TestMigrationManager_HandleListClusters
+    zookeeper_test.go:678: 
+        	Error Trace:	/home/calelin/dev/orchestrator/pkg/migration/zookeeper_test.go:678
+        	Error:      	Not equal: 
+        	            	expected: string("cluster-b")
+        	            	actual  : <nil>(<nil>)
+        	Test:       	TestMigrationManager_HandleListClusters
+--- FAIL: TestMigrationManager_HandleListClusters (0.00s)
+=== RUN   TestMigrationManager_HandleClusterStatus
+    zookeeper_test.go:691: 
+        	Error Trace:	/home/calelin/dev/orchestrator/pkg/migration/zookeeper_test.go:691
+        	Error:      	Not equal: 
+        	            	expected: 200
+        	            	actual  : 404
+        	Test:       	TestMigrationManager_HandleClusterStatus
+    zookeeper_test.go:695: 
+        	Error Trace:	/home/calelin/dev/orchestrator/pkg/migration/zookeeper_test.go:695
+        	Error:      	Received unexpected error:
+        	            	invalid character 'p' after top-level value
+        	Test:       	TestMigrationManager_HandleClusterStatus
+    zookeeper_test.go:697: 
+        	Error Trace:	/home/calelin/dev/orchestrator/pkg/migration/zookeeper_test.go:697
+        	Error:      	Not equal: 
+        	            	expected: string("cluster-a")
+        	            	actual  : <nil>(<nil>)
+        	Test:       	TestMigrationManager_HandleClusterStatus
+--- FAIL: TestMigrationManager_HandleClusterStatus (0.00s)
+=== RUN   TestMigrationManager_HandleClusterStatusNotFound
+--- PASS: TestMigrationManager_HandleClusterStatusNotFound (0.00s)
+=== RUN   TestMigrationManager_HandleHealth
+--- PASS: TestMigrationManager_HandleHealth (0.00s)
+=== RUN   TestMigrationManager_ConcurrentAccess
+2025/10/17 23:15:44 Starting phase 1: Deploy Target Zookeeper Cluster
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Started bidirectional synchronization between cluster-a and cluster-b
+2025/10/17 23:15:44 Stopped synchronization between cluster-a and cluster-b
+--- PASS: TestMigrationManager_ConcurrentAccess (0.00s)
+=== RUN   TestMigrationManager_StartStop
+2025/10/17 23:15:44 Starting migration manager test-migration
+    zookeeper_test.go:786: 
+        	Error Trace:	/home/calelin/dev/orchestrator/pkg/migration/zookeeper_test.go:786
+        	Error:      	Received unexpected error:
+        	            	listen tcp :8080: bind: address already in use
+        	Test:       	TestMigrationManager_StartStop
+--- FAIL: TestMigrationManager_StartStop (0.10s)
+=== RUN   TestMigrationManager_SetupRoutes
+=== RUN   TestMigrationManager_SetupRoutes/GET_/api/v1/migration/status
+=== RUN   TestMigrationManager_SetupRoutes/GET_/api/v1/migration/phases
+=== RUN   TestMigrationManager_SetupRoutes/POST_/api/v1/migration/phases/1/start
+2025/10/17 23:15:44 Starting phase 1: Deploy Target Zookeeper Cluster
+=== RUN   TestMigrationManager_SetupRoutes/POST_/api/v1/migration/phases/1/validate
+=== RUN   TestMigrationManager_SetupRoutes/POST_/api/v1/migration/phases/1/rollback
+2025/10/17 23:15:44 Rolling back phase 1: Deploy Target Zookeeper Cluster
+2025/10/17 23:15:44 Executing rollback step: Stop Zookeeper Cluster-B
+2025/10/17 23:15:45 Executing rollback step: Remove Zookeeper Cluster-B configuration
+=== RUN   TestMigrationManager_SetupRoutes/GET_/api/v1/sync/status
+=== RUN   TestMigrationManager_SetupRoutes/POST_/api/v1/sync/start
+2025/10/17 23:15:46 Started bidirectional synchronization between cluster-a and cluster-b
+=== RUN   TestMigrationManager_SetupRoutes/POST_/api/v1/sync/stop
+2025/10/17 23:15:46 Stopped synchronization between cluster-a and cluster-b
+=== RUN   TestMigrationManager_SetupRoutes/GET_/api/v1/sync/conflicts
+=== RUN   TestMigrationManager_SetupRoutes/GET_/api/v1/clusters
+=== RUN   TestMigrationManager_SetupRoutes/GET_/api/v1/clusters/cluster-a/status
+=== RUN   TestMigrationManager_SetupRoutes/GET_/health
+--- PASS: TestMigrationManager_SetupRoutes (2.00s)
+    --- PASS: TestMigrationManager_SetupRoutes/GET_/api/v1/migration/status (0.00s)
+    --- PASS: TestMigrationManager_SetupRoutes/GET_/api/v1/migration/phases (0.00s)
+    --- PASS: TestMigrationManager_SetupRoutes/POST_/api/v1/migration/phases/1/start (0.00s)
+    --- PASS: TestMigrationManager_SetupRoutes/POST_/api/v1/migration/phases/1/validate (0.00s)
+    --- PASS: TestMigrationManager_SetupRoutes/POST_/api/v1/migration/phases/1/rollback (2.00s)
+    --- PASS: TestMigrationManager_SetupRoutes/GET_/api/v1/sync/status (0.00s)
+    --- PASS: TestMigrationManager_SetupRoutes/POST_/api/v1/sync/start (0.00s)
+    --- PASS: TestMigrationManager_SetupRoutes/POST_/api/v1/sync/stop (0.00s)
+    --- PASS: TestMigrationManager_SetupRoutes/GET_/api/v1/sync/conflicts (0.00s)
+    --- PASS: TestMigrationManager_SetupRoutes/GET_/api/v1/clusters (0.00s)
+    --- PASS: TestMigrationManager_SetupRoutes/GET_/api/v1/clusters/cluster-a/status (0.00s)
+    --- PASS: TestMigrationManager_SetupRoutes/GET_/health (0.00s)
+FAIL
+coverage: 59.0% of statements
+FAIL	github.com/ljluestc/orchestrator/pkg/migration	14.427s
+FAIL

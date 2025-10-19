@@ -1,0 +1,39 @@
+# Test coverage configuration for orchestrator project
+
+# Profile files
+profile: coverage.out
+local: false
+
+# Thresholds
+threshold:
+  file: 80
+  package: 75
+  total: 85
+
+# Exclusions
+exclude:
+  # Exclude auto-generated code
+  - ".*\\.pb\\.go$"
+  - ".*\\.pb\\.gw\\.go$"
+  - ".*_gen\\.go$"
+
+  # Exclude test directories
+  - "^go/test/"
+  - "testdata/"
+
+  # Exclude vendor
+  - "^vendor/"
+
+# Override thresholds for specific packages
+override:
+  # Allow lower coverage for main packages (mostly just setup)
+  cmd/.*:
+    total: 50
+
+  # Require high coverage for critical packages
+  pkg/app:
+    total: 90
+  internal/storage:
+    total: 85
+  pkg/marathon:
+    total: 85

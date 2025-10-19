@@ -1,0 +1,412 @@
+=== RUN   TestResourceUsage
+    benchmark_test.go:226: Memory allocated during test: 1.91 MB
+--- PASS: TestResourceUsage (2.00s)
+=== RUN   TestClientPing
+=== RUN   TestClientPing/successful_ping
+=== RUN   TestClientPing/server_error
+=== RUN   TestClientPing/not_found
+--- PASS: TestClientPing (0.00s)
+    --- PASS: TestClientPing/successful_ping (0.00s)
+    --- PASS: TestClientPing/server_error (0.00s)
+    --- PASS: TestClientPing/not_found (0.00s)
+=== RUN   TestClientGetConfig
+=== RUN   TestClientGetConfig/successful_config_retrieval
+=== RUN   TestClientGetConfig/server_error
+=== RUN   TestClientGetConfig/invalid_json_response
+--- PASS: TestClientGetConfig (0.00s)
+    --- PASS: TestClientGetConfig/successful_config_retrieval (0.00s)
+    --- PASS: TestClientGetConfig/server_error (0.00s)
+    --- PASS: TestClientGetConfig/invalid_json_response (0.00s)
+=== RUN   TestClientRegisterAgent
+=== RUN   TestClientRegisterAgent/successful_registration
+=== RUN   TestClientRegisterAgent/registration_created
+=== RUN   TestClientRegisterAgent/registration_conflict
+=== RUN   TestClientRegisterAgent/server_error
+=== RUN   TestClientRegisterAgent/bad_request
+--- PASS: TestClientRegisterAgent (0.00s)
+    --- PASS: TestClientRegisterAgent/successful_registration (0.00s)
+    --- PASS: TestClientRegisterAgent/registration_created (0.00s)
+    --- PASS: TestClientRegisterAgent/registration_conflict (0.00s)
+    --- PASS: TestClientRegisterAgent/server_error (0.00s)
+    --- PASS: TestClientRegisterAgent/bad_request (0.00s)
+=== RUN   TestClientHeartbeat
+=== RUN   TestClientHeartbeat/successful_heartbeat
+=== RUN   TestClientHeartbeat/agent_not_found
+=== RUN   TestClientHeartbeat/server_unavailable
+--- PASS: TestClientHeartbeat (0.00s)
+    --- PASS: TestClientHeartbeat/successful_heartbeat (0.00s)
+    --- PASS: TestClientHeartbeat/agent_not_found (0.00s)
+    --- PASS: TestClientHeartbeat/server_unavailable (0.00s)
+=== RUN   TestClientSendReport
+=== RUN   TestClientSendReport/successful_report_submission
+=== RUN   TestClientSendReport/accepted_status
+=== RUN   TestClientSendReport/server_error_on_report
+=== RUN   TestClientSendReport/bad_request
+--- PASS: TestClientSendReport (0.00s)
+    --- PASS: TestClientSendReport/successful_report_submission (0.00s)
+    --- PASS: TestClientSendReport/accepted_status (0.00s)
+    --- PASS: TestClientSendReport/server_error_on_report (0.00s)
+    --- PASS: TestClientSendReport/bad_request (0.00s)
+=== RUN   TestClientSendReportWithRetry
+=== RUN   TestClientSendReportWithRetry/succeeds_on_first_attempt
+=== RUN   TestClientSendReportWithRetry/retries_on_failure_then_succeeds
+=== RUN   TestClientSendReportWithRetry/fails_after_max_retries
+--- PASS: TestClientSendReportWithRetry (0.10s)
+    --- PASS: TestClientSendReportWithRetry/succeeds_on_first_attempt (0.00s)
+    --- PASS: TestClientSendReportWithRetry/retries_on_failure_then_succeeds (0.05s)
+    --- PASS: TestClientSendReportWithRetry/fails_after_max_retries (0.05s)
+=== RUN   TestNewClient
+--- PASS: TestNewClient (0.00s)
+=== RUN   TestDockerCollector_NewDockerCollector
+--- PASS: TestDockerCollector_NewDockerCollector (0.00s)
+=== RUN   TestDockerCollector_NewDockerCollectorWithStats
+--- PASS: TestDockerCollector_NewDockerCollectorWithStats (0.00s)
+=== RUN   TestDockerCollector_Collect
+--- PASS: TestDockerCollector_Collect (0.12s)
+=== RUN   TestDockerCollector_CollectWithStats
+    docker_test.go:117: No running containers to test stats collection
+--- PASS: TestDockerCollector_CollectWithStats (0.02s)
+=== RUN   TestDockerCollector_ContextCancellation
+--- PASS: TestDockerCollector_ContextCancellation (0.00s)
+=== RUN   TestDockerCollector_Close
+--- PASS: TestDockerCollector_Close (0.00s)
+=== RUN   TestPortMapping
+--- PASS: TestPortMapping (0.00s)
+=== RUN   TestContainerStats
+--- PASS: TestContainerStats (0.00s)
+=== RUN   TestNewDockerCollectorWithClient
+--- PASS: TestNewDockerCollectorWithClient (0.00s)
+=== RUN   TestDockerCollector_GetContainerStats
+    docker_test.go:212: Expected panic with nil client: runtime error: invalid memory address or nil pointer dereference
+--- PASS: TestDockerCollector_GetContainerStats (0.00s)
+=== RUN   TestDockerCollector_CloseWithNilClient
+--- PASS: TestDockerCollector_CloseWithNilClient (0.00s)
+=== RUN   TestDockerCollector_CollectWithNilClient
+--- PASS: TestDockerCollector_CollectWithNilClient (0.00s)
+=== RUN   TestDockerCollector_CollectWithStatsNilClient
+--- PASS: TestDockerCollector_CollectWithStatsNilClient (0.00s)
+=== RUN   TestDockerCollector_GetContainerStatsWithNilClient
+    docker_test.go:257: Expected panic with nil client: runtime error: invalid memory address or nil pointer dereference
+--- PASS: TestDockerCollector_GetContainerStatsWithNilClient (0.00s)
+=== RUN   TestDockerCollector_CollectWithEmptyContainerList
+--- PASS: TestDockerCollector_CollectWithEmptyContainerList (0.00s)
+=== RUN   TestDockerCollector_CollectWithStatsEnabled
+--- PASS: TestDockerCollector_CollectWithStatsEnabled (0.00s)
+=== RUN   TestDockerCollector_CollectWithValidClient
+--- PASS: TestDockerCollector_CollectWithValidClient (0.01s)
+=== RUN   TestDockerCollector_CollectWithStatsEnabledValidClient
+--- PASS: TestDockerCollector_CollectWithStatsEnabledValidClient (0.01s)
+=== RUN   TestDockerCollector_CollectWithContextCancellation
+--- PASS: TestDockerCollector_CollectWithContextCancellation (0.00s)
+=== RUN   TestDockerCollector_CollectWithTimeout
+--- PASS: TestDockerCollector_CollectWithTimeout (0.00s)
+=== RUN   TestDockerCollector_CollectWithNilClientComprehensive
+--- PASS: TestDockerCollector_CollectWithNilClientComprehensive (0.00s)
+=== RUN   TestDockerCollector_GetContainerStatsWithNilClientComprehensive
+--- PASS: TestDockerCollector_GetContainerStatsWithNilClientComprehensive (0.00s)
+=== RUN   TestE2E_FullProbeLifecycle
+2025/10/17 23:15:50 Starting probe agent (ID: e2e-test-probe, Hostname: DESKTOP-FO42SG8)
+2025/10/17 23:15:50 Agent registered successfully
+2025/10/17 23:15:50 Probe agent started
+2025/10/17 23:15:50 Report sent successfully
+2025/10/17 23:15:50 Report sent successfully
+2025/10/17 23:15:50 Report sent successfully
+2025/10/17 23:15:51 Report sent successfully
+    e2e_test.go:69: Collected 4 reports
+    e2e_test.go:79: Validating report 0
+    e2e_test.go:79: Validating report 1
+    e2e_test.go:79: Validating report 2
+    e2e_test.go:79: Validating report 3
+2025/10/17 23:15:51 Stopping probe agent...
+2025/10/17 23:15:51 Probe agent stopped
+--- PASS: TestE2E_FullProbeLifecycle (0.80s)
+=== RUN   TestE2E_ProbeResilience
+2025/10/17 23:15:51 Starting probe agent (ID: resilience-test, Hostname: DESKTOP-FO42SG8)
+2025/10/17 23:15:51 Agent registered successfully
+2025/10/17 23:15:51 Probe agent started
+2025/10/17 23:15:51 Report sent successfully
+2025/10/17 23:15:51 Report sent successfully
+2025/10/17 23:15:51 Failed to send report: failed after 3 attempts: server returned error status 500: Internal server error
+2025/10/17 23:15:51 Report sent successfully
+2025/10/17 23:15:51 Report sent successfully
+2025/10/17 23:15:51 Report sent successfully
+2025/10/17 23:15:51 Stopping probe agent...
+2025/10/17 23:15:51 Probe agent stopped
+--- PASS: TestE2E_ProbeResilience (0.55s)
+=== RUN   TestE2E_MultipleProbes
+2025/10/17 23:15:51 Starting probe agent (ID: A, Hostname: DESKTOP-FO42SG8)
+2025/10/17 23:15:51 Agent registered successfully
+2025/10/17 23:15:51 Probe agent started
+2025/10/17 23:15:51 Starting probe agent (ID: B, Hostname: DESKTOP-FO42SG8)
+2025/10/17 23:15:51 Agent registered successfully
+2025/10/17 23:15:51 Probe agent started
+2025/10/17 23:15:51 Starting probe agent (ID: C, Hostname: DESKTOP-FO42SG8)
+2025/10/17 23:15:51 Agent registered successfully
+2025/10/17 23:15:51 Probe agent started
+2025/10/17 23:15:51 Report sent successfully
+2025/10/17 23:15:51 Report sent successfully
+2025/10/17 23:15:51 Report sent successfully
+2025/10/17 23:15:51 Report sent successfully
+2025/10/17 23:15:51 Report sent successfully
+2025/10/17 23:15:51 Report sent successfully
+2025/10/17 23:15:52 Report sent successfully
+2025/10/17 23:15:52 Report sent successfully
+2025/10/17 23:15:52 Report sent successfully
+2025/10/17 23:15:52 Report sent successfully
+2025/10/17 23:15:52 Report sent successfully
+2025/10/17 23:15:52 Report sent successfully
+2025/10/17 23:15:52 Stopping probe agent...
+2025/10/17 23:15:52 Probe agent stopped
+2025/10/17 23:15:52 Stopping probe agent...
+2025/10/17 23:15:52 Probe agent stopped
+2025/10/17 23:15:52 Stopping probe agent...
+2025/10/17 23:15:52 Probe agent stopped
+--- PASS: TestE2E_MultipleProbes (0.50s)
+=== RUN   TestE2E_LongRunning
+    e2e_test.go:246: Set RUN_LONG_TESTS=1 to run long-running tests
+--- SKIP: TestE2E_LongRunning (0.00s)
+=== RUN   TestE2E_ConfigValidation
+=== RUN   TestE2E_ConfigValidation/valid_minimal_config
+=== RUN   TestE2E_ConfigValidation/valid_full_config
+--- PASS: TestE2E_ConfigValidation (0.00s)
+    --- PASS: TestE2E_ConfigValidation/valid_minimal_config (0.00s)
+    --- PASS: TestE2E_ConfigValidation/valid_full_config (0.00s)
+=== RUN   TestHostCollector_GetLoadAverageError
+--- PASS: TestHostCollector_GetLoadAverageError (0.00s)
+=== RUN   TestHostCollector_GetLoadAverageInvalidFormat
+--- PASS: TestHostCollector_GetLoadAverageInvalidFormat (0.00s)
+=== RUN   TestHostCollector_GetLoadAverageInvalidFloats
+=== RUN   TestHostCollector_GetLoadAverageInvalidFloats/Invalid_first_field
+=== RUN   TestHostCollector_GetLoadAverageInvalidFloats/Invalid_second_field
+=== RUN   TestHostCollector_GetLoadAverageInvalidFloats/Invalid_third_field
+--- PASS: TestHostCollector_GetLoadAverageInvalidFloats (0.00s)
+    --- PASS: TestHostCollector_GetLoadAverageInvalidFloats/Invalid_first_field (0.00s)
+    --- PASS: TestHostCollector_GetLoadAverageInvalidFloats/Invalid_second_field (0.00s)
+    --- PASS: TestHostCollector_GetLoadAverageInvalidFloats/Invalid_third_field (0.00s)
+=== RUN   TestHostCollector_GetMemoryInfoError
+--- PASS: TestHostCollector_GetMemoryInfoError (0.00s)
+=== RUN   TestHostCollector_GetCPUUsageError
+--- PASS: TestHostCollector_GetCPUUsageError (0.00s)
+=== RUN   TestHostCollector_GetCPUUsageInvalidFormat
+--- PASS: TestHostCollector_GetCPUUsageInvalidFormat (0.00s)
+=== RUN   TestHostCollector_GetCPUUsageInvalidCPULine
+--- PASS: TestHostCollector_GetCPUUsageInvalidCPULine (0.00s)
+=== RUN   TestHostCollector_GetCPUUsageInsufficientFields
+--- PASS: TestHostCollector_GetCPUUsageInsufficientFields (0.00s)
+=== RUN   TestHostCollector_GetCPUInfoError
+--- PASS: TestHostCollector_GetCPUInfoError (0.00s)
+=== RUN   TestHostCollector_GetKernelVersionError
+--- PASS: TestHostCollector_GetKernelVersionError (0.00s)
+=== RUN   TestHostCollector_GetUptimeError
+--- PASS: TestHostCollector_GetUptimeError (0.00s)
+=== RUN   TestHostCollector_GetUptimeInvalidFormat
+--- PASS: TestHostCollector_GetUptimeInvalidFormat (0.00s)
+=== RUN   TestHostCollector_GetUptimeInvalidNumber
+--- PASS: TestHostCollector_GetUptimeInvalidNumber (0.00s)
+=== RUN   TestHostCollector_GetCPUUsageZeroTotal
+--- PASS: TestHostCollector_GetCPUUsageZeroTotal (0.00s)
+=== RUN   TestHostCollector_GetMemoryInfoZeroTotal
+--- PASS: TestHostCollector_GetMemoryInfoZeroTotal (0.00s)
+=== RUN   TestHostCollector_GetMemoryInfoWithoutAvailable
+--- PASS: TestHostCollector_GetMemoryInfoWithoutAvailable (0.00s)
+=== RUN   TestHostCollector_CollectLinuxError
+--- PASS: TestHostCollector_CollectLinuxError (0.00s)
+=== RUN   TestNewHostCollectorWithPath
+--- PASS: TestNewHostCollectorWithPath (0.00s)
+=== RUN   TestNewHostCollector
+--- PASS: TestNewHostCollector (0.00s)
+=== RUN   TestClient_SendReport
+--- PASS: TestClient_SendReport (0.00s)
+=== RUN   TestClient_SendReportWithRetry
+--- PASS: TestClient_SendReportWithRetry (0.10s)
+=== RUN   TestClient_RegisterAgent
+--- PASS: TestClient_RegisterAgent (0.00s)
+=== RUN   TestClient_Ping
+--- PASS: TestClient_Ping (0.00s)
+=== RUN   TestClient_GetConfig
+--- PASS: TestClient_GetConfig (0.00s)
+=== RUN   TestClient_SendReportErrorHandling
+--- PASS: TestClient_SendReportErrorHandling (0.00s)
+=== RUN   TestClient_RegisterAgentErrorHandling
+--- PASS: TestClient_RegisterAgentErrorHandling (0.00s)
+=== RUN   TestClient_HeartbeatErrorHandling
+--- PASS: TestClient_HeartbeatErrorHandling (0.00s)
+=== RUN   TestProbe_Integration
+2025/10/17 23:15:52 Starting probe agent (ID: test-probe, Hostname: DESKTOP-FO42SG8)
+2025/10/17 23:15:52 Agent registered successfully
+2025/10/17 23:15:52 Probe agent started
+2025/10/17 23:15:52 Report sent successfully
+2025/10/17 23:15:52 Report sent successfully
+2025/10/17 23:15:52 Report sent successfully
+2025/10/17 23:15:52 Stopping probe agent...
+2025/10/17 23:15:52 Probe agent stopped
+2025/10/17 23:15:52 Failed to collect Docker info: failed to get Docker version: Get "http://%2Fvar%2Frun%2Fdocker.sock/v1.44/version": context canceled
+--- PASS: TestProbe_Integration (0.30s)
+=== RUN   TestProbe_StartStop
+2025/10/17 23:15:52 Starting probe agent (ID: test-probe, Hostname: DESKTOP-FO42SG8)
+2025/10/17 23:15:52 Agent registered successfully
+2025/10/17 23:15:52 Probe agent started
+2025/10/17 23:15:52 Stopping probe agent...
+2025/10/17 23:15:52 Probe agent stopped
+--- PASS: TestProbe_StartStop (0.00s)
+=== RUN   TestProbe_ContextCancellation
+2025/10/17 23:15:52 Starting probe agent (ID: test-probe, Hostname: DESKTOP-FO42SG8)
+2025/10/17 23:15:52 Agent registered successfully
+2025/10/17 23:15:52 Probe agent started
+2025/10/17 23:15:52 Stopping probe agent...
+2025/10/17 23:15:52 Probe agent stopped
+--- PASS: TestProbe_ContextCancellation (0.20s)
+=== RUN   TestProbe_CollectionWithAllModules
+2025/10/17 23:15:52 Starting probe agent (ID: test-probe, Hostname: DESKTOP-FO42SG8)
+2025/10/17 23:15:52 Agent registered successfully
+2025/10/17 23:15:52 Probe agent started
+2025/10/17 23:15:52 Report sent successfully
+2025/10/17 23:15:52 Report sent successfully
+2025/10/17 23:15:53 Report sent successfully
+2025/10/17 23:15:53 Stopping probe agent...
+2025/10/17 23:15:53 Failed to collect Docker info: failed to get Docker version: Get "http://%2Fvar%2Frun%2Fdocker.sock/v1.44/version": context canceled
+2025/10/17 23:15:53 Probe agent stopped
+--- PASS: TestProbe_CollectionWithAllModules (0.15s)
+=== RUN   TestNetworkCollector_Collect
+--- PASS: TestNetworkCollector_Collect (0.00s)
+=== RUN   TestNetworkCollector_MaxConnectionsLimit
+    network_test.go:48: System has 10 connections, which exceeds test limit of 5. This is expected on busy systems.
+--- PASS: TestNetworkCollector_MaxConnectionsLimit (0.00s)
+=== RUN   TestNetworkCollector_ExcludeLocalhost
+--- PASS: TestNetworkCollector_ExcludeLocalhost (0.00s)
+=== RUN   TestNetworkCollector_HexToIP
+=== RUN   TestNetworkCollector_HexToIP/0100007F
+=== RUN   TestNetworkCollector_HexToIP/00000000
+=== RUN   TestNetworkCollector_HexToIP/FFFFFFFF
+=== RUN   TestNetworkCollector_HexToIP/0A00020F
+=== RUN   TestNetworkCollector_HexToIP/C0A80001
+--- PASS: TestNetworkCollector_HexToIP (0.00s)
+    --- PASS: TestNetworkCollector_HexToIP/0100007F (0.00s)
+    --- PASS: TestNetworkCollector_HexToIP/00000000 (0.00s)
+    --- PASS: TestNetworkCollector_HexToIP/FFFFFFFF (0.00s)
+    --- PASS: TestNetworkCollector_HexToIP/0A00020F (0.00s)
+    --- PASS: TestNetworkCollector_HexToIP/C0A80001 (0.00s)
+=== RUN   TestNetworkCollector_TCPStateToString
+=== RUN   TestNetworkCollector_TCPStateToString/ESTABLISHED
+=== RUN   TestNetworkCollector_TCPStateToString/SYN_SENT
+=== RUN   TestNetworkCollector_TCPStateToString/SYN_RECV
+=== RUN   TestNetworkCollector_TCPStateToString/FIN_WAIT1
+=== RUN   TestNetworkCollector_TCPStateToString/FIN_WAIT2
+=== RUN   TestNetworkCollector_TCPStateToString/TIME_WAIT
+=== RUN   TestNetworkCollector_TCPStateToString/CLOSE
+=== RUN   TestNetworkCollector_TCPStateToString/CLOSE_WAIT
+=== RUN   TestNetworkCollector_TCPStateToString/LAST_ACK
+=== RUN   TestNetworkCollector_TCPStateToString/LISTEN
+=== RUN   TestNetworkCollector_TCPStateToString/CLOSING
+=== RUN   TestNetworkCollector_TCPStateToString/UNKNOWN(FF)
+--- PASS: TestNetworkCollector_TCPStateToString (0.00s)
+    --- PASS: TestNetworkCollector_TCPStateToString/ESTABLISHED (0.00s)
+    --- PASS: TestNetworkCollector_TCPStateToString/SYN_SENT (0.00s)
+    --- PASS: TestNetworkCollector_TCPStateToString/SYN_RECV (0.00s)
+    --- PASS: TestNetworkCollector_TCPStateToString/FIN_WAIT1 (0.00s)
+    --- PASS: TestNetworkCollector_TCPStateToString/FIN_WAIT2 (0.00s)
+    --- PASS: TestNetworkCollector_TCPStateToString/TIME_WAIT (0.00s)
+    --- PASS: TestNetworkCollector_TCPStateToString/CLOSE (0.00s)
+    --- PASS: TestNetworkCollector_TCPStateToString/CLOSE_WAIT (0.00s)
+    --- PASS: TestNetworkCollector_TCPStateToString/LAST_ACK (0.00s)
+    --- PASS: TestNetworkCollector_TCPStateToString/LISTEN (0.00s)
+    --- PASS: TestNetworkCollector_TCPStateToString/CLOSING (0.00s)
+    --- PASS: TestNetworkCollector_TCPStateToString/UNKNOWN(FF) (0.00s)
+=== RUN   TestNetworkCollector_ParseConnectionLine
+=== RUN   TestNetworkCollector_ParseConnectionLine/tcp_established
+=== RUN   TestNetworkCollector_ParseConnectionLine/tcp_listen
+=== RUN   TestNetworkCollector_ParseConnectionLine/udp_active
+=== RUN   TestNetworkCollector_ParseConnectionLine/invalid_format
+--- PASS: TestNetworkCollector_ParseConnectionLine (0.00s)
+    --- PASS: TestNetworkCollector_ParseConnectionLine/tcp_established (0.00s)
+    --- PASS: TestNetworkCollector_ParseConnectionLine/tcp_listen (0.00s)
+    --- PASS: TestNetworkCollector_ParseConnectionLine/udp_active (0.00s)
+    --- PASS: TestNetworkCollector_ParseConnectionLine/invalid_format (0.00s)
+=== RUN   TestNetworkCollector_WithMockProcFS
+--- PASS: TestNetworkCollector_WithMockProcFS (0.00s)
+=== RUN   TestNetworkCollector_ExtractListeningPorts
+--- PASS: TestNetworkCollector_ExtractListeningPorts (0.00s)
+=== RUN   TestNetworkCollector_ExtractProcessName
+=== RUN   TestNetworkCollector_ExtractProcessName/nginx
+=== RUN   TestNetworkCollector_ExtractProcessName/process_with_spaces
+=== RUN   TestNetworkCollector_ExtractProcessName/test
+=== RUN   TestNetworkCollector_ExtractProcessName/#00
+--- PASS: TestNetworkCollector_ExtractProcessName (0.00s)
+    --- PASS: TestNetworkCollector_ExtractProcessName/nginx (0.00s)
+    --- PASS: TestNetworkCollector_ExtractProcessName/process_with_spaces (0.00s)
+    --- PASS: TestNetworkCollector_ExtractProcessName/test (0.00s)
+    --- PASS: TestNetworkCollector_ExtractProcessName/#00 (0.00s)
+=== RUN   TestNetworkCollector_BuildInodeMapping
+--- PASS: TestNetworkCollector_BuildInodeMapping (0.00s)
+=== RUN   TestNetworkCollector_CollectWithProcessResolution
+--- PASS: TestNetworkCollector_CollectWithProcessResolution (0.04s)
+=== RUN   TestNetworkCollector_CollectWithLimits
+    network_test.go:344: System has 2 connections, which exceeds test limit of 1. This is expected on busy systems.
+--- PASS: TestNetworkCollector_CollectWithLimits (0.00s)
+=== RUN   TestNetworkCollector_CollectWithEmptyProcFS
+--- PASS: TestNetworkCollector_CollectWithEmptyProcFS (0.00s)
+=== RUN   TestNetworkCollector_CollectWithCorruptedFiles
+--- PASS: TestNetworkCollector_CollectWithCorruptedFiles (0.00s)
+=== RUN   TestNetworkCollector_CollectWithPermissionDenied
+--- PASS: TestNetworkCollector_CollectWithPermissionDenied (0.00s)
+=== RUN   TestNetworkCollector_CollectWithInvalidData
+--- PASS: TestNetworkCollector_CollectWithInvalidData (0.00s)
+=== RUN   TestNetworkCollector_CollectWithVeryLargeFiles
+--- PASS: TestNetworkCollector_CollectWithVeryLargeFiles (0.00s)
+=== RUN   TestProcessCollector_Collect
+--- PASS: TestProcessCollector_Collect (0.01s)
+=== RUN   TestProcessCollector_GetProcessByPID
+--- PASS: TestProcessCollector_GetProcessByPID (0.00s)
+=== RUN   TestProcessCollector_MaxProcessesLimit
+--- PASS: TestProcessCollector_MaxProcessesLimit (0.00s)
+=== RUN   TestProcessCollector_FilterContainersOnly
+--- PASS: TestProcessCollector_FilterContainersOnly (0.05s)
+=== RUN   TestProcessCollector_ParseStatFile
+=== RUN   TestProcessCollector_ParseStatFile/valid_stat
+=== RUN   TestProcessCollector_ParseStatFile/process_with_spaces
+=== RUN   TestProcessCollector_ParseStatFile/invalid_format_no_parens
+=== RUN   TestProcessCollector_ParseStatFile/insufficient_fields
+--- PASS: TestProcessCollector_ParseStatFile (0.00s)
+    --- PASS: TestProcessCollector_ParseStatFile/valid_stat (0.00s)
+    --- PASS: TestProcessCollector_ParseStatFile/process_with_spaces (0.00s)
+    --- PASS: TestProcessCollector_ParseStatFile/invalid_format_no_parens (0.00s)
+    --- PASS: TestProcessCollector_ParseStatFile/insufficient_fields (0.00s)
+=== RUN   TestProcessCollector_ParseStatusFile
+--- PASS: TestProcessCollector_ParseStatusFile (0.00s)
+=== RUN   TestProcessCollector_ExtractContainerID
+=== RUN   TestProcessCollector_ExtractContainerID/docker_cgroup_v2
+=== RUN   TestProcessCollector_ExtractContainerID/docker_cgroup_scope
+=== RUN   TestProcessCollector_ExtractContainerID/no_docker
+=== RUN   TestProcessCollector_ExtractContainerID/multiple_lines
+--- PASS: TestProcessCollector_ExtractContainerID (0.00s)
+    --- PASS: TestProcessCollector_ExtractContainerID/docker_cgroup_v2 (0.00s)
+    --- PASS: TestProcessCollector_ExtractContainerID/docker_cgroup_scope (0.00s)
+    --- PASS: TestProcessCollector_ExtractContainerID/no_docker (0.00s)
+    --- PASS: TestProcessCollector_ExtractContainerID/multiple_lines (0.00s)
+=== RUN   TestProcessCollector_IsHexString
+=== RUN   TestProcessCollector_IsHexString/a1b2c3d4
+=== RUN   TestProcessCollector_IsHexString/ABCDEF01
+=== RUN   TestProcessCollector_IsHexString/0123456789abcdef
+=== RUN   TestProcessCollector_IsHexString/g1b2c3d4
+=== RUN   TestProcessCollector_IsHexString/a1b2c3d4!
+=== RUN   TestProcessCollector_IsHexString/#00
+=== RUN   TestProcessCollector_IsHexString/xyz
+--- PASS: TestProcessCollector_IsHexString (0.00s)
+    --- PASS: TestProcessCollector_IsHexString/a1b2c3d4 (0.00s)
+    --- PASS: TestProcessCollector_IsHexString/ABCDEF01 (0.00s)
+    --- PASS: TestProcessCollector_IsHexString/0123456789abcdef (0.00s)
+    --- PASS: TestProcessCollector_IsHexString/g1b2c3d4 (0.00s)
+    --- PASS: TestProcessCollector_IsHexString/a1b2c3d4! (0.00s)
+    --- PASS: TestProcessCollector_IsHexString/#00 (0.00s)
+    --- PASS: TestProcessCollector_IsHexString/xyz (0.00s)
+=== RUN   TestProcessCollector_WithMockProcFS
+--- PASS: TestProcessCollector_WithMockProcFS (0.00s)
+=== RUN   TestProcessCollector_GetProcessInfoEdgeCases
+--- PASS: TestProcessCollector_GetProcessInfoEdgeCases (0.00s)
+=== RUN   TestProcessCollector_CollectWithErrors
+--- PASS: TestProcessCollector_CollectWithErrors (0.00s)
+=== RUN   TestProcessCollector_ParseStatusFileEdgeCases
+--- PASS: TestProcessCollector_ParseStatusFileEdgeCases (0.00s)
+PASS
+coverage: 84.5% of statements
+ok  	github.com/ljluestc/orchestrator/pkg/probe	4.998s	coverage: 84.5% of statements

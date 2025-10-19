@@ -2,6 +2,8 @@ package containerizer
 
 import (
 	"context"
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -456,8 +458,278 @@ type ContainerConfig struct {
 	GPUCount      int64
 }
 
-// Helper function to encode auth config (stub)
+// KillContainer force-stops a running container
+func (dc *DockerContainerizer) KillContainer(ctx context.Context, containerID string) error {
+	err := dc.client.ContainerKill(ctx, containerID, "SIGKILL")
+	if err != nil {
+		return fmt.Errorf("failed to kill container: %w", err)
+	}
+
+	// Update state
+	dc.statesMux.Lock()
+	if state, exists := dc.containerStates[containerID]; exists {
+		state.Status = "killed"
+		state.StopTime = time.Now()
+	}
+	dc.statesMux.Unlock()
+
+	log.Printf("Container %s killed", containerID[:12])
+	return nil
+}
+
+// RestartContainer restarts a container
+func (dc *DockerContainerizer) RestartContainer(ctx context.Context, containerID string, timeout int) error {
+	startTime := time.Now()
+
+	restartTimeout := timeout
+	err := dc.client.ContainerRestart(ctx, containerID, container.StopOptions{
+		Timeout: &restartTimeout,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to restart container: %w", err)
+	}
+
+	restartDuration := time.Since(startTime)
+
+	// Update state
+	dc.statesMux.Lock()
+	if state, exists := dc.containerStates[containerID]; exists {
+		state.Status = "running"
+		state.StartTime = time.Now()
+	}
+	dc.statesMux.Unlock()
+
+	log.Printf("Container %s restarted in %v", containerID[:12], restartDuration)
+	return nil
+}
+
+// InspectContainer returns detailed container information
+func (dc *DockerContainerizer) InspectContainer(ctx context.Context, containerID string) (*types.ContainerJSON, error) {
+	inspect, err := dc.client.ContainerInspect(ctx, containerID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to inspect container: %w", err)
+	}
+
+	return &inspect, nil
+}
+
+// GetContainerStats returns resource usage statistics
+func (dc *DockerContainerizer) GetContainerStats(ctx context.Context, containerID string) (*ResourceUsage, error) {
+	stats, err := dc.client.ContainerStats(ctx, containerID, false)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get container stats: %w", err)
+	}
+	defer stats.Body.Close()
+
+	// Parse stats JSON
+	var v types.StatsJSON
+	if err := json.NewDecoder(stats.Body).Decode(&v); err != nil {
+		return nil, fmt.Errorf("failed to decode stats: %w", err)
+	}
+
+	// Calculate CPU percentage
+	cpuDelta := float64(v.CPUStats.CPUUsage.TotalUsage - v.PreCPUStats.CPUUsage.TotalUsage)
+	systemDelta := float64(v.CPUStats.SystemUsage - v.PreCPUStats.SystemUsage)
+	cpuPercent := 0.0
+	if systemDelta > 0.0 {
+		cpuPercent = (cpuDelta / systemDelta) * float64(len(v.CPUStats.CPUUsage.PercpuUsage)) * 100.0
+	}
+
+	// Calculate network I/O
+	var networkRx, networkTx uint64
+	for _, network := range v.Networks {
+		networkRx += network.RxBytes
+		networkTx += network.TxBytes
+	}
+
+	// Calculate block I/O
+	var blockRead, blockWrite uint64
+	for _, stat := range v.BlkioStats.IoServiceBytesRecursive {
+		if stat.Op == "Read" {
+			blockRead += stat.Value
+		} else if stat.Op == "Write" {
+			blockWrite += stat.Value
+		}
+	}
+
+	usage := &ResourceUsage{
+		CPUPercent:     cpuPercent,
+		MemoryUsage:    v.MemoryStats.Usage,
+		MemoryLimit:    v.MemoryStats.Limit,
+		NetworkRxBytes: networkRx,
+		NetworkTxBytes: networkTx,
+		BlockRead:      blockRead,
+		BlockWrite:     blockWrite,
+	}
+
+	// Update state cache
+	dc.statesMux.Lock()
+	if state, exists := dc.containerStates[containerID]; exists {
+		state.ResourceUsage = *usage
+	}
+	dc.statesMux.Unlock()
+
+	return usage, nil
+}
+
+// GetContainerLogs streams container logs
+func (dc *DockerContainerizer) GetContainerLogs(ctx context.Context, containerID string, follow bool, tail string) (io.ReadCloser, error) {
+	options := container.LogsOptions{
+		ShowStdout: true,
+		ShowStderr: true,
+		Follow:     follow,
+		Tail:       tail,
+		Timestamps: true,
+	}
+
+	logs, err := dc.client.ContainerLogs(ctx, containerID, options)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get container logs: %w", err)
+	}
+
+	return logs, nil
+}
+
+// ListContainers returns all containers matching the filters
+func (dc *DockerContainerizer) ListContainers(ctx context.Context, all bool) ([]types.Container, error) {
+	options := container.ListOptions{
+		All: all,
+	}
+
+	containers, err := dc.client.ContainerList(ctx, options)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list containers: %w", err)
+	}
+
+	return containers, nil
+}
+
+// TagImage tags an image with a new name
+func (dc *DockerContainerizer) TagImage(ctx context.Context, source, target string) error {
+	err := dc.client.ImageTag(ctx, source, target)
+	if err != nil {
+		return fmt.Errorf("failed to tag image: %w", err)
+	}
+
+	log.Printf("Image tagged: %s -> %s", source, target)
+	return nil
+}
+
+// PushImage pushes an image to a registry
+func (dc *DockerContainerizer) PushImage(ctx context.Context, imageName string) error {
+	// Get registry credentials
+	options := types.ImagePushOptions{}
+	if creds, exists := dc.config.RegistryAuth[dc.config.DefaultRegistry]; exists {
+		authConfig := registry.AuthConfig{
+			Username:      creds.Username,
+			Password:      creds.Password,
+			Email:         creds.Email,
+			ServerAddress: creds.ServerAddress,
+		}
+		encodedAuth, err := encodeAuthToBase64(authConfig)
+		if err == nil {
+			options.RegistryAuth = encodedAuth
+		}
+	}
+
+	log.Printf("Pushing image: %s", imageName)
+
+	reader, err := dc.client.ImagePush(ctx, imageName, options)
+	if err != nil {
+		return fmt.Errorf("failed to push image: %w", err)
+	}
+	defer reader.Close()
+
+	// Stream push output
+	_, err = io.Copy(io.Discard, reader)
+	if err != nil {
+		return fmt.Errorf("error reading push output: %w", err)
+	}
+
+	log.Printf("Image %s pushed successfully", imageName)
+	return nil
+}
+
+// RemoveImage removes an image
+func (dc *DockerContainerizer) RemoveImage(ctx context.Context, imageID string, force bool) error {
+	options := types.ImageRemoveOptions{
+		Force:         force,
+		PruneChildren: true,
+	}
+
+	_, err := dc.client.ImageRemove(ctx, imageID, options)
+	if err != nil {
+		return fmt.Errorf("failed to remove image: %w", err)
+	}
+
+	// Remove from cache
+	dc.imageCache.mu.Lock()
+	if cached, exists := dc.imageCache.images[imageID]; exists {
+		dc.imageCache.currentSize -= cached.Size
+		delete(dc.imageCache.images, imageID)
+	}
+	dc.imageCache.mu.Unlock()
+
+	log.Printf("Image %s removed", imageID)
+	return nil
+}
+
+// GetImageList returns list of all images
+func (dc *DockerContainerizer) GetImageList(ctx context.Context) ([]types.ImageSummary, error) {
+	images, err := dc.client.ImageList(ctx, types.ImageListOptions{})
+	if err != nil {
+		return nil, fmt.Errorf("failed to list images: %w", err)
+	}
+
+	return images, nil
+}
+
+// Close closes the Docker client connection
+func (dc *DockerContainerizer) Close() error {
+	if dc.client != nil {
+		return dc.client.Close()
+	}
+	return nil
+}
+
+// GetStats returns aggregated statistics
+func (dc *DockerContainerizer) GetStats() map[string]interface{} {
+	dc.statesMux.RLock()
+	defer dc.statesMux.RUnlock()
+
+	dc.imageCache.mu.RLock()
+	defer dc.imageCache.mu.RUnlock()
+
+	return map[string]interface{}{
+		"containers": map[string]interface{}{
+			"total":   len(dc.containerStates),
+			"running": dc.countContainersByStatus("running"),
+			"stopped": dc.countContainersByStatus("stopped"),
+		},
+		"images": map[string]interface{}{
+			"cached":       len(dc.imageCache.images),
+			"cache_size_gb": float64(dc.imageCache.currentSize) / (1024 * 1024 * 1024),
+			"max_size_gb":   float64(dc.imageCache.maxSize) / (1024 * 1024 * 1024),
+		},
+	}
+}
+
+// countContainersByStatus counts containers with given status
+func (dc *DockerContainerizer) countContainersByStatus(status string) int {
+	count := 0
+	for _, state := range dc.containerStates {
+		if state.Status == status {
+			count++
+		}
+	}
+	return count
+}
+
+// Helper function to encode auth config
 func encodeAuthToBase64(authConfig registry.AuthConfig) (string, error) {
-	// In production, implement proper base64 encoding of auth config
-	return "", nil
+	authJSON, err := json.Marshal(authConfig)
+	if err != nil {
+		return "", err
+	}
+	return base64.URLEncoding.EncodeToString(authJSON), nil
 }

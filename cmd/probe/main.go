@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -45,11 +46,24 @@ func main() {
 	}()
 
 	// Create probe
-	p, err := probe.NewProbe(*probeID, *hostname, *appURL, *collectInterval)
+	p, err := probe.NewProbe(probe.ProbeConfig{
+		ServerURL:          *appURL,
+		AgentID:            *probeID,
+		CollectionInterval: *collectInterval,
+		CollectHost:        true,
+		CollectDocker:      true,
+		CollectProcesses:   true,
+		CollectNetwork:     true,
+		CollectDockerStats: true,
+		MaxProcesses:       500,
+		MaxConnections:     1000,
+		IncludeLocalhost:   false,
+		ResolveProcesses:   true,
+	})
 	if err != nil {
 		log.Fatalf("Failed to create probe: %v", err)
 	}
-	defer p.Close()
+	defer p.Stop()
 
 	// Start metrics server
 	go func() {

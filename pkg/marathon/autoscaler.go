@@ -223,25 +223,45 @@ func (as *AutoScaler) makeScalingDecision(config *AutoScaleConfig, app *Applicat
 		ShouldScale: false,
 	}
 
+	// Apply defaults if not set (in case makeScalingDecision is called directly)
+	targetCPU := config.TargetCPUPercent
+	if targetCPU <= 0 {
+		targetCPU = 70.0
+	}
+	targetMem := config.TargetMemPercent
+
 	currentInstances := app.Instances
 
 	// Check scale-up conditions
-	if cpuUtil > config.TargetCPUPercent {
+	if cpuUtil > targetCPU {
 		decision.ShouldScale = true
 		decision.Direction = "up"
 		decision.MetricName = "cpu"
 		decision.MetricValue = cpuUtil
-		decision.Reason = fmt.Sprintf("CPU utilization %.1f%% > target %.1f%%", cpuUtil, config.TargetCPUPercent)
-	} else if memUtil > config.TargetMemPercent && config.TargetMemPercent > 0 {
+		decision.Reason = fmt.Sprintf("CPU utilization %.1f%% > target %.1f%%", cpuUtil, targetCPU)
+	} else if memUtil > targetMem && targetMem > 0 {
 		decision.ShouldScale = true
 		decision.Direction = "up"
 		decision.MetricName = "memory"
 		decision.MetricValue = memUtil
-		decision.Reason = fmt.Sprintf("Memory utilization %.1f%% > target %.1f%%", memUtil, config.TargetMemPercent)
+		decision.Reason = fmt.Sprintf("Memory utilization %.1f%% > target %.1f%%", memUtil, targetMem)
 	}
 
 	// Check scale-down conditions
-	if cpuUtil < config.TargetCPUPercent*0.5 && memUtil < config.TargetMemPercent*0.5 {
+	// Only scale down if we have valid metrics (not 0 due to errors)
+	scaleDown := false
+	if targetMem > 0 {
+		// If memory target is set, require both CPU and memory to be low
+		// Also ensure metrics are valid (> 0) to avoid scaling down on metric failures
+		scaleDown = cpuUtil > 0 && memUtil > 0 &&
+			cpuUtil < targetCPU*0.5 && memUtil < targetMem*0.5
+	} else {
+		// If memory target is not set, only check CPU
+		// Ensure CPU metric is valid (> 0)
+		scaleDown = cpuUtil > 0 && cpuUtil < targetCPU*0.5
+	}
+
+	if scaleDown {
 		decision.ShouldScale = true
 		decision.Direction = "down"
 		decision.MetricName = "cpu_memory"

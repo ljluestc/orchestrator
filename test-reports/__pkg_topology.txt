@@ -1,0 +1,238 @@
+=== RUN   TestNewManager
+=== RUN   TestNewManager/Valid_Manager
+=== RUN   TestNewManager/Empty_ID
+--- PASS: TestNewManager (0.00s)
+    --- PASS: TestNewManager/Valid_Manager (0.00s)
+    --- PASS: TestNewManager/Empty_ID (0.00s)
+=== RUN   TestTopologyManager_AddNode
+=== RUN   TestTopologyManager_AddNode/Valid_node
+=== RUN   TestTopologyManager_AddNode/Node_with_metrics
+=== RUN   TestTopologyManager_AddNode/Empty_node_ID
+=== RUN   TestTopologyManager_AddNode/Nil_node
+--- PASS: TestTopologyManager_AddNode (0.00s)
+    --- PASS: TestTopologyManager_AddNode/Valid_node (0.00s)
+    --- PASS: TestTopologyManager_AddNode/Node_with_metrics (0.00s)
+    --- PASS: TestTopologyManager_AddNode/Empty_node_ID (0.00s)
+    --- PASS: TestTopologyManager_AddNode/Nil_node (0.00s)
+=== RUN   TestTopologyManager_AddNodeDuplicate
+--- PASS: TestTopologyManager_AddNodeDuplicate (0.00s)
+=== RUN   TestTopologyManager_UpdateNode
+--- PASS: TestTopologyManager_UpdateNode (0.00s)
+=== RUN   TestTopologyManager_UpdateNodeNotFound
+--- PASS: TestTopologyManager_UpdateNodeNotFound (0.00s)
+=== RUN   TestTopologyManager_RemoveNode
+--- PASS: TestTopologyManager_RemoveNode (0.00s)
+=== RUN   TestTopologyManager_RemoveNodeNotFound
+--- PASS: TestTopologyManager_RemoveNodeNotFound (0.00s)
+=== RUN   TestTopologyManager_AddEdge
+=== RUN   TestTopologyManager_AddEdge/Valid_edge
+=== RUN   TestTopologyManager_AddEdge/Edge_with_metrics
+=== RUN   TestTopologyManager_AddEdge/Empty_edge_ID
+=== RUN   TestTopologyManager_AddEdge/Nonexistent_source_node
+=== RUN   TestTopologyManager_AddEdge/Nonexistent_target_node
+=== RUN   TestTopologyManager_AddEdge/Nil_edge
+--- PASS: TestTopologyManager_AddEdge (0.00s)
+    --- PASS: TestTopologyManager_AddEdge/Valid_edge (0.00s)
+    --- PASS: TestTopologyManager_AddEdge/Edge_with_metrics (0.00s)
+    --- PASS: TestTopologyManager_AddEdge/Empty_edge_ID (0.00s)
+    --- PASS: TestTopologyManager_AddEdge/Nonexistent_source_node (0.00s)
+    --- PASS: TestTopologyManager_AddEdge/Nonexistent_target_node (0.00s)
+    --- PASS: TestTopologyManager_AddEdge/Nil_edge (0.00s)
+=== RUN   TestTopologyManager_AddEdgeDuplicate
+--- PASS: TestTopologyManager_AddEdgeDuplicate (0.00s)
+=== RUN   TestTopologyManager_UpdateEdge
+--- PASS: TestTopologyManager_UpdateEdge (0.00s)
+=== RUN   TestTopologyManager_UpdateEdgeNotFound
+--- PASS: TestTopologyManager_UpdateEdgeNotFound (0.00s)
+=== RUN   TestTopologyManager_RemoveEdge
+--- PASS: TestTopologyManager_RemoveEdge (0.00s)
+=== RUN   TestTopologyManager_RemoveEdgeNotFound
+--- PASS: TestTopologyManager_RemoveEdgeNotFound (0.00s)
+=== RUN   TestTopologyManager_GetNode
+--- PASS: TestTopologyManager_GetNode (0.00s)
+=== RUN   TestTopologyManager_GetNodeNotFound
+--- PASS: TestTopologyManager_GetNodeNotFound (0.00s)
+=== RUN   TestTopologyManager_GetEdge
+--- PASS: TestTopologyManager_GetEdge (0.00s)
+=== RUN   TestTopologyManager_GetEdgeNotFound
+--- PASS: TestTopologyManager_GetEdgeNotFound (0.00s)
+=== RUN   TestTopologyManager_ListNodes
+--- PASS: TestTopologyManager_ListNodes (0.00s)
+=== RUN   TestTopologyManager_ListEdges
+--- PASS: TestTopologyManager_ListEdges (0.00s)
+=== RUN   TestTopologyManager_SearchNodes
+--- PASS: TestTopologyManager_SearchNodes (0.00s)
+=== RUN   TestTopologyManager_GetView
+--- PASS: TestTopologyManager_GetView (0.00s)
+=== RUN   TestTopologyManager_GetViewNotFound
+--- PASS: TestTopologyManager_GetViewNotFound (0.00s)
+=== RUN   TestTopologyManager_UpdateMetrics
+--- PASS: TestTopologyManager_UpdateMetrics (0.00s)
+=== RUN   TestTopologyManager_HTTPHandlers
+=== RUN   TestTopologyManager_HTTPHandlers/Get_Topology
+=== RUN   TestTopologyManager_HTTPHandlers/Get_Nodes
+=== RUN   TestTopologyManager_HTTPHandlers/Get_Edges
+=== RUN   TestTopologyManager_HTTPHandlers/Search_Topology
+=== RUN   TestTopologyManager_HTTPHandlers/Get_Views
+=== RUN   TestTopologyManager_HTTPHandlers/Get_Metrics
+=== RUN   TestTopologyManager_HTTPHandlers/Health
+--- PASS: TestTopologyManager_HTTPHandlers (0.00s)
+    --- PASS: TestTopologyManager_HTTPHandlers/Get_Topology (0.00s)
+    --- PASS: TestTopologyManager_HTTPHandlers/Get_Nodes (0.00s)
+    --- PASS: TestTopologyManager_HTTPHandlers/Get_Edges (0.00s)
+    --- PASS: TestTopologyManager_HTTPHandlers/Search_Topology (0.00s)
+    --- PASS: TestTopologyManager_HTTPHandlers/Get_Views (0.00s)
+    --- PASS: TestTopologyManager_HTTPHandlers/Get_Metrics (0.00s)
+    --- PASS: TestTopologyManager_HTTPHandlers/Health (0.00s)
+=== RUN   TestTopologyManager_HandleGetTopology
+--- PASS: TestTopologyManager_HandleGetTopology (0.00s)
+=== RUN   TestTopologyManager_HandleGetNodes
+--- PASS: TestTopologyManager_HandleGetNodes (0.00s)
+=== RUN   TestTopologyManager_HandleGetEdges
+--- PASS: TestTopologyManager_HandleGetEdges (0.00s)
+=== RUN   TestTopologyManager_HandleGetViews
+--- PASS: TestTopologyManager_HandleGetViews (0.00s)
+=== RUN   TestTopologyManager_HandleHealth
+--- PASS: TestTopologyManager_HandleHealth (0.00s)
+=== RUN   TestTopologyManager_SetupRoutes
+=== RUN   TestTopologyManager_SetupRoutes/GET_/api/topology
+=== RUN   TestTopologyManager_SetupRoutes/GET_/api/topology/nodes
+=== RUN   TestTopologyManager_SetupRoutes/GET_/api/topology/edges
+=== RUN   TestTopologyManager_SetupRoutes/GET_/api/topology/search
+=== RUN   TestTopologyManager_SetupRoutes/POST_/api/topology/filter
+=== RUN   TestTopologyManager_SetupRoutes/GET_/api/views
+=== RUN   TestTopologyManager_SetupRoutes/GET_/api/metrics
+=== RUN   TestTopologyManager_SetupRoutes/GET_/health
+--- PASS: TestTopologyManager_SetupRoutes (0.00s)
+    --- PASS: TestTopologyManager_SetupRoutes/GET_/api/topology (0.00s)
+    --- PASS: TestTopologyManager_SetupRoutes/GET_/api/topology/nodes (0.00s)
+    --- PASS: TestTopologyManager_SetupRoutes/GET_/api/topology/edges (0.00s)
+    --- PASS: TestTopologyManager_SetupRoutes/GET_/api/topology/search (0.00s)
+    --- PASS: TestTopologyManager_SetupRoutes/POST_/api/topology/filter (0.00s)
+    --- PASS: TestTopologyManager_SetupRoutes/GET_/api/views (0.00s)
+    --- PASS: TestTopologyManager_SetupRoutes/GET_/api/metrics (0.00s)
+    --- PASS: TestTopologyManager_SetupRoutes/GET_/health (0.00s)
+=== RUN   TestTopologyManager_StartStop
+2025/10/17 23:16:05 Starting topology manager on :8082
+--- PASS: TestTopologyManager_StartStop (0.10s)
+=== RUN   TestTopologyManager_ConcurrentAccess
+--- PASS: TestTopologyManager_ConcurrentAccess (0.01s)
+=== RUN   TestTopologyManager_NodeStructures
+--- PASS: TestTopologyManager_NodeStructures (0.00s)
+=== RUN   TestTopologyManager_EdgeStructures
+--- PASS: TestTopologyManager_EdgeStructures (0.00s)
+=== RUN   TestTopologyManager_SparklineStructures
+--- PASS: TestTopologyManager_SparklineStructures (0.00s)
+=== RUN   TestTopologyManager_Stop
+--- PASS: TestTopologyManager_Stop (0.00s)
+=== RUN   TestTopologyManager_HandleGetNode
+--- PASS: TestTopologyManager_HandleGetNode (0.00s)
+=== RUN   TestTopologyManager_HandleGetEdge
+--- PASS: TestTopologyManager_HandleGetEdge (0.00s)
+=== RUN   TestTopologyManager_HandleGetView
+--- PASS: TestTopologyManager_HandleGetView (0.00s)
+=== RUN   TestTopologyManager_HandleCreateView
+--- PASS: TestTopologyManager_HandleCreateView (0.00s)
+=== RUN   TestTopologyManager_HandleUpdateView
+--- PASS: TestTopologyManager_HandleUpdateView (0.00s)
+=== RUN   TestTopologyManager_HandleDeleteView
+--- PASS: TestTopologyManager_HandleDeleteView (0.00s)
+=== RUN   TestTopologyManager_HandleGetNodeMetrics
+--- PASS: TestTopologyManager_HandleGetNodeMetrics (0.00s)
+=== RUN   TestTopologyManager_HandleGetEdgeMetrics
+--- PASS: TestTopologyManager_HandleGetEdgeMetrics (0.00s)
+=== RUN   TestTopologyManager_HandleFilter
+--- PASS: TestTopologyManager_HandleFilter (0.00s)
+=== RUN   TestTopologyManager_MatchesSearch
+--- PASS: TestTopologyManager_MatchesSearch (0.00s)
+=== RUN   TestTopologyManager_MatchesFilter
+--- PASS: TestTopologyManager_MatchesFilter (0.00s)
+=== RUN   TestTopologyManager_MatchesMetricsFilter
+--- PASS: TestTopologyManager_MatchesMetricsFilter (0.00s)
+=== RUN   TestTopologyManager_BroadcastUpdate
+--- PASS: TestTopologyManager_BroadcastUpdate (0.00s)
+=== RUN   TestTopologyManager_CleanupWebSocketConnections
+--- PASS: TestTopologyManager_CleanupWebSocketConnections (0.00s)
+=== RUN   TestTopologyManager_GetTopologyForSubscriber
+--- PASS: TestTopologyManager_GetTopologyForSubscriber (0.00s)
+=== RUN   TestTopologyManager_HandleAddNode
+--- PASS: TestTopologyManager_HandleAddNode (0.00s)
+=== RUN   TestTopologyManager_HandleAddEdge
+--- PASS: TestTopologyManager_HandleAddEdge (0.00s)
+=== RUN   TestNewCollector
+--- PASS: TestNewCollector (0.00s)
+=== RUN   TestCollector_Start
+2025/10/17 23:16:06 Starting topology collector test-collector
+2025/10/17 23:16:06 Stopping topology collector test-collector
+--- PASS: TestCollector_Start (0.10s)
+=== RUN   TestCollector_Stop
+2025/10/17 23:16:06 Starting topology collector test-collector
+2025/10/17 23:16:06 Stopping topology collector test-collector
+2025/10/17 23:16:06 Stopping topology collector test-collector
+--- PASS: TestCollector_Stop (0.00s)
+=== RUN   TestCollector_ConvertToNode
+--- PASS: TestCollector_ConvertToNode (0.00s)
+=== RUN   TestCollector_ConvertToEdge
+--- PASS: TestCollector_ConvertToEdge (0.00s)
+=== RUN   TestCollector_GetString
+--- PASS: TestCollector_GetString (0.00s)
+=== RUN   TestCollector_CreateHostNode
+--- PASS: TestCollector_CreateHostNode (0.00s)
+=== RUN   TestCollector_CreateContainerNode
+--- PASS: TestCollector_CreateContainerNode (0.00s)
+=== RUN   TestCollector_CreateProcessNode
+--- PASS: TestCollector_CreateProcessNode (0.00s)
+=== RUN   TestCollector_CreateNetworkEdge
+--- PASS: TestCollector_CreateNetworkEdge (0.00s)
+=== RUN   TestCollector_GenerateMockData
+--- PASS: TestCollector_GenerateMockData (0.00s)
+=== RUN   TestTopologyManager_HandleStartContainer
+2025/10/17 23:16:06 Starting container test-container
+--- PASS: TestTopologyManager_HandleStartContainer (0.00s)
+=== RUN   TestTopologyManager_HandleStopContainer
+2025/10/17 23:16:06 Stopping container test-container
+--- PASS: TestTopologyManager_HandleStopContainer (0.00s)
+=== RUN   TestTopologyManager_HandleRestartContainer
+2025/10/17 23:16:06 Restarting container test-container
+--- PASS: TestTopologyManager_HandleRestartContainer (0.00s)
+=== RUN   TestTopologyManager_HandlePauseContainer
+2025/10/17 23:16:06 Pausing container test-container
+--- PASS: TestTopologyManager_HandlePauseContainer (0.00s)
+=== RUN   TestTopologyManager_HandleUnpauseContainer
+2025/10/17 23:16:06 Unpausing container test-container
+--- PASS: TestTopologyManager_HandleUnpauseContainer (0.00s)
+=== RUN   TestTopologyManager_HandleGetContainerLogs
+2025/10/17 23:16:06 Getting logs for container test-container
+--- PASS: TestTopologyManager_HandleGetContainerLogs (0.00s)
+=== RUN   TestTopologyManager_HandleContainerExec
+2025/10/17 23:16:06 Executing command in container test-container
+--- PASS: TestTopologyManager_HandleContainerExec (0.00s)
+=== RUN   TestTopologyManager_HandleWebSocket
+2025/10/17 23:16:06 WebSocket upgrade error: websocket: response does not implement http.Hijacker
+--- PASS: TestTopologyManager_HandleWebSocket (0.00s)
+=== RUN   TestCollector_FetchTopologyFromAppServer
+--- PASS: TestCollector_FetchTopologyFromAppServer (0.04s)
+=== RUN   TestCollector_CollectProbeData_WithMockServer
+2025/10/17 23:16:06 Failed to fetch topology from app server: app server returned status 503
+--- PASS: TestCollector_CollectProbeData_WithMockServer (0.00s)
+=== RUN   TestCollector_ConvertToNode_WithParentID
+--- PASS: TestCollector_ConvertToNode_WithParentID (0.00s)
+=== RUN   TestCollector_ConvertToNode_InvalidData
+--- PASS: TestCollector_ConvertToNode_InvalidData (0.00s)
+=== RUN   TestCollector_ConvertToEdge_WithProtocolAndConnections
+--- PASS: TestCollector_ConvertToEdge_WithProtocolAndConnections (0.00s)
+=== RUN   TestCollector_ConvertToEdge_InvalidData
+--- PASS: TestCollector_ConvertToEdge_InvalidData (0.00s)
+=== RUN   TestCollector_CollectAgentData
+--- PASS: TestCollector_CollectAgentData (0.00s)
+=== RUN   TestCollector_ProcessReport
+--- PASS: TestCollector_ProcessReport (0.00s)
+=== RUN   TestCollector_ProcessCollectedData
+--- PASS: TestCollector_ProcessCollectedData (0.00s)
+=== RUN   TestCollector_CollectFromProbes_Integration
+2025/10/17 23:16:06 Starting topology collector test-collector
+2025/10/17 23:16:06 Stopping topology collector test-collector
+--- PASS: TestCollector_CollectFromProbes_Integration (0.20s)
+PASS
+coverage: 86.2% of statements
+ok  	github.com/ljluestc/orchestrator/pkg/topology	0.479s	coverage: 86.2% of statements

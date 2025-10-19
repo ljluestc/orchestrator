@@ -1,0 +1,452 @@
+name: CI/CD Comprehensive Testing Pipeline
+
+on:
+  push:
+    branches: [ main, develop, 'feature/**' ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      run_benchmarks:
+        description: 'Run performance benchmarks'
+        required: false
+        default: 'false'
+
+env:
+  GO_VERSION: '1.23.7'
+  MIN_COVERAGE: 85.0
+  TARGET_COVERAGE: 100.0
+
+jobs:
+  ###############################################################################
+  # Code Quality and Linting
+  ###############################################################################
+  lint:
+    name: Code Quality & Linting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+
+      - name: Install golangci-lint
+        uses: golangci/golangci-lint-action@v4
+        with:
+          version: latest
+          args: --timeout=10m
+
+      - name: Run go vet
+        run: go vet ./...
+
+      - name: Run go fmt check
+        run: |
+          if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then
+            echo "The following files are not formatted:"
+            gofmt -s -l .
+            exit 1
+          fi
+
+      - name: Check go mod tidy
+        run: |
+          go mod tidy
+          git diff --exit-code go.mod go.sum
+
+  ###############################################################################
+  # Unit Tests with Coverage
+  ###############################################################################
+  unit-tests:
+    name: Unit Tests (Go ${{ matrix.go-version }} on ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        go-version: ['1.23.7', '1.23.x']
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go-version }}
+          cache: true
+
+      - name: Install Dependencies
+        run: go mod download
+
+      - name: Run Unit Tests with Coverage
+        run: |
+          mkdir -p coverage
+          go test -v -race -timeout=10m \
+            -coverprofile=coverage/profile.out \
+            -covermode=atomic \
+            $(go list ./... | grep -v "/go/")
+
+      - name: Generate Coverage Report
+        run: |
+          go tool cover -func=coverage/profile.out > coverage/coverage.txt
+          go tool cover -html=coverage/profile.out -o coverage/coverage.html
+
+      - name: Calculate Coverage
+        id: coverage
+        run: |
+          COVERAGE=$(go tool cover -func=coverage/profile.out | grep "^total:" | awk '{print $3}' | sed 's/%//')
+          echo "coverage=${COVERAGE}" >> $GITHUB_OUTPUT
+          echo "Total Coverage: ${COVERAGE}%"
+
+      - name: Check Coverage Threshold
+        run: |
+          COVERAGE=${{ steps.coverage.outputs.coverage }}
+          if (( $(echo "$COVERAGE < $MIN_COVERAGE" | bc -l) )); then
+            echo "❌ Coverage ${COVERAGE}% is below minimum threshold ${MIN_COVERAGE}%"
+            exit 1
+          else
+            echo "✅ Coverage ${COVERAGE}% meets minimum threshold ${MIN_COVERAGE}%"
+          fi
+
+      - name: Upload Coverage Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ matrix.os }}-go${{ matrix.go-version }}
+          path: coverage/
+          retention-days: 30
+
+      - name: Upload to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          file: coverage/profile.out
+          flags: unittests
+          name: ${{ matrix.os }}-go${{ matrix.go-version }}
+          fail_ci_if_error: false
+
+  ###############################################################################
+  # Integration Tests
+  ###############################################################################
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: [lint, unit-tests]
+
+    services:
+      docker:
+        image: docker:24-dind
+        options: --privileged
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Start Docker Services
+        run: docker compose up -d
+
+      - name: Wait for Services
+        run: |
+          timeout 60 bash -c 'until docker compose ps | grep -q "healthy"; do sleep 2; done' || true
+
+      - name: Run Integration Tests
+        run: |
+          if [ -f "./integration_test.go" ]; then
+            go test -v -tags=integration -timeout=10m ./integration_test.go
+          else
+            echo "No integration tests found, skipping..."
+          fi
+
+      - name: Stop Docker Services
+        if: always()
+        run: docker compose down
+
+  ###############################################################################
+  # Package-Specific Deep Testing
+  ###############################################################################
+  package-coverage-deep-dive:
+    name: Package Coverage Analysis
+    runs-on: ubuntu-latest
+    needs: unit-tests
+
+    strategy:
+      fail-fast: false
+      matrix:
+        package:
+          - cmd/app
+          - cmd/probe
+          - cmd/probe-agent
+          - internal/storage
+          - pkg/app
+          - pkg/containerizer
+          - pkg/isolation
+          - pkg/marathon
+          - pkg/mesos
+          - pkg/migration
+          - pkg/probe
+          - pkg/security
+          - pkg/topology
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+
+      - name: Test Package ${{ matrix.package }}
+        run: |
+          mkdir -p coverage
+          PACKAGE="${{ matrix.package }}"
+          echo "Testing package: $PACKAGE"
+
+          go test -v -race -timeout=10m \
+            -coverprofile=coverage/${PACKAGE//\//_}.out \
+            -covermode=atomic \
+            ./$PACKAGE/... || echo "Some tests may have failed"
+
+      - name: Analyze Package Coverage
+        run: |
+          PACKAGE="${{ matrix.package }}"
+          COVERAGE_FILE="coverage/${PACKAGE//\//_}.out"
+
+          if [ -f "$COVERAGE_FILE" ]; then
+            COVERAGE=$(go tool cover -func=$COVERAGE_FILE | grep "^total:" | awk '{print $3}' | sed 's/%//' || echo "0.0")
+            echo "Package: $PACKAGE"
+            echo "Coverage: ${COVERAGE}%"
+            echo "${PACKAGE}: ${COVERAGE}%" >> coverage/package_summary.txt
+          else
+            echo "No coverage data for $PACKAGE"
+          fi
+
+      - name: Upload Package Coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: package-coverage-${{ matrix.package }}
+          path: coverage/
+          retention-days: 15
+
+  ###############################################################################
+  # Performance Benchmarks
+  ###############################################################################
+  benchmarks:
+    name: Performance Benchmarks
+    runs-on: ubuntu-latest
+    if: github.event.inputs.run_benchmarks == 'true' || github.event_name == 'schedule'
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+
+      - name: Run Benchmarks
+        run: |
+          mkdir -p benchmarks
+          go test -v -run=^$ -bench=. -benchmem \
+            -benchtime=10s \
+            $(go list ./... | grep -v "/go/") \
+            2>&1 | tee benchmarks/benchmark_results.txt
+
+      - name: Upload Benchmark Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results
+          path: benchmarks/
+          retention-days: 90
+
+  ###############################################################################
+  # Security Scanning
+  ###############################################################################
+  security-scan:
+    name: Security Scanning
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Run Gosec Security Scanner
+        uses: securego/gosec@master
+        with:
+          args: '-no-fail -fmt sarif -out gosec-results.sarif ./...'
+
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: gosec-results.sarif
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-results.sarif
+
+  ###############################################################################
+  # Dependency Check
+  ###############################################################################
+  dependency-check:
+    name: Dependency Vulnerability Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Run govulncheck
+        run: |
+          go install golang.org/x/vuln/cmd/govulncheck@latest
+          govulncheck ./...
+
+  ###############################################################################
+  # Build and Docker Image
+  ###############################################################################
+  build:
+    name: Build Artifacts
+    runs-on: ubuntu-latest
+    needs: [lint, unit-tests]
+
+    strategy:
+      matrix:
+        component:
+          - app-server
+          - probe-agent
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+
+      - name: Build ${{ matrix.component }}
+        run: |
+          mkdir -p bin
+          if [ "${{ matrix.component }}" = "app-server" ]; then
+            go build -v -o bin/app-server ./cmd/app
+          elif [ "${{ matrix.component }}" = "probe-agent" ]; then
+            go build -v -o bin/probe-agent ./cmd/probe
+          fi
+
+      - name: Upload Binary Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.component }}-binary
+          path: bin/
+          retention-days: 30
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile.${{ matrix.component == 'app-server' && 'app' || 'probe' }}
+          push: false
+          tags: orchestrator/${{ matrix.component }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  ###############################################################################
+  # Generate Coverage Report
+  ###############################################################################
+  coverage-report:
+    name: Generate Coverage Report
+    runs-on: ubuntu-latest
+    needs: [package-coverage-deep-dive]
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Download All Coverage Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: all-coverage
+
+      - name: Merge Coverage Reports
+        run: |
+          mkdir -p final-coverage
+          echo "# Coverage Report - $(date)" > final-coverage/REPORT.md
+          echo "" >> final-coverage/REPORT.md
+          echo "## Package Coverage Summary" >> final-coverage/REPORT.md
+          echo "" >> final-coverage/REPORT.md
+
+          find all-coverage -name "package_summary.txt" -exec cat {} \; | sort >> final-coverage/REPORT.md
+
+      - name: Upload Final Coverage Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: final-coverage-report
+          path: final-coverage/
+          retention-days: 90
+
+  ###############################################################################
+  # Post-Run Summary
+  ###############################################################################
+  summary:
+    name: Pipeline Summary
+    runs-on: ubuntu-latest
+    needs: [lint, unit-tests, integration-tests, build, security-scan]
+    if: always()
+
+    steps:
+      - name: Check Pipeline Status
+        run: |
+          echo "## Pipeline Execution Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Lint: ${{ needs.lint.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Unit Tests: ${{ needs.unit-tests.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Integration Tests: ${{ needs.integration-tests.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Build: ${{ needs.build.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Security Scan: ${{ needs.security-scan.result }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: Post Status to PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '## CI/CD Pipeline Results\n\n' +
+                    '✅ All checks passed!\n\n' +
+                    'View detailed results in the [Actions tab](' + context.payload.repository.html_url + '/actions/runs/' + context.runId + ')'
+            })

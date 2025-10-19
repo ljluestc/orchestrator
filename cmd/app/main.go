@@ -26,6 +26,15 @@ func main() {
 
 	// Setup logging
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
+
+	// Run the server
+	if err := run(); err != nil {
+		log.Fatalf("Server error: %v", err)
+	}
+}
+
+// run starts the server and handles graceful shutdown
+func run() error {
 	log.Println("Starting App Backend Server...")
 
 	// Create server configuration
@@ -37,6 +46,11 @@ func main() {
 		StaleNodeThreshold: *staleNodeThreshold,
 	}
 
+	return runWithConfig(config)
+}
+
+// runWithConfig runs the server with the given configuration
+func runWithConfig(config app.ServerConfig) error {
 	// Create server
 	server := app.NewServer(config)
 
@@ -48,17 +62,24 @@ func main() {
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
-	// Start server
-	if err := server.Start(ctx); err != nil {
-		log.Fatalf("Failed to start server: %v", err)
-	}
+	// Start server in a goroutine
+	errChan := make(chan error, 1)
+	go func() {
+		if err := server.Start(ctx); err != nil {
+			errChan <- err
+		}
+	}()
 
-	// Print configuration
+	// Print configuration after server starts
 	printConfig(config)
 
-	// Wait for termination signal
-	sig := <-sigChan
-	log.Printf("Received signal: %v", sig)
+	// Wait for termination signal or error
+	select {
+	case err := <-errChan:
+		return fmt.Errorf("failed to start server: %w", err)
+	case sig := <-sigChan:
+		log.Printf("Received signal: %v", sig)
+	}
 
 	// Cancel context to stop background tasks
 	cancel()
@@ -66,10 +87,11 @@ func main() {
 	// Stop server gracefully
 	log.Println("Stopping app server...")
 	if err := server.Stop(); err != nil {
-		log.Printf("Error stopping server: %v", err)
+		return fmt.Errorf("error stopping server: %w", err)
 	}
 
 	log.Println("App server stopped successfully")
+	return nil
 }
 
 func printConfig(config app.ServerConfig) {

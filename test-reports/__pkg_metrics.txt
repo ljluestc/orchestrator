@@ -1,0 +1,55 @@
+=== RUN   TestRecordHTTPRequest
+=== RUN   TestRecordHTTPRequest/GET_request
+=== RUN   TestRecordHTTPRequest/POST_request
+=== RUN   TestRecordHTTPRequest/Error_request
+--- PASS: TestRecordHTTPRequest (0.00s)
+    --- PASS: TestRecordHTTPRequest/GET_request (0.00s)
+    --- PASS: TestRecordHTTPRequest/POST_request (0.00s)
+    --- PASS: TestRecordHTTPRequest/Error_request (0.00s)
+=== RUN   TestUpdateMesosMetrics
+=== RUN   TestUpdateMesosMetrics/Normal_metrics
+=== RUN   TestUpdateMesosMetrics/Zero_metrics
+=== RUN   TestUpdateMesosMetrics/High_utilization
+--- PASS: TestUpdateMesosMetrics (0.00s)
+    --- PASS: TestUpdateMesosMetrics/Normal_metrics (0.00s)
+    --- PASS: TestUpdateMesosMetrics/Zero_metrics (0.00s)
+    --- PASS: TestUpdateMesosMetrics/High_utilization (0.00s)
+=== RUN   TestUpdateMarathonMetrics
+=== RUN   TestUpdateMarathonMetrics/Normal_deployment
+=== RUN   TestUpdateMarathonMetrics/No_deployments
+=== RUN   TestUpdateMarathonMetrics/Many_deployments
+--- PASS: TestUpdateMarathonMetrics (0.00s)
+    --- PASS: TestUpdateMarathonMetrics/Normal_deployment (0.00s)
+    --- PASS: TestUpdateMarathonMetrics/No_deployments (0.00s)
+    --- PASS: TestUpdateMarathonMetrics/Many_deployments (0.00s)
+=== RUN   TestUpdateZookeeperMetrics
+=== RUN   TestUpdateZookeeperMetrics/Connected_cluster
+=== RUN   TestUpdateZookeeperMetrics/Disconnected_cluster
+=== RUN   TestUpdateZookeeperMetrics/High_sync_lag
+--- PASS: TestUpdateZookeeperMetrics (0.00s)
+    --- PASS: TestUpdateZookeeperMetrics/Connected_cluster (0.00s)
+    --- PASS: TestUpdateZookeeperMetrics/Disconnected_cluster (0.00s)
+    --- PASS: TestUpdateZookeeperMetrics/High_sync_lag (0.00s)
+=== RUN   TestUpdateProbeMetrics
+=== RUN   TestUpdateProbeMetrics/Small_deployment
+=== RUN   TestUpdateProbeMetrics/Large_deployment
+=== RUN   TestUpdateProbeMetrics/No_containers
+--- PASS: TestUpdateProbeMetrics (0.00s)
+    --- PASS: TestUpdateProbeMetrics/Small_deployment (0.00s)
+    --- PASS: TestUpdateProbeMetrics/Large_deployment (0.00s)
+    --- PASS: TestUpdateProbeMetrics/No_containers (0.00s)
+=== RUN   TestMetricsRegistration
+--- PASS: TestMetricsRegistration (0.00s)
+=== RUN   TestMetricsConcurrency
+--- PASS: TestMetricsConcurrency (0.03s)
+=== RUN   TestMetricsEdgeCases
+=== RUN   TestMetricsEdgeCases/Negative_values
+=== RUN   TestMetricsEdgeCases/Very_large_values
+=== RUN   TestMetricsEdgeCases/Zero_duration
+--- PASS: TestMetricsEdgeCases (0.00s)
+    --- PASS: TestMetricsEdgeCases/Negative_values (0.00s)
+    --- PASS: TestMetricsEdgeCases/Very_large_values (0.00s)
+    --- PASS: TestMetricsEdgeCases/Zero_duration (0.00s)
+PASS
+coverage: 100.0% of statements
+ok  	github.com/ljluestc/orchestrator/pkg/metrics	0.034s	coverage: 100.0% of statements

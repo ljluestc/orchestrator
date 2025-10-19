@@ -1,0 +1,81 @@
+=== RUN   TestNewStorage
+--- PASS: TestNewStorage (0.00s)
+=== RUN   TestStorage_Store
+--- PASS: TestStorage_Store (0.00s)
+=== RUN   TestStorage_Get
+--- PASS: TestStorage_Get (0.00s)
+=== RUN   TestStorage_Delete
+--- PASS: TestStorage_Delete (0.00s)
+=== RUN   TestStorage_List
+--- PASS: TestStorage_List (0.00s)
+=== RUN   TestStorage_Exists
+--- PASS: TestStorage_Exists (0.00s)
+=== RUN   TestStorage_Clear
+--- PASS: TestStorage_Clear (0.00s)
+=== RUN   TestStorage_Size
+--- PASS: TestStorage_Size (0.00s)
+=== RUN   TestStorage_Close
+--- PASS: TestStorage_Close (0.00s)
+=== RUN   TestStorage_ContextHandling
+--- PASS: TestStorage_ContextHandling (0.00s)
+=== RUN   TestStorage_ConcurrentAccess
+--- PASS: TestStorage_ConcurrentAccess (0.00s)
+=== RUN   TestStorage_ErrorHandling
+--- PASS: TestStorage_ErrorHandling (0.00s)
+=== RUN   TestStorage_Performance
+--- PASS: TestStorage_Performance (0.00s)
+=== RUN   TestStorage_StoreWithContext
+--- PASS: TestStorage_StoreWithContext (0.00s)
+=== RUN   TestStorage_GetWithContext
+--- PASS: TestStorage_GetWithContext (0.00s)
+=== RUN   TestTimeSeriesData_AddPoint
+--- PASS: TestTimeSeriesData_AddPoint (0.00s)
+=== RUN   TestTimeSeriesData_GetRecentPoints
+--- PASS: TestTimeSeriesData_GetRecentPoints (0.00s)
+=== RUN   TestTimeSeriesData_GetLatestReport
+--- PASS: TestTimeSeriesData_GetLatestReport (0.00s)
+=== RUN   TestTimeSeriesStore_GetTimeSeriesData
+--- PASS: TestTimeSeriesStore_GetTimeSeriesData (0.00s)
+=== RUN   TestStorage_EdgeCases
+--- PASS: TestStorage_EdgeCases (0.00s)
+=== RUN   TestStorage_ConcurrentModifications
+--- PASS: TestStorage_ConcurrentModifications (0.00s)
+=== RUN   TestStorage_AfterClose
+--- PASS: TestStorage_AfterClose (0.00s)
+=== RUN   TestTimeSeriesStore_EdgeCases
+--- PASS: TestTimeSeriesStore_EdgeCases (0.00s)
+=== RUN   TestTimeSeriesData_EdgeCases
+--- PASS: TestTimeSeriesData_EdgeCases (0.00s)
+=== RUN   TestTimeSeriesStore_Cleanup
+    timeseries_edge_cases_test.go:39: Agents after cleanup: [agent-1 agent-2]
+--- PASS: TestTimeSeriesStore_Cleanup (1.00s)
+=== RUN   TestTimeSeriesStore_CleanupWithMixedData
+--- PASS: TestTimeSeriesStore_CleanupWithMixedData (3.00s)
+=== RUN   TestTimeSeriesStore_CleanupEmptyAgent
+    timeseries_edge_cases_test.go:104: Agents after cleanup: [temp-agent]
+--- PASS: TestTimeSeriesStore_CleanupEmptyAgent (0.20s)
+=== RUN   TestTimeSeriesStore_GetStats
+--- PASS: TestTimeSeriesStore_GetStats (0.00s)
+=== RUN   TestTimeSeriesStore_GetStatsWithMultipleAgents
+--- PASS: TestTimeSeriesStore_GetStatsWithMultipleAgents (0.00s)
+=== RUN   TestNewTimeSeriesStore_ZeroMaxAge
+--- PASS: TestNewTimeSeriesStore_ZeroMaxAge (0.00s)
+=== RUN   TestTimeSeriesStore_GetRecentPoints_NonExistentAgent
+--- PASS: TestTimeSeriesStore_GetRecentPoints_NonExistentAgent (0.00s)
+=== RUN   TestTimeSeriesStore_GetLatestReport_NonExistentAgent
+--- PASS: TestTimeSeriesStore_GetLatestReport_NonExistentAgent (0.00s)
+=== RUN   TestTimeSeriesData_GetLatestReport_EmptyData
+--- PASS: TestTimeSeriesData_GetLatestReport_EmptyData (0.00s)
+=== RUN   TestTimeSeriesStore_GetAllAgents_Empty
+--- PASS: TestTimeSeriesStore_GetAllAgents_Empty (0.00s)
+=== RUN   TestTimeSeriesStore_CleanupLoop
+--- PASS: TestTimeSeriesStore_CleanupLoop (0.00s)
+=== RUN   TestTimeSeriesStore_ConcurrentCleanup
+--- PASS: TestTimeSeriesStore_ConcurrentCleanup (0.00s)
+=== RUN   TestTimeSeriesData_GetRecentPoints_AllOld
+--- PASS: TestTimeSeriesData_GetRecentPoints_AllOld (0.00s)
+=== RUN   TestTimeSeriesStore_StopWithoutData
+--- PASS: TestTimeSeriesStore_StopWithoutData (0.00s)
+PASS
+coverage: 96.1% of statements
+ok  	github.com/ljluestc/orchestrator/internal/storage	4.286s	coverage: 96.1% of statements

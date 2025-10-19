@@ -1,0 +1,219 @@
+=== RUN   TestPrintConfig_AllModulesEnabled
+--- PASS: TestPrintConfig_AllModulesEnabled (0.00s)
+=== RUN   TestPrintConfig_DockerDisabled
+--- PASS: TestPrintConfig_DockerDisabled (0.00s)
+=== RUN   TestPrintConfig_MinimalConfiguration
+--- PASS: TestPrintConfig_MinimalConfiguration (0.00s)
+=== RUN   TestPrintConfig_NetworkModuleDetails
+--- PASS: TestPrintConfig_NetworkModuleDetails (0.00s)
+=== RUN   TestPrintConfig_ProcessModuleDetails
+--- PASS: TestPrintConfig_ProcessModuleDetails (0.00s)
+=== RUN   TestPrintConfig
+
+=== Probe Agent Configuration ===
+Server URL:           http://localhost:8080
+Agent ID:             test-agent
+Collection Interval:  30s
+Heartbeat Interval:   1m0s
+
+=== Collection Modules ===
+Host Information:     true
+Docker Information:   true
+  - Container Stats:  false
+Process Information:  true
+  - Max Processes:    100
+  - Include All:      true
+Network Information:  true
+  - Max Connections:  100
+  - Include Localhost:true
+  - Resolve Processes:true
+
+=== Retry Configuration ===
+Retry Attempts:       3
+Retry Delay:          5s
+================================
+--- PASS: TestPrintConfig (0.00s)
+=== RUN   TestMainFunction
+--- PASS: TestMainFunction (0.00s)
+=== RUN   TestMainFunctionWithAllFlags
+--- PASS: TestMainFunctionWithAllFlags (0.00s)
+=== RUN   TestPrintConfigWithDockerStats
+
+=== Probe Agent Configuration ===
+Server URL:           http://localhost:8080
+Agent ID:             test-agent
+Collection Interval:  30s
+Heartbeat Interval:   1m0s
+
+=== Collection Modules ===
+Host Information:     true
+Docker Information:   true
+  - Container Stats:  true
+Process Information:  true
+  - Max Processes:    100
+  - Include All:      true
+Network Information:  true
+  - Max Connections:  100
+  - Include Localhost:true
+  - Resolve Processes:true
+
+=== Retry Configuration ===
+Retry Attempts:       3
+Retry Delay:          5s
+================================
+--- PASS: TestPrintConfigWithDockerStats (0.00s)
+=== RUN   TestPrintConfigWithoutDocker
+
+=== Probe Agent Configuration ===
+Server URL:           http://localhost:8080
+Agent ID:             test-agent
+Collection Interval:  30s
+Heartbeat Interval:   1m0s
+
+=== Collection Modules ===
+Host Information:     true
+Docker Information:   false
+Process Information:  false
+Network Information:  false
+
+=== Retry Configuration ===
+Retry Attempts:       3
+Retry Delay:          5s
+================================
+--- PASS: TestPrintConfigWithoutDocker (0.00s)
+=== RUN   TestPrintConfigWithoutProcesses
+
+=== Probe Agent Configuration ===
+Server URL:           http://localhost:8080
+Agent ID:             test-agent
+Collection Interval:  30s
+Heartbeat Interval:   1m0s
+
+=== Collection Modules ===
+Host Information:     true
+Docker Information:   true
+  - Container Stats:  false
+Process Information:  false
+Network Information:  true
+  - Max Connections:  100
+  - Include Localhost:true
+  - Resolve Processes:false
+
+=== Retry Configuration ===
+Retry Attempts:       3
+Retry Delay:          5s
+================================
+--- PASS: TestPrintConfigWithoutProcesses (0.00s)
+=== RUN   TestPrintConfigWithoutNetwork
+
+=== Probe Agent Configuration ===
+Server URL:           http://localhost:8080
+Agent ID:             test-agent
+Collection Interval:  30s
+Heartbeat Interval:   1m0s
+
+=== Collection Modules ===
+Host Information:     true
+Docker Information:   true
+  - Container Stats:  false
+Process Information:  true
+  - Max Processes:    100
+  - Include All:      false
+Network Information:  false
+
+=== Retry Configuration ===
+Retry Attempts:       3
+Retry Delay:          5s
+================================
+--- PASS: TestPrintConfigWithoutNetwork (0.00s)
+=== RUN   TestMainFunctionLogic
+=== RUN   TestMainFunctionLogic/minimal_args
+=== RUN   TestMainFunctionLogic/all_flags
+--- PASS: TestMainFunctionLogic (0.00s)
+    --- PASS: TestMainFunctionLogic/minimal_args (0.00s)
+    --- PASS: TestMainFunctionLogic/all_flags (0.00s)
+=== RUN   TestMainFunctionErrorHandling
+2025/10/17 23:14:47 Starting probe agent (ID: test-agent, Hostname: DESKTOP-FO42SG8)
+2025/10/17 23:14:47 Warning: Failed to register agent: registration failed with status 503: {"error": "No healthy servers available"}
+2025/10/17 23:14:47 Probe agent started
+2025/10/17 23:14:47 Stopping probe agent...
+2025/10/17 23:14:47 Probe agent stopped
+--- PASS: TestMainFunctionErrorHandling (0.00s)
+=== RUN   TestMainFunctionSignalHandling
+--- PASS: TestMainFunctionSignalHandling (0.00s)
+=== RUN   TestMainFunctionLogging
+2025/10/17 23:14:47 main_test.go:477: Test log message
+--- PASS: TestMainFunctionLogging (0.00s)
+=== RUN   TestMainFunctionProbeManagement
+2025/10/17 23:14:47 probe.go:148: Starting probe agent (ID: test-agent, Hostname: DESKTOP-FO42SG8)
+2025/10/17 23:14:47 probe.go:160: Warning: Failed to register agent: registration failed with status 503: {"error": "No healthy servers available"}
+2025/10/17 23:14:47 probe.go:173: Probe agent started
+2025/10/17 23:14:47 probe.go:188: Stopping probe agent...
+2025/10/17 23:14:47 probe.go:214: Probe agent stopped
+--- PASS: TestMainFunctionProbeManagement (0.00s)
+=== RUN   TestMainFunctionWithDifferentConfigs
+=== RUN   TestMainFunctionWithDifferentConfigs/minimal_config
+2025/10/17 23:14:47 probe.go:148: Starting probe agent (ID: DESKTOP-FO42SG8-1760768087, Hostname: DESKTOP-FO42SG8)
+2025/10/17 23:14:47 probe.go:160: Warning: Failed to register agent: registration failed with status 503: {"error": "No healthy servers available"}
+2025/10/17 23:14:47 probe.go:173: Probe agent started
+2025/10/17 23:14:47 probe.go:188: Stopping probe agent...
+2025/10/17 23:14:47 probe.go:214: Probe agent stopped
+=== RUN   TestMainFunctionWithDifferentConfigs/full_config
+2025/10/17 23:14:47 probe.go:148: Starting probe agent (ID: test-agent, Hostname: DESKTOP-FO42SG8)
+2025/10/17 23:14:47 probe.go:160: Warning: Failed to register agent: registration failed with status 503: {"error": "No healthy servers available"}
+2025/10/17 23:14:47 probe.go:173: Probe agent started
+2025/10/17 23:14:47 probe.go:188: Stopping probe agent...
+2025/10/17 23:14:47 probe.go:214: Probe agent stopped
+=== RUN   TestMainFunctionWithDifferentConfigs/disabled_collectors
+2025/10/17 23:14:47 probe.go:148: Starting probe agent (ID: DESKTOP-FO42SG8-1760768087, Hostname: DESKTOP-FO42SG8)
+2025/10/17 23:14:47 probe.go:160: Warning: Failed to register agent: registration failed with status 503: {"error": "No healthy servers available"}
+2025/10/17 23:14:47 probe.go:173: Probe agent started
+2025/10/17 23:14:47 probe.go:188: Stopping probe agent...
+2025/10/17 23:14:47 probe.go:214: Probe agent stopped
+--- PASS: TestMainFunctionWithDifferentConfigs (0.01s)
+    --- PASS: TestMainFunctionWithDifferentConfigs/minimal_config (0.00s)
+    --- PASS: TestMainFunctionWithDifferentConfigs/full_config (0.00s)
+    --- PASS: TestMainFunctionWithDifferentConfigs/disabled_collectors (0.00s)
+=== RUN   TestMainFunctionErrorScenarios
+--- PASS: TestMainFunctionErrorScenarios (0.00s)
+=== RUN   TestMainFunctionContextScenarios
+2025/10/17 23:14:47 probe.go:148: Starting probe agent (ID: DESKTOP-FO42SG8-1760768087, Hostname: DESKTOP-FO42SG8)
+2025/10/17 23:14:47 probe.go:160: Warning: Failed to register agent: failed to register agent: Post "http://localhost:8080/api/v1/agents/register": context canceled
+2025/10/17 23:14:47 probe.go:173: Probe agent started
+2025/10/17 23:14:47 probe.go:148: Starting probe agent (ID: DESKTOP-FO42SG8-1760768087, Hostname: DESKTOP-FO42SG8)
+2025/10/17 23:14:47 probe.go:160: Warning: Failed to register agent: registration failed with status 503: {"error": "No healthy servers available"}
+2025/10/17 23:14:47 probe.go:173: Probe agent started
+--- PASS: TestMainFunctionContextScenarios (0.00s)
+=== RUN   TestMainFunctionExecution
+2025/10/17 23:14:47 probe.go:148: Starting probe agent (ID: test-agent, Hostname: DESKTOP-FO42SG8)
+2025/10/17 23:14:47 probe.go:160: Warning: Failed to register agent: registration failed with status 503: {"error": "No healthy servers available"}
+2025/10/17 23:14:47 probe.go:173: Probe agent started
+2025/10/17 23:14:47 probe.go:188: Stopping probe agent...
+2025/10/17 23:14:47 probe.go:214: Probe agent stopped
+--- PASS: TestMainFunctionExecution (0.00s)
+=== RUN   TestMainFunctionWithInvalidFlags
+2025/10/17 23:14:47 probe.go:148: Starting probe agent (ID: test-agent, Hostname: DESKTOP-FO42SG8)
+2025/10/17 23:14:47 probe.go:160: Warning: Failed to register agent: failed to register agent: Post "invalid-url/api/v1/agents/register": unsupported protocol scheme ""
+2025/10/17 23:14:47 probe.go:173: Probe agent started
+2025/10/17 23:14:47 probe.go:188: Stopping probe agent...
+2025/10/17 23:14:47 probe.go:214: Probe agent stopped
+--- PASS: TestMainFunctionWithInvalidFlags (0.00s)
+=== RUN   TestMainFunctionWithMinimalFlags
+2025/10/17 23:14:47 probe.go:148: Starting probe agent (ID: test-agent, Hostname: DESKTOP-FO42SG8)
+2025/10/17 23:14:47 probe.go:307: Failed to collect Docker info: failed to get Docker version: Get "http://%2Fvar%2Frun%2Fdocker.sock/v1.24/version": context canceled
+2025/10/17 23:14:47 probe.go:160: Warning: Failed to register agent: registration failed with status 503: {"error": "No healthy servers available"}
+2025/10/17 23:14:47 probe.go:173: Probe agent started
+2025/10/17 23:14:47 probe.go:188: Stopping probe agent...
+2025/10/17 23:14:47 probe.go:214: Probe agent stopped
+--- PASS: TestMainFunctionWithMinimalFlags (0.00s)
+=== RUN   TestMainFunctionWithAllFlagsComprehensive
+2025/10/17 23:14:47 probe.go:148: Starting probe agent (ID: test-agent, Hostname: DESKTOP-FO42SG8)
+2025/10/17 23:14:47 probe.go:160: Warning: Failed to register agent: registration failed with status 503: {"error": "No healthy servers available"}
+2025/10/17 23:14:47 probe.go:173: Probe agent started
+2025/10/17 23:14:47 probe.go:188: Stopping probe agent...
+2025/10/17 23:14:47 probe.go:214: Probe agent stopped
+--- PASS: TestMainFunctionWithAllFlagsComprehensive (0.00s)
+PASS
+2025/10/17 23:14:47 probe.go:307: Failed to collect Docker info: failed to get Docker version: Get "http://%2Fvar%2Frun%2Fdocker.sock/v1.24/version": context canceled
+coverage: 52.3% of statements
+ok  	github.com/ljluestc/orchestrator/cmd/probe-agent	0.022s	coverage: 52.3% of statements

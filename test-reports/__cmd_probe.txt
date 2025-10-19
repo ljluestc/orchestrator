@@ -1,0 +1,69 @@
+=== RUN   TestMainFunctionFlags
+--- PASS: TestMainFunctionFlags (0.00s)
+=== RUN   TestMainFunctionFlagParsing
+--- PASS: TestMainFunctionFlagParsing (0.00s)
+=== RUN   TestMainFunctionEnvironmentVariables
+--- PASS: TestMainFunctionEnvironmentVariables (0.00s)
+=== RUN   TestMainFunctionMissingProbeID
+--- PASS: TestMainFunctionMissingProbeID (0.00s)
+=== RUN   TestSignalHandling
+--- PASS: TestSignalHandling (0.10s)
+=== RUN   TestMetricsServerEndpoints
+--- PASS: TestMetricsServerEndpoints (0.10s)
+=== RUN   TestProbeConfiguration
+--- PASS: TestProbeConfiguration (0.00s)
+=== RUN   TestMainExecutableBuild
+--- PASS: TestMainExecutableBuild (0.58s)
+=== RUN   TestMainFunctionValidation
+=== RUN   TestMainFunctionValidation/Valid_probe_ID_from_flag
+=== RUN   TestMainFunctionValidation/Valid_probe_ID_from_env
+=== RUN   TestMainFunctionValidation/Missing_probe_ID
+--- PASS: TestMainFunctionValidation (0.00s)
+    --- PASS: TestMainFunctionValidation/Valid_probe_ID_from_flag (0.00s)
+    --- PASS: TestMainFunctionValidation/Valid_probe_ID_from_env (0.00s)
+    --- PASS: TestMainFunctionValidation/Missing_probe_ID (0.00s)
+=== RUN   TestContextCancellation
+--- PASS: TestContextCancellation (0.00s)
+=== RUN   TestMetricsPortConfiguration
+=== RUN   TestMetricsPortConfiguration/Default_port
+=== RUN   TestMetricsPortConfiguration/Custom_port
+=== RUN   TestMetricsPortConfiguration/Low_port
+=== RUN   TestMetricsPortConfiguration/High_port
+--- PASS: TestMetricsPortConfiguration (0.00s)
+    --- PASS: TestMetricsPortConfiguration/Default_port (0.00s)
+    --- PASS: TestMetricsPortConfiguration/Custom_port (0.00s)
+    --- PASS: TestMetricsPortConfiguration/Low_port (0.00s)
+    --- PASS: TestMetricsPortConfiguration/High_port (0.00s)
+=== RUN   TestCollectionIntervalConfiguration
+=== RUN   TestCollectionIntervalConfiguration/Default_15_seconds
+=== RUN   TestCollectionIntervalConfiguration/Custom_30_seconds
+=== RUN   TestCollectionIntervalConfiguration/Fast_5_seconds
+=== RUN   TestCollectionIntervalConfiguration/Slow_60_seconds
+--- PASS: TestCollectionIntervalConfiguration (0.00s)
+    --- PASS: TestCollectionIntervalConfiguration/Default_15_seconds (0.00s)
+    --- PASS: TestCollectionIntervalConfiguration/Custom_30_seconds (0.00s)
+    --- PASS: TestCollectionIntervalConfiguration/Fast_5_seconds (0.00s)
+    --- PASS: TestCollectionIntervalConfiguration/Slow_60_seconds (0.00s)
+=== RUN   TestProbeIDSources
+=== RUN   TestProbeIDSources/Flag_takes_precedence
+=== RUN   TestProbeIDSources/Fall_back_to_env
+=== RUN   TestProbeIDSources/Error_when_both_empty
+--- PASS: TestProbeIDSources (0.00s)
+    --- PASS: TestProbeIDSources/Flag_takes_precedence (0.00s)
+    --- PASS: TestProbeIDSources/Fall_back_to_env (0.00s)
+    --- PASS: TestProbeIDSources/Error_when_both_empty (0.00s)
+=== RUN   TestHTTPServerConfiguration
+--- PASS: TestHTTPServerConfiguration (0.00s)
+=== RUN   TestFlagValidation
+--- PASS: TestFlagValidation (0.00s)
+=== RUN   TestMainFunctionComponentsIntegration
+--- PASS: TestMainFunctionComponentsIntegration (0.05s)
+=== RUN   TestDefaultConfiguration
+--- PASS: TestDefaultConfiguration (0.00s)
+=== RUN   TestErrorHandlingPaths
+--- PASS: TestErrorHandlingPaths (0.00s)
+=== RUN   TestMainFunctionCoverage
+--- PASS: TestMainFunctionCoverage (0.00s)
+PASS
+coverage: 0.0% of statements
+ok  	github.com/ljluestc/orchestrator/cmd/probe	0.838s	coverage: 0.0% of statements

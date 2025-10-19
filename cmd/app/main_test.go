@@ -1,274 +1,195 @@
 package main
 
 import (
-	"context"
-	"flag"
+	"bytes"
+	"io"
 	"os"
+	"strings"
 	"testing"
 	"time"
+
+	"github.com/ljluestc/orchestrator/pkg/app"
+	"github.com/stretchr/testify/assert"
 )
 
-func TestMainFunction(t *testing.T) {
-	// Test that main function can be called without panicking
-	// We'll test this by running the main function in a goroutine
-	// and checking that it doesn't panic immediately
+func TestPrintConfig(t *testing.T) {
+	// Capture stdout
+	old := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
 
-	done := make(chan bool)
-	go func() {
-		defer func() {
-			if r := recover(); r != nil {
-				t.Errorf("main() panicked: %v", r)
-			}
-			done <- true
-		}()
+	config := app.ServerConfig{
+		Host:               "127.0.0.1",
+		Port:               9090,
+		MaxDataAge:         2 * time.Hour,
+		CleanupInterval:    10 * time.Minute,
+		StaleNodeThreshold: 15 * time.Minute,
+	}
 
-		// We can't call main() directly, but we can test the server creation
-		// which is the main logic
-		// This is a basic test to ensure the main function exists and can be called
-		_ = "main function exists"
-	}()
+	printConfig(config)
 
-	// Wait for completion or timeout
-	select {
-	case <-done:
-		// Test completed successfully
-	case <-time.After(1 * time.Second):
-		// Timeout - this is expected since main() would run indefinitely
-		t.Log("Main function test timed out (expected)")
+	// Restore stdout
+	w.Close()
+	os.Stdout = old
+
+	var buf bytes.Buffer
+	io.Copy(&buf, r)
+	output := buf.String()
+
+	// Verify output contains key information
+	assert.Contains(t, output, "App Backend Server Configuration")
+	assert.Contains(t, output, "Host:                  127.0.0.1")
+	assert.Contains(t, output, "Port:                  9090")
+	assert.Contains(t, output, "Max Data Age:          2h0m0s")
+	assert.Contains(t, output, "Cleanup Interval:      10m0s")
+	assert.Contains(t, output, "Stale Node Threshold:  15m0s")
+	assert.Contains(t, output, "REST API:")
+	assert.Contains(t, output, "WebSocket:")
+	assert.Contains(t, output, "Health Check:")
+	assert.Contains(t, output, "/api/v1/agents/register")
+	assert.Contains(t, output, "/api/v1/query/topology")
+}
+
+func TestPrintConfigDefaultValues(t *testing.T) {
+	// Capture stdout
+	old := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+
+	config := app.ServerConfig{
+		Host:               "0.0.0.0",
+		Port:               8080,
+		MaxDataAge:         1 * time.Hour,
+		CleanupInterval:    5 * time.Minute,
+		StaleNodeThreshold: 5 * time.Minute,
+	}
+
+	printConfig(config)
+
+	// Restore stdout
+	w.Close()
+	os.Stdout = old
+
+	var buf bytes.Buffer
+	io.Copy(&buf, r)
+	output := buf.String()
+
+	// Verify default values are printed correctly
+	assert.Contains(t, output, "0.0.0.0")
+	assert.Contains(t, output, "8080")
+	assert.Contains(t, output, "1h0m0s")
+	assert.Contains(t, output, "5m0s")
+}
+
+func TestPrintConfigEndpoints(t *testing.T) {
+	// Capture stdout
+	old := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+
+	config := app.ServerConfig{
+		Host:               "localhost",
+		Port:               3000,
+		MaxDataAge:         30 * time.Minute,
+		CleanupInterval:    2 * time.Minute,
+		StaleNodeThreshold: 3 * time.Minute,
+	}
+
+	printConfig(config)
+
+	// Restore stdout
+	w.Close()
+	os.Stdout = old
+
+	var buf bytes.Buffer
+	io.Copy(&buf, r)
+	output := buf.String()
+
+	// Verify all endpoints are listed
+	endpoints := []string{
+		"/api/v1/agents/register",
+		"/api/v1/agents/heartbeat/:agent_id",
+		"/api/v1/agents/config/:agent_id",
+		"/api/v1/agents/list",
+		"/api/v1/reports",
+		"/api/v1/query/topology",
+		"/api/v1/query/agents/:agent_id/latest",
+		"/api/v1/query/agents/:agent_id/timeseries",
+		"/api/v1/query/stats",
+		"/api/v1/ws",
+	}
+
+	for _, endpoint := range endpoints {
+		assert.Contains(t, output, endpoint, "Output should contain endpoint: %s", endpoint)
 	}
 }
 
-func TestMainFunctionWithFlags(t *testing.T) {
-	// Test main function with various flag combinations
-	originalArgs := os.Args
-	defer func() {
-		os.Args = originalArgs
-		flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
-	}()
+func TestPrintConfigURLFormats(t *testing.T) {
+	// Capture stdout
+	old := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
 
-	// Test with custom flags
-	os.Args = []string{"app", "-port=9090", "-host=127.0.0.1"}
-
-	done := make(chan bool)
-	go func() {
-		defer func() {
-			if r := recover(); r != nil {
-				t.Errorf("main() panicked with flags: %v", r)
-			}
-			done <- true
-		}()
-
-		// Test flag parsing
-		flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
-		_ = "flag parsing works"
-	}()
-
-	select {
-	case <-done:
-		// Test completed successfully
-	case <-time.After(1 * time.Second):
-		t.Log("Main function with flags test timed out (expected)")
+	config := app.ServerConfig{
+		Host:               "192.168.1.100",
+		Port:               5000,
+		MaxDataAge:         45 * time.Minute,
+		CleanupInterval:    3 * time.Minute,
+		StaleNodeThreshold: 7 * time.Minute,
 	}
+
+	printConfig(config)
+
+	// Restore stdout
+	w.Close()
+	os.Stdout = old
+
+	var buf bytes.Buffer
+	io.Copy(&buf, r)
+	output := buf.String()
+
+	// Verify URLs are formatted correctly
+	assert.Contains(t, output, "http://192.168.1.100:5000/api/v1")
+	assert.Contains(t, output, "ws://192.168.1.100:5000/api/v1/ws")
+	assert.Contains(t, output, "http://192.168.1.100:5000/health")
 }
 
-func TestMainFunctionErrorHandling(t *testing.T) {
-	// Test main function error handling
-	originalArgs := os.Args
-	defer func() {
-		os.Args = originalArgs
-		flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
-	}()
+func TestPrintConfigStructure(t *testing.T) {
+	// Capture stdout
+	old := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
 
-	// Test with invalid flags
-	os.Args = []string{"app", "-invalid-flag=value"}
-
-	done := make(chan bool)
-	go func() {
-		defer func() {
-			if r := recover(); r != nil {
-				t.Errorf("main() panicked with invalid flags: %v", r)
-			}
-			done <- true
-		}()
-
-		// Test invalid flag handling
-		flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
-		_ = "invalid flag handling works"
-	}()
-
-	select {
-	case <-done:
-		// Test completed successfully
-	case <-time.After(1 * time.Second):
-		t.Log("Main function error handling test timed out (expected)")
+	config := app.ServerConfig{
+		Host:               "test-host",
+		Port:               7777,
+		MaxDataAge:         10 * time.Minute,
+		CleanupInterval:    1 * time.Minute,
+		StaleNodeThreshold: 2 * time.Minute,
 	}
-}
 
-func TestMainFunctionContextHandling(t *testing.T) {
-	// Test main function context handling
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	printConfig(config)
 
-	done := make(chan bool)
-	go func() {
-		defer func() {
-			if r := recover(); r != nil {
-				t.Errorf("main() panicked with context: %v", r)
-			}
-			done <- true
-		}()
+	// Restore stdout
+	w.Close()
+	os.Stdout = old
 
-		// Test context handling
-		select {
-		case <-ctx.Done():
-			// Context was cancelled
-		case <-time.After(100 * time.Millisecond):
-			// Timeout
-		}
-	}()
+	var buf bytes.Buffer
+	io.Copy(&buf, r)
+	output := buf.String()
 
-	select {
-	case <-done:
-		// Test completed successfully
-	case <-time.After(1 * time.Second):
-		t.Log("Main function context handling test timed out (expected)")
+	// Verify section headers are present
+	sections := []string{
+		"=== App Backend Server Configuration ===",
+		"=== Endpoints ===",
+		"=== Available Endpoints ===",
 	}
-}
 
-func TestMainFunctionSignalHandling(t *testing.T) {
-	// Test main function signal handling
-	done := make(chan bool)
-	go func() {
-		defer func() {
-			if r := recover(); r != nil {
-				t.Errorf("main() panicked with signals: %v", r)
-			}
-			done <- true
-		}()
-
-		// Test signal handling
-		_ = "signal handling works"
-	}()
-
-	select {
-	case <-done:
-		// Test completed successfully
-	case <-time.After(1 * time.Second):
-		t.Log("Main function signal handling test timed out (expected)")
+	for _, section := range sections {
+		assert.Contains(t, output, section, "Output should contain section: %s", section)
 	}
-}
 
-func TestMainFunctionLogging(t *testing.T) {
-	// Test main function logging
-	done := make(chan bool)
-	go func() {
-		defer func() {
-			if r := recover(); r != nil {
-				t.Errorf("main() panicked with logging: %v", r)
-			}
-			done <- true
-		}()
-
-		// Test logging
-		t.Log("Test log message")
-	}()
-
-	select {
-	case <-done:
-		// Test completed successfully
-	case <-time.After(1 * time.Second):
-		t.Log("Main function logging test timed out (expected)")
-	}
-}
-
-func TestMainFunctionServerStartup(t *testing.T) {
-	// Test main function server startup
-	done := make(chan bool)
-	go func() {
-		defer func() {
-			if r := recover(); r != nil {
-				t.Errorf("main() panicked with server startup: %v", r)
-			}
-			done <- true
-		}()
-
-		// Test server startup logic
-		_ = "server startup works"
-	}()
-
-	select {
-	case <-done:
-		// Test completed successfully
-	case <-time.After(1 * time.Second):
-		t.Log("Main function server startup test timed out (expected)")
-	}
-}
-
-func TestMainFunctionConfiguration(t *testing.T) {
-	// Test main function configuration
-	done := make(chan bool)
-	go func() {
-		defer func() {
-			if r := recover(); r != nil {
-				t.Errorf("main() panicked with configuration: %v", r)
-			}
-			done <- true
-		}()
-
-		// Test configuration loading
-		_ = "configuration loading works"
-	}()
-
-	select {
-	case <-done:
-		// Test completed successfully
-	case <-time.After(1 * time.Second):
-		t.Log("Main function configuration test timed out (expected)")
-	}
-}
-
-func TestMainFunctionGracefulShutdown(t *testing.T) {
-	// Test main function graceful shutdown
-	done := make(chan bool)
-	go func() {
-		defer func() {
-			if r := recover(); r != nil {
-				t.Errorf("main() panicked with graceful shutdown: %v", r)
-			}
-			done <- true
-		}()
-
-		// Test graceful shutdown
-		_ = "graceful shutdown works"
-	}()
-
-	select {
-	case <-done:
-		// Test completed successfully
-	case <-time.After(1 * time.Second):
-		t.Log("Main function graceful shutdown test timed out (expected)")
-	}
-}
-
-func TestMainFunctionExecution(t *testing.T) {
-	// Test main function execution
-	done := make(chan bool)
-	go func() {
-		defer func() {
-			if r := recover(); r != nil {
-				t.Errorf("main() panicked during execution: %v", r)
-			}
-			done <- true
-		}()
-
-		// Test main function execution
-		_ = "main function execution works"
-	}()
-
-	select {
-	case <-done:
-		// Test completed successfully
-	case <-time.After(1 * time.Second):
-		t.Log("Main function execution test timed out (expected)")
-	}
+	// Verify output contains separator lines
+	separatorCount := strings.Count(output, "========")
+	assert.GreaterOrEqual(t, separatorCount, 1, "Output should contain separator lines")
 }

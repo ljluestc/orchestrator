@@ -1,0 +1,261 @@
+=== RUN   TestDetectCgroupsVersion
+=== RUN   TestDetectCgroupsVersion/NewCgroupsManager_uses_detected_version
+2025/10/17 23:15:28 Cgroups manager initialized with version: v2, root: /tmp/TestDetectCgroupsVersionNewCgroupsManager_uses_detected_version153188143/001
+=== RUN   TestDetectCgroupsVersion/NewCgroupsManager_with_v1_structure
+2025/10/17 23:15:28 Cgroups manager initialized with version: v2, root: /tmp/TestDetectCgroupsVersionNewCgroupsManager_with_v1_structure1304205691/001
+--- PASS: TestDetectCgroupsVersion (0.00s)
+    --- PASS: TestDetectCgroupsVersion/NewCgroupsManager_uses_detected_version (0.00s)
+    --- PASS: TestDetectCgroupsVersion/NewCgroupsManager_with_v1_structure (0.00s)
+=== RUN   TestCgroupsManager_CgroupsV1_CreateContainer
+=== RUN   TestCgroupsManager_CgroupsV1_CreateContainer/Create_v1_container_with_CPU_limits
+2025/10/17 23:15:28 Creating cgroups for container v1-container-cpu
+2025/10/17 23:15:28 Cgroups created successfully for container v1-container-cpu
+=== RUN   TestCgroupsManager_CgroupsV1_CreateContainer/Create_v1_container_with_memory_limits
+2025/10/17 23:15:28 Creating cgroups for container v1-container-mem
+2025/10/17 23:15:28 Cgroups created successfully for container v1-container-mem
+=== RUN   TestCgroupsManager_CgroupsV1_CreateContainer/Create_v1_container_with_Block_IO_limits
+2025/10/17 23:15:28 Creating cgroups for container v1-container-blkio
+2025/10/17 23:15:28 Cgroups created successfully for container v1-container-blkio
+=== RUN   TestCgroupsManager_CgroupsV1_CreateContainer/Create_v1_container_with_PIDs_limit
+2025/10/17 23:15:28 Creating cgroups for container v1-container-pids
+2025/10/17 23:15:28 Cgroups created successfully for container v1-container-pids
+=== RUN   TestCgroupsManager_CgroupsV1_CreateContainer/Create_v1_container_with_CPU_affinity
+2025/10/17 23:15:28 Creating cgroups for container v1-container-cpuset
+2025/10/17 23:15:28 Cgroups created successfully for container v1-container-cpuset
+=== RUN   TestCgroupsManager_CgroupsV1_CreateContainer/Create_v1_container_with_all_limits
+2025/10/17 23:15:28 Creating cgroups for container v1-container-all
+2025/10/17 23:15:28 Cgroups created successfully for container v1-container-all
+--- PASS: TestCgroupsManager_CgroupsV1_CreateContainer (0.00s)
+    --- PASS: TestCgroupsManager_CgroupsV1_CreateContainer/Create_v1_container_with_CPU_limits (0.00s)
+    --- PASS: TestCgroupsManager_CgroupsV1_CreateContainer/Create_v1_container_with_memory_limits (0.00s)
+    --- PASS: TestCgroupsManager_CgroupsV1_CreateContainer/Create_v1_container_with_Block_IO_limits (0.00s)
+    --- PASS: TestCgroupsManager_CgroupsV1_CreateContainer/Create_v1_container_with_PIDs_limit (0.00s)
+    --- PASS: TestCgroupsManager_CgroupsV1_CreateContainer/Create_v1_container_with_CPU_affinity (0.00s)
+    --- PASS: TestCgroupsManager_CgroupsV1_CreateContainer/Create_v1_container_with_all_limits (0.00s)
+=== RUN   TestCgroupsManager_CgroupsV1_GetStats
+2025/10/17 23:15:28 Creating cgroups for container test-v1-stats
+2025/10/17 23:15:28 Cgroups created successfully for container test-v1-stats
+--- PASS: TestCgroupsManager_CgroupsV1_GetStats (0.00s)
+=== RUN   TestCgroupsManager_CgroupsV2_GetStats
+2025/10/17 23:15:28 Creating cgroups for container test-v2-stats
+2025/10/17 23:15:28 Cgroups created successfully for container test-v2-stats
+--- PASS: TestCgroupsManager_CgroupsV2_GetStats (0.00s)
+=== RUN   TestCgroupsManager_CgroupsV2_GetStats_UnlimitedMemory
+2025/10/17 23:15:28 Creating cgroups for container test-v2-unlimited
+2025/10/17 23:15:28 Cgroups created successfully for container test-v2-unlimited
+--- PASS: TestCgroupsManager_CgroupsV2_GetStats_UnlimitedMemory (0.00s)
+=== RUN   TestCgroupsManager_AddProcessToCgroup_V1
+2025/10/17 23:15:28 Creating cgroups for container test-v1-process
+2025/10/17 23:15:28 Cgroups created successfully for container test-v1-process
+2025/10/17 23:15:28 Added PID 12345 to cgroups for container test-v1-process
+--- PASS: TestCgroupsManager_AddProcessToCgroup_V1 (0.00s)
+=== RUN   TestCgroupsManager_AddProcessToCgroup_V2
+2025/10/17 23:15:28 Creating cgroups for container test-v2-process
+2025/10/17 23:15:28 Cgroups created successfully for container test-v2-process
+2025/10/17 23:15:28 Added PID 67890 to cgroups for container test-v2-process
+--- PASS: TestCgroupsManager_AddProcessToCgroup_V2 (0.00s)
+=== RUN   TestCgroupsManager_RemoveContainerCgroups_V1
+2025/10/17 23:15:28 Creating cgroups for container test-v1-remove
+2025/10/17 23:15:28 Cgroups created successfully for container test-v1-remove
+2025/10/17 23:15:28 Failed to remove cgroup /tmp/TestCgroupsManager_RemoveContainerCgroups_V12369086322/001/cpu/mesos/containers/test-v1-remove: remove /tmp/TestCgroupsManager_RemoveContainerCgroups_V12369086322/001/cpu/mesos/containers/test-v1-remove: directory not empty
+2025/10/17 23:15:28 Removed cgroups for container test-v1-remove
+--- PASS: TestCgroupsManager_RemoveContainerCgroups_V1 (0.00s)
+=== RUN   TestCgroupsManager_RemoveContainerCgroups_V2
+2025/10/17 23:15:28 Creating cgroups for container test-v2-remove
+2025/10/17 23:15:28 Cgroups created successfully for container test-v2-remove
+2025/10/17 23:15:28 Removed cgroups for container test-v2-remove
+--- PASS: TestCgroupsManager_RemoveContainerCgroups_V2 (0.00s)
+=== RUN   TestCgroupsManager_MonitorResourceViolations_WithViolations
+2025/10/17 23:15:28 Creating cgroups for container test-violations
+2025/10/17 23:15:28 Cgroups created successfully for container test-violations
+--- PASS: TestCgroupsManager_MonitorResourceViolations_WithViolations (0.00s)
+=== RUN   TestCgroupsManager_MonitorResourceViolations_OOMKills
+2025/10/17 23:15:28 Creating cgroups for container test-oom
+2025/10/17 23:15:28 Cgroups created successfully for container test-oom
+--- PASS: TestCgroupsManager_MonitorResourceViolations_OOMKills (0.00s)
+=== RUN   TestCgroupsManager_ConcurrentOperations
+2025/10/17 23:15:28 Creating cgroups for container c
+2025/10/17 23:15:28 Cgroups created successfully for container c
+2025/10/17 23:15:28 Added PID 1002 to cgroups for container c
+2025/10/17 23:15:28 Creating cgroups for container j
+2025/10/17 23:15:28 Cgroups created successfully for container j
+2025/10/17 23:15:28 Creating cgroups for container d
+2025/10/17 23:15:28 Added PID 1009 to cgroups for container j
+2025/10/17 23:15:28 Cgroups created successfully for container d
+2025/10/17 23:15:28 Failed to remove cgroup /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/cpu/mesos/containers/c: remove /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/cpu/mesos/containers/c: directory not empty
+2025/10/17 23:15:28 Failed to remove cgroup /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/memory/mesos/containers/c: remove /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/memory/mesos/containers/c: directory not empty
+2025/10/17 23:15:28 Failed to remove cgroup /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/blkio/mesos/containers/c: remove /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/blkio/mesos/containers/c: directory not empty
+2025/10/17 23:15:28 Failed to remove cgroup /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/pids/mesos/containers/c: remove /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/pids/mesos/containers/c: directory not empty
+2025/10/17 23:15:28 Failed to remove cgroup /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/cpuset/mesos/containers/c: remove /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/cpuset/mesos/containers/c: directory not empty
+2025/10/17 23:15:28 Added PID 1003 to cgroups for container d
+2025/10/17 23:15:28 Removed cgroups for container c
+2025/10/17 23:15:28 Failed to remove cgroup /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/cpu/mesos/containers/j: remove /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/cpu/mesos/containers/j: directory not empty
+2025/10/17 23:15:28 Failed to remove cgroup /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/memory/mesos/containers/j: remove /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/memory/mesos/containers/j: directory not empty
+2025/10/17 23:15:28 Failed to remove cgroup /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/blkio/mesos/containers/j: remove /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/blkio/mesos/containers/j: directory not empty
+2025/10/17 23:15:28 Failed to remove cgroup /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/pids/mesos/containers/j: remove /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/pids/mesos/containers/j: directory not empty
+2025/10/17 23:15:28 Failed to remove cgroup /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/cpuset/mesos/containers/j: remove /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/cpuset/mesos/containers/j: directory not empty
+2025/10/17 23:15:28 Removed cgroups for container j
+2025/10/17 23:15:28 Creating cgroups for container e
+2025/10/17 23:15:28 Cgroups created successfully for container e
+2025/10/17 23:15:28 Creating cgroups for container f
+2025/10/17 23:15:28 Cgroups created successfully for container f
+2025/10/17 23:15:28 Creating cgroups for container g
+2025/10/17 23:15:28 Added PID 1005 to cgroups for container f
+2025/10/17 23:15:28 Added PID 1004 to cgroups for container e
+2025/10/17 23:15:28 Cgroups created successfully for container g
+2025/10/17 23:15:28 Creating cgroups for container h
+2025/10/17 23:15:28 Added PID 1006 to cgroups for container g
+2025/10/17 23:15:28 Cgroups created successfully for container h
+2025/10/17 23:15:28 Failed to remove cgroup /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/cpu/mesos/containers/f: remove /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/cpu/mesos/containers/f: directory not empty
+2025/10/17 23:15:28 Failed to remove cgroup /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/memory/mesos/containers/f: remove /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/memory/mesos/containers/f: directory not empty
+2025/10/17 23:15:28 Failed to remove cgroup /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/blkio/mesos/containers/f: remove /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/blkio/mesos/containers/f: directory not empty
+2025/10/17 23:15:28 Failed to remove cgroup /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/pids/mesos/containers/f: remove /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/pids/mesos/containers/f: directory not empty
+2025/10/17 23:15:28 Failed to remove cgroup /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/cpuset/mesos/containers/f: remove /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/cpuset/mesos/containers/f: directory not empty
+2025/10/17 23:15:28 Removed cgroups for container f
+2025/10/17 23:15:28 Failed to remove cgroup /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/cpu/mesos/containers/e: remove /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/cpu/mesos/containers/e: directory not empty
+2025/10/17 23:15:28 Failed to remove cgroup /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/memory/mesos/containers/e: remove /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/memory/mesos/containers/e: directory not empty
+2025/10/17 23:15:28 Added PID 1007 to cgroups for container h
+2025/10/17 23:15:28 Failed to remove cgroup /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/blkio/mesos/containers/e: remove /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/blkio/mesos/containers/e: directory not empty
+2025/10/17 23:15:28 Failed to remove cgroup /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/pids/mesos/containers/e: remove /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/pids/mesos/containers/e: directory not empty
+2025/10/17 23:15:28 Failed to remove cgroup /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/cpuset/mesos/containers/e: remove /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/cpuset/mesos/containers/e: directory not empty
+2025/10/17 23:15:28 Removed cgroups for container e
+2025/10/17 23:15:28 Creating cgroups for container i
+2025/10/17 23:15:28 Cgroups created successfully for container i
+2025/10/17 23:15:28 Failed to remove cgroup /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/cpu/mesos/containers/h: remove /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/cpu/mesos/containers/h: directory not empty
+2025/10/17 23:15:28 Failed to remove cgroup /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/memory/mesos/containers/h: remove /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/memory/mesos/containers/h: directory not empty
+2025/10/17 23:15:28 Failed to remove cgroup /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/blkio/mesos/containers/h: remove /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/blkio/mesos/containers/h: directory not empty
+2025/10/17 23:15:28 Failed to remove cgroup /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/pids/mesos/containers/h: remove /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/pids/mesos/containers/h: directory not empty
+2025/10/17 23:15:28 Failed to remove cgroup /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/cpuset/mesos/containers/h: remove /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/cpuset/mesos/containers/h: directory not empty
+2025/10/17 23:15:28 Removed cgroups for container h
+2025/10/17 23:15:28 Added PID 1008 to cgroups for container i
+2025/10/17 23:15:28 Creating cgroups for container a
+2025/10/17 23:15:28 Cgroups created successfully for container a
+2025/10/17 23:15:28 Failed to remove cgroup /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/cpu/mesos/containers/i: remove /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/cpu/mesos/containers/i: directory not empty
+2025/10/17 23:15:28 Failed to remove cgroup /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/memory/mesos/containers/i: remove /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/memory/mesos/containers/i: directory not empty
+2025/10/17 23:15:28 Added PID 1000 to cgroups for container a
+2025/10/17 23:15:28 Failed to remove cgroup /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/blkio/mesos/containers/i: remove /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/blkio/mesos/containers/i: directory not empty
+2025/10/17 23:15:28 Failed to remove cgroup /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/pids/mesos/containers/i: remove /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/pids/mesos/containers/i: directory not empty
+2025/10/17 23:15:28 Failed to remove cgroup /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/cpuset/mesos/containers/i: remove /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/cpuset/mesos/containers/i: directory not empty
+2025/10/17 23:15:28 Removed cgroups for container i
+2025/10/17 23:15:28 Creating cgroups for container b
+2025/10/17 23:15:28 Cgroups created successfully for container b
+2025/10/17 23:15:28 Failed to remove cgroup /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/cpu/mesos/containers/d: remove /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/cpu/mesos/containers/d: directory not empty
+2025/10/17 23:15:28 Failed to remove cgroup /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/memory/mesos/containers/d: remove /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/memory/mesos/containers/d: directory not empty
+2025/10/17 23:15:28 Failed to remove cgroup /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/blkio/mesos/containers/d: remove /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/blkio/mesos/containers/d: directory not empty
+2025/10/17 23:15:28 Failed to remove cgroup /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/pids/mesos/containers/d: remove /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/pids/mesos/containers/d: directory not empty
+2025/10/17 23:15:28 Failed to remove cgroup /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/cpuset/mesos/containers/d: remove /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/cpuset/mesos/containers/d: directory not empty
+2025/10/17 23:15:28 Removed cgroups for container d
+2025/10/17 23:15:28 Failed to remove cgroup /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/cpu/mesos/containers/g: remove /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/cpu/mesos/containers/g: directory not empty
+2025/10/17 23:15:28 Added PID 1001 to cgroups for container b
+2025/10/17 23:15:28 Failed to remove cgroup /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/memory/mesos/containers/g: remove /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/memory/mesos/containers/g: directory not empty
+2025/10/17 23:15:28 Failed to remove cgroup /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/blkio/mesos/containers/g: remove /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/blkio/mesos/containers/g: directory not empty
+2025/10/17 23:15:28 Failed to remove cgroup /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/pids/mesos/containers/g: remove /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/pids/mesos/containers/g: directory not empty
+2025/10/17 23:15:28 Failed to remove cgroup /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/cpuset/mesos/containers/g: remove /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/cpuset/mesos/containers/g: directory not empty
+2025/10/17 23:15:28 Removed cgroups for container g
+2025/10/17 23:15:28 Failed to remove cgroup /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/cpu/mesos/containers/a: remove /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/cpu/mesos/containers/a: directory not empty
+2025/10/17 23:15:28 Failed to remove cgroup /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/memory/mesos/containers/a: remove /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/memory/mesos/containers/a: directory not empty
+2025/10/17 23:15:28 Failed to remove cgroup /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/blkio/mesos/containers/a: remove /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/blkio/mesos/containers/a: directory not empty
+2025/10/17 23:15:28 Failed to remove cgroup /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/pids/mesos/containers/a: remove /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/pids/mesos/containers/a: directory not empty
+2025/10/17 23:15:28 Failed to remove cgroup /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/cpuset/mesos/containers/a: remove /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/cpuset/mesos/containers/a: directory not empty
+2025/10/17 23:15:28 Removed cgroups for container a
+2025/10/17 23:15:28 Failed to remove cgroup /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/cpu/mesos/containers/b: remove /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/cpu/mesos/containers/b: directory not empty
+2025/10/17 23:15:28 Failed to remove cgroup /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/memory/mesos/containers/b: remove /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/memory/mesos/containers/b: directory not empty
+2025/10/17 23:15:28 Failed to remove cgroup /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/blkio/mesos/containers/b: remove /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/blkio/mesos/containers/b: directory not empty
+2025/10/17 23:15:28 Failed to remove cgroup /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/pids/mesos/containers/b: remove /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/pids/mesos/containers/b: directory not empty
+2025/10/17 23:15:28 Failed to remove cgroup /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/cpuset/mesos/containers/b: remove /tmp/TestCgroupsManager_ConcurrentOperations1859456221/001/cpuset/mesos/containers/b: directory not empty
+2025/10/17 23:15:28 Removed cgroups for container b
+--- PASS: TestCgroupsManager_ConcurrentOperations (0.00s)
+=== RUN   TestNewCgroupsManager
+=== RUN   TestNewCgroupsManager/Default_root_path
+2025/10/17 23:15:28 Cgroups manager initialized with version: v2, root: /tmp/TestNewCgroupsManagerDefault_root_path3710309583/001
+=== RUN   TestNewCgroupsManager/Custom_root_path
+2025/10/17 23:15:28 Cgroups manager initialized with version: v2, root: /tmp/test-cgroups
+--- PASS: TestNewCgroupsManager (0.00s)
+    --- PASS: TestNewCgroupsManager/Default_root_path (0.00s)
+    --- PASS: TestNewCgroupsManager/Custom_root_path (0.00s)
+=== RUN   TestCgroupsManager_CreateContainerCgroups
+2025/10/17 23:15:28 Cgroups manager initialized with version: v2, root: /tmp/TestCgroupsManager_CreateContainerCgroups1602474599/001
+=== RUN   TestCgroupsManager_CreateContainerCgroups/Basic_container_with_CPU_limits
+2025/10/17 23:15:28 Creating cgroups for container test-container-1
+2025/10/17 23:15:28 Cgroups created successfully for container test-container-1
+=== RUN   TestCgroupsManager_CreateContainerCgroups/Container_with_all_limits
+2025/10/17 23:15:28 Creating cgroups for container test-container-2
+2025/10/17 23:15:28 IO limits configured: read=1048576 bps, write=1048576 bps
+2025/10/17 23:15:28 Cgroups created successfully for container test-container-2
+=== RUN   TestCgroupsManager_CreateContainerCgroups/Container_with_minimal_limits
+2025/10/17 23:15:28 Creating cgroups for container test-container-3
+2025/10/17 23:15:28 Cgroups created successfully for container test-container-3
+--- PASS: TestCgroupsManager_CreateContainerCgroups (0.00s)
+    --- PASS: TestCgroupsManager_CreateContainerCgroups/Basic_container_with_CPU_limits (0.00s)
+    --- PASS: TestCgroupsManager_CreateContainerCgroups/Container_with_all_limits (0.00s)
+    --- PASS: TestCgroupsManager_CreateContainerCgroups/Container_with_minimal_limits (0.00s)
+=== RUN   TestCgroupsManager_AddProcessToCgroup
+2025/10/17 23:15:28 Cgroups manager initialized with version: v2, root: /tmp/TestCgroupsManager_AddProcessToCgroup3495239685/001
+2025/10/17 23:15:28 Creating cgroups for container test-container
+2025/10/17 23:15:28 Cgroups created successfully for container test-container
+=== RUN   TestCgroupsManager_AddProcessToCgroup/Valid_container_and_PID
+2025/10/17 23:15:28 Added PID 1234 to cgroups for container test-container
+=== RUN   TestCgroupsManager_AddProcessToCgroup/Non-existent_container
+--- PASS: TestCgroupsManager_AddProcessToCgroup (0.00s)
+    --- PASS: TestCgroupsManager_AddProcessToCgroup/Valid_container_and_PID (0.00s)
+    --- PASS: TestCgroupsManager_AddProcessToCgroup/Non-existent_container (0.00s)
+=== RUN   TestCgroupsManager_GetResourceStats
+2025/10/17 23:15:28 Cgroups manager initialized with version: v2, root: /tmp/TestCgroupsManager_GetResourceStats3835936912/001
+2025/10/17 23:15:28 Creating cgroups for container test-container
+2025/10/17 23:15:28 Cgroups created successfully for container test-container
+=== RUN   TestCgroupsManager_GetResourceStats/Valid_container
+=== RUN   TestCgroupsManager_GetResourceStats/Non-existent_container
+--- PASS: TestCgroupsManager_GetResourceStats (0.00s)
+    --- PASS: TestCgroupsManager_GetResourceStats/Valid_container (0.00s)
+    --- PASS: TestCgroupsManager_GetResourceStats/Non-existent_container (0.00s)
+=== RUN   TestCgroupsManager_RemoveContainerCgroups
+2025/10/17 23:15:28 Cgroups manager initialized with version: v2, root: /tmp/TestCgroupsManager_RemoveContainerCgroups2088247520/001
+2025/10/17 23:15:28 Creating cgroups for container test-container
+2025/10/17 23:15:28 Cgroups created successfully for container test-container
+=== RUN   TestCgroupsManager_RemoveContainerCgroups/Valid_container
+2025/10/17 23:15:28 Failed to remove cgroup /tmp/TestCgroupsManager_RemoveContainerCgroups2088247520/001/mesos/containers/test-container: remove /tmp/TestCgroupsManager_RemoveContainerCgroups2088247520/001/mesos/containers/test-container: directory not empty
+2025/10/17 23:15:28 Removed cgroups for container test-container
+=== RUN   TestCgroupsManager_RemoveContainerCgroups/Non-existent_container
+--- PASS: TestCgroupsManager_RemoveContainerCgroups (0.00s)
+    --- PASS: TestCgroupsManager_RemoveContainerCgroups/Valid_container (0.00s)
+    --- PASS: TestCgroupsManager_RemoveContainerCgroups/Non-existent_container (0.00s)
+=== RUN   TestCgroupsManager_MonitorResourceViolations
+2025/10/17 23:15:28 Cgroups manager initialized with version: v2, root: /tmp/TestCgroupsManager_MonitorResourceViolations3152931112/001
+2025/10/17 23:15:28 Creating cgroups for container test-container
+2025/10/17 23:15:28 Cgroups created successfully for container test-container
+=== RUN   TestCgroupsManager_MonitorResourceViolations/Valid_container
+=== RUN   TestCgroupsManager_MonitorResourceViolations/Non-existent_container
+--- PASS: TestCgroupsManager_MonitorResourceViolations (0.00s)
+    --- PASS: TestCgroupsManager_MonitorResourceViolations/Valid_container (0.00s)
+    --- PASS: TestCgroupsManager_MonitorResourceViolations/Non-existent_container (0.00s)
+=== RUN   TestFormatCPUList
+=== RUN   TestFormatCPUList/Single_core
+=== RUN   TestFormatCPUList/Multiple_cores
+=== RUN   TestFormatCPUList/Non-sequential_cores
+=== RUN   TestFormatCPUList/Empty_cores
+=== RUN   TestFormatCPUList/Nil_cores
+--- PASS: TestFormatCPUList (0.00s)
+    --- PASS: TestFormatCPUList/Single_core (0.00s)
+    --- PASS: TestFormatCPUList/Multiple_cores (0.00s)
+    --- PASS: TestFormatCPUList/Non-sequential_cores (0.00s)
+    --- PASS: TestFormatCPUList/Empty_cores (0.00s)
+    --- PASS: TestFormatCPUList/Nil_cores (0.00s)
+=== RUN   TestCgroupsManager_EdgeCases
+2025/10/17 23:15:28 Cgroups manager initialized with version: v2, root: /tmp/TestCgroupsManager_EdgeCases2414034209/001
+=== RUN   TestCgroupsManager_EdgeCases/CreateContainerCgroups_with_empty_container_ID
+=== RUN   TestCgroupsManager_EdgeCases/AddProcessToCgroup_with_invalid_PID
+2025/10/17 23:15:28 Creating cgroups for container test-container
+2025/10/17 23:15:28 Cgroups created successfully for container test-container
+2025/10/17 23:15:28 Added PID -1 to cgroups for container test-container
+=== RUN   TestCgroupsManager_EdgeCases/GetResourceStats_for_non-existent_container
+=== RUN   TestCgroupsManager_EdgeCases/RemoveContainerCgroups_for_non-existent_container
+=== RUN   TestCgroupsManager_EdgeCases/MonitorResourceViolations_for_non-existent_container
+--- PASS: TestCgroupsManager_EdgeCases (0.00s)
+    --- PASS: TestCgroupsManager_EdgeCases/CreateContainerCgroups_with_empty_container_ID (0.00s)
+    --- PASS: TestCgroupsManager_EdgeCases/AddProcessToCgroup_with_invalid_PID (0.00s)
+    --- PASS: TestCgroupsManager_EdgeCases/GetResourceStats_for_non-existent_container (0.00s)
+    --- PASS: TestCgroupsManager_EdgeCases/RemoveContainerCgroups_for_non-existent_container (0.00s)
+    --- PASS: TestCgroupsManager_EdgeCases/MonitorResourceViolations_for_non-existent_container (0.00s)
+PASS
+coverage: 85.7% of statements
+ok  	github.com/ljluestc/orchestrator/pkg/isolation	0.012s	coverage: 85.7% of statements
