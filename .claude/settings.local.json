@@ -55,7 +55,9 @@
       "Bash(go tool cover:*)",
       "Bash(do [ -f \"$f\" ])",
       "Bash(./scripts/test_orchestrator.sh --skip-integration)",
-      "Bash(docker rm -f startup-test)"
+      "Bash(docker rm -f startup-test)",
+      "Bash(tree -L 2 -d /home/calelin/dev/orchestrator/pkg /home/calelin/dev/orchestrator/cmd /home/calelin/dev/orchestrator/internal)",
+      "Bash(./bin/app-server --help)"
     ],
     "deny": [],
     "ask": []
