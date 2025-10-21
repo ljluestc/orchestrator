@@ -57,7 +57,11 @@
       "Bash(./scripts/test_orchestrator.sh --skip-integration)",
       "Bash(docker rm -f startup-test)",
       "Bash(tree -L 2 -d /home/calelin/dev/orchestrator/pkg /home/calelin/dev/orchestrator/cmd /home/calelin/dev/orchestrator/internal)",
-      "Bash(./bin/app-server --help)"
+      "Bash(./bin/app-server --help)",
+      "Bash(./marathon.test)",
+      "Bash(/dev/null)",
+      "Bash(/home/calelin/dev/orchestrator/scripts/achieve_100_percent_coverage.sh)",
+      "Bash(git add -A)"
     ],
     "deny": [],
     "ask": []

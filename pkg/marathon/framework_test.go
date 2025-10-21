@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"testing"
 	"time"
 
@@ -120,7 +121,7 @@ func TestMarathon_CreateApp(t *testing.T) {
 
 				// Verify tasks are created
 				for i, task := range tt.app.Tasks {
-					expectedTaskID := tt.app.ID + "." + string(rune(i))
+					expectedTaskID := tt.app.ID + "." + strconv.Itoa(i)
 					assert.Equal(t, expectedTaskID, task.ID)
 					assert.Equal(t, tt.app.ID, task.AppID)
 					assert.Equal(t, tt.app.Version, task.Version)

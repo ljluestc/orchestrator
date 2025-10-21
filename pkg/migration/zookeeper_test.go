@@ -783,7 +783,10 @@ func TestMigrationManager_StartStop(t *testing.T) {
 	// Check for start error
 	select {
 	case err := <-errChan:
-		assert.NoError(t, err)
+		// Server closed error is expected when Shutdown() is called
+		if err != nil && err != http.ErrServerClosed {
+			assert.NoError(t, err)
+		}
 	case <-time.After(1 * time.Second):
 		t.Fatal("Server start timeout")
 	}

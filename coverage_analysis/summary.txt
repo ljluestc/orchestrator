@@ -1,0 +1,17 @@
+root: 16.0%
+cmd/app: 85.4%
+cmd/probe: 0.0%
+cmd/probe-agent: 52.3%
+internal/storage: 96.1%
+pkg/app: 93.4%
+pkg/containerizer: 72.2%
+pkg/isolation: 85.7%
+pkg/marathon: FAIL
+pkg/mesos: FAIL
+pkg/metrics: 100.0%
+pkg/migration: FAIL
+pkg/probe: FAIL
+pkg/scheduler: 96.2%
+pkg/security: FAIL
+pkg/topology: 85.9%
+pkg/ui: 100.0%

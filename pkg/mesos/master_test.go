@@ -917,10 +917,11 @@ func TestMaster_HandleGetTask(t *testing.T) {
 	}
 	master.LaunchTask(task)
 
+	router := master.setupRoutes()
 	req := httptest.NewRequest("GET", "/api/v1/tasks/task-1", nil)
 	rr := httptest.NewRecorder()
 
-	master.handleGetTask(rr, req)
+	router.ServeHTTP(rr, req)
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 
@@ -934,10 +935,11 @@ func TestMaster_HandleGetTask(t *testing.T) {
 func TestMaster_HandleGetTaskNotFound(t *testing.T) {
 	master := NewMaster("test-master", "localhost", 5050, "zk://localhost:2181/mesos")
 
+	router := master.setupRoutes()
 	req := httptest.NewRequest("GET", "/api/v1/tasks/nonexistent", nil)
 	rr := httptest.NewRecorder()
 
-	master.handleGetTask(rr, req)
+	router.ServeHTTP(rr, req)
 
 	assert.Equal(t, http.StatusNotFound, rr.Code)
 }
@@ -985,10 +987,11 @@ func TestMaster_HandleKillTask(t *testing.T) {
 	}
 	master.LaunchTask(task)
 
+	router := master.setupRoutes()
 	req := httptest.NewRequest("POST", "/api/v1/tasks/task-1/kill", nil)
 	rr := httptest.NewRecorder()
 
-	master.handleKillTask(rr, req)
+	router.ServeHTTP(rr, req)
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 
@@ -1110,6 +1113,56 @@ func TestMaster_HandleHealth(t *testing.T) {
 func TestMaster_SetupRoutes(t *testing.T) {
 	master := NewMaster("test-master", "localhost", 5050, "zk://localhost:2181/mesos")
 
+	// Add test data for routes with path parameters
+	agent := &AgentInfo{
+		ID:       "agent-1",
+		Hostname: "localhost",
+		Port:     5051,
+		Resources: &Resources{
+			CPUs:   4.0,
+			Memory: 8192.0,
+			Disk:   100000.0,
+		},
+		Tasks: make(map[string]*Task),
+	}
+	master.RegisterAgent(agent)
+
+	framework := &Framework{
+		ID:        "framework-1",
+		Name:      "marathon",
+		Principal: "marathon-principal",
+		Role:      "*",
+		Hostname:  "localhost",
+		Port:      8080,
+	}
+	master.RegisterFramework(framework)
+
+	task := &Task{
+		ID:          "task-1",
+		Name:        "test-task",
+		FrameworkID: "framework-1",
+		AgentID:     "agent-1",
+		State:       "running",
+		Resources: &Resources{
+			CPUs:   1.0,
+			Memory: 1024.0,
+			Disk:   1000.0,
+		},
+	}
+	master.LaunchTask(task)
+
+	offer := &ResourceOffer{
+		ID:          "offer-1",
+		FrameworkID: "framework-1",
+		AgentID:     "agent-1",
+		Resources: &Resources{
+			CPUs:   2.0,
+			Memory: 2048.0,
+			Disk:   5000.0,
+		},
+	}
+	master.State.Offers = append(master.State.Offers, offer)
+
 	router := master.setupRoutes()
 
 	assert.NotNil(t, router)
@@ -1174,7 +1227,10 @@ func TestMaster_StartStop(t *testing.T) {
 	// Check for start error
 	select {
 	case err := <-errChan:
-		assert.NoError(t, err)
+		// Server closed error is expected when Shutdown() is called
+		if err != nil && err != http.ErrServerClosed {
+			assert.NoError(t, err)
+		}
 	case <-time.After(1 * time.Second):
 		t.Fatal("Server start timeout")
 	}
