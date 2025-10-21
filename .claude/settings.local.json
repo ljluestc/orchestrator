@@ -61,7 +61,8 @@
       "Bash(./marathon.test)",
       "Bash(/dev/null)",
       "Bash(/home/calelin/dev/orchestrator/scripts/achieve_100_percent_coverage.sh)",
-      "Bash(git add -A)"
+      "Bash(git add -A)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nfix: Resolve test failures and improve coverage infrastructure\n\nTest Fixes:\n- pkg/containerizer: Add missing fmt import\n- pkg/marathon: Fix task ID generation using strconv.Itoa\n- pkg/mesos: Fix routing tests to use router, handle http.ErrServerClosed\n- pkg/migration: Handle http.ErrServerClosed in server lifecycle tests\n\nTest Infrastructure:\n- Create coverage analysis script (scripts/achieve_100_percent_coverage.sh)\n- Generate detailed coverage reports (coverage_analysis/)\n- Add TEST_FIXING_GUIDE.md with common patterns and solutions\n- Add PROGRESS_SUMMARY.md tracking session accomplishments\n\nCoverage Status:\n- pkg/mesos: All tests passing ✅\n- Overall project coverage: ~77-88%\n- 2 packages at 100% (metrics, ui)\n- 12 packages passing tests\n- 4 packages with remaining test failures\n\nKey Patterns Documented:\n1. HTTP handler tests must use router for URL parameter extraction\n2. http.ErrServerClosed is expected behavior in shutdown tests\n3. Route tests require actual test data, not just route existence\n\nRemaining Work:\n- Fix ~18 tests across pkg/migration, pkg/probe, pkg/security\n- Increase coverage on 8 packages (0%-96% → 100%)\n- Create performance benchmarks\n- Complete integration test suite\n- Add ARCHITECTURE.md\n\nEstimated time to 100% coverage: 10-15 hours\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
     ],
     "deny": [],
     "ask": []
